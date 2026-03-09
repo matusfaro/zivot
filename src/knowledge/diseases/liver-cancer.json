@@ -1,0 +1,187 @@
+{
+  "metadata": {
+    "id": "liver_cancer_10year",
+    "name": "Liver Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "SEER Cancer Statistics: Liver and Intrahepatic Bile Duct Cancer 2018-2023",
+        "url": "https://seer.cancer.gov/statfacts/html/livibd.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Hepatocellular Carcinoma Incidence and Mortality in the USA",
+        "doi": "10.1007/s10620-024-08336-8",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Hepatitis and Hepatocellular Carcinoma Meta-analysis",
+        "doi": "10.1016/S1470-2045(13)70500-8",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "description": "10-year risk of hepatocellular carcinoma and other liver cancers"
+  },
+  "baselineRisk": {
+    "defaultCurve": "general_us",
+    "curves": [
+      {
+        "id": "general_us",
+        "applicability": {
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Liver Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/livibd.html",
+        "notes": "Hepatocellular carcinoma (HCC) incidence; strongly associated with viral hepatitis",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00015 },
+          { "age": 50, "risk": 0.00040 },
+          { "age": 60, "risk": 0.00080 },
+          { "age": 70, "risk": 0.00110 },
+          { "age": 80, "risk": 0.00100 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "hepatitis_b",
+      "name": "Hepatitis B Infection",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "citation": "Hepatitis B and Liver Cancer Meta-analysis",
+      "doi": "10.1016/S1470-2045(13)70500-8",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Chronic HBV HR~15-20 for HCC; major global risk factor",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.hepatitisHistory.hepatitisB.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 18.0,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "hepatitis_c",
+      "name": "Hepatitis C Infection",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "citation": "Hepatitis C and Liver Cancer Meta-analysis",
+      "doi": "10.1016/S1470-2045(13)70500-8",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Chronic HCV HR~17 for HCC; curable with direct-acting antivirals",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.hepatitisHistory.hepatitisC.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 17.0,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "liver_disease",
+      "name": "Chronic Liver Disease / Cirrhosis",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "has_condition",
+        "conditionId": "liver_disease",
+        "presentHR": 8.0,
+        "absentHR": 1.0,
+        "notes": "Cirrhosis dramatically increases HCC risk"
+      }
+    },
+    {
+      "factorId": "alcohol_consumption",
+      "name": "Heavy Alcohol Consumption",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0 },
+          { "value": 7, "hazardRatio": 1.2 },
+          { "value": 14, "hazardRatio": 1.5 },
+          { "value": 21, "hazardRatio": 2.5 },
+          { "value": 35, "hazardRatio": 4.0 }
+        ],
+        "validRange": [0, 70],
+        "notes": "Heavy drinking causes cirrhosis leading to HCC"
+      }
+    },
+    {
+      "factorId": "diabetes",
+      "name": "Diabetes",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "has_condition",
+        "conditionId": "type2_diabetes",
+        "presentHR": 2.0,
+        "absentHR": 1.0,
+        "notes": "Diabetes increases HCC risk via NAFLD"
+      }
+    },
+    {
+      "factorId": "obesity_bmi",
+      "name": "Obesity (BMI)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        },
+        {
+          "path": "biometrics.height.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "bmi_lookup",
+        "points": [
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.1 },
+          { "value": 30, "hazardRatio": 1.5 },
+          { "value": 35, "hazardRatio": 2.0 }
+        ],
+        "validRange": [18, 50],
+        "notes": "Obesity increases risk via NAFLD/NASH"
+      }
+    }
+  ]
+}

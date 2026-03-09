@@ -1,0 +1,74 @@
+/**
+ * Recent Activity Summary Styles
+ */
+
+.recent-activity-summary {
+  margin: 2rem 0;
+}
+
+.recent-activity-summary h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  border-bottom: 3px solid #000;
+  padding-bottom: 0.5rem;
+  color: #000;
+}
+
+.no-data {
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+  text-align: center;
+  border: 2px dashed #ccc;
+  border-radius: 0;
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 0;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.stat-card.good {
+  background: #d4edda;
+}
+
+.stat-card.needs-work {
+  background: #fff3cd;
+}
+
+.stat-emoji {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+  color: #000;
+}
+
+.stat-unit {
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: #666;
+}

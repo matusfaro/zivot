@@ -1,0 +1,203 @@
+{
+  "metadata": {
+    "id": "esophageal_cancer_10year",
+    "name": "Esophageal Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "SEER Cancer Statistics: Esophageal Cancer 2018-2023",
+        "url": "https://seer.cancer.gov/statfacts/html/esoph.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Barrett's Esophagus and Esophageal Adenocarcinoma Risk",
+        "doi": "10.1056/NEJMra1314530",
+        "evidenceLevel": "meta_analysis"
+      },
+      {
+        "citation": "Barrett's Esophagus and Esophageal Adenocarcinoma",
+        "doi": "10.1056/NEJMoa1306209",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of esophageal cancer, including both adenocarcinoma and squamous cell carcinoma"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Esophageal Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/esoph.html",
+        "notes": "Esophageal cancer incidence; adenocarcinoma rising in Western populations",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00010 },
+          { "age": 50, "risk": 0.00025 },
+          { "age": 60, "risk": 0.00050 },
+          { "age": 70, "risk": 0.00080 },
+          { "age": 80, "risk": 0.00090 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Esophageal Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/esoph.html",
+        "notes": "Esophageal cancer incidence; adenocarcinoma rising in Western populations",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00003 },
+          { "age": 50, "risk": 0.00008 },
+          { "age": 60, "risk": 0.00015 },
+          { "age": 70, "risk": 0.00025 },
+          { "age": 80, "risk": 0.00030 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "sex",
+      "name": "Biological Sex",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "demographics.biologicalSex.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "male", "hazardRatio": 3.0 },
+          { "value": "female", "hazardRatio": 1.0 }
+        ],
+        "referenceCategory": "female",
+        "notes": "Males have 3-4x higher risk"
+      }
+    },
+    {
+      "factorId": "gerd",
+      "name": "GERD (Gastroesophageal Reflux Disease)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.gastrointestinalHistory.gerdDiagnosis.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.5,
+        "falseHazardRatio": 1.0,
+        "notes": "Chronic GERD is major risk factor for adenocarcinoma"
+      }
+    },
+    {
+      "factorId": "barretts_esophagus",
+      "name": "Barrett's Esophagus",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "citation": "Barrett's Esophagus Cancer Risk",
+      "doi": "10.1056/NEJMoa1306209",
+      "evidenceLevel": "cohort",
+      "notes": "Barrett's esophagus HR~10-40 for esophageal adenocarcinoma; surveillance recommended",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.gastrointestinalHistory.barretsEsophagus.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 12.0,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "smoking",
+      "name": "Smoking Status",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "never", "hazardRatio": 1.0 },
+          { "value": "former", "hazardRatio": 1.8 },
+          { "value": "current", "hazardRatio": 3.0 }
+        ],
+        "referenceCategory": "never"
+      }
+    },
+    {
+      "factorId": "alcohol_consumption",
+      "name": "Alcohol Consumption",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "linear",
+        "coefficients": {
+          "slope": 0.04
+        },
+        "validRange": [0, 50],
+        "notes": "Heavy drinking increases squamous cell carcinoma risk"
+      }
+    },
+    {
+      "factorId": "bmi",
+      "name": "Body Mass Index (Obesity)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        },
+        {
+          "path": "biometrics.height.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "bmi_lookup",
+        "points": [
+          { "value": 20, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.2 },
+          { "value": 30, "hazardRatio": 1.5 },
+          { "value": 35, "hazardRatio": 1.8 }
+        ],
+        "validRange": [18, 50],
+        "notes": "Obesity increases adenocarcinoma risk"
+      }
+    }
+  ]
+}

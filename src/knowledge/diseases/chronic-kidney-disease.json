@@ -1,0 +1,200 @@
+{
+  "metadata": {
+    "id": "ckd_progression_10year",
+    "name": "Chronic Kidney Disease (10-year)",
+    "category": "other",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "CRIC Study (Chronic Renal Insufficiency Cohort)",
+        "doi": "10.1056/NEJMoa1613995",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of kidney failure based on KFRE"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [18, 100]
+        },
+        "source": "CRIC Study - CKD Progression Rates",
+        "doi": "10.1056/NEJMoa1613995",
+        "notes": "CKD stages 3/4 progression ~5-10%/year to kidney failure",
+        "ageRiskMapping": [
+          { "age": 30, "risk": 0.002 },
+          { "age": 50, "risk": 0.008 },
+          { "age": 65, "risk": 0.018 },
+          { "age": 75, "risk": 0.032 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [18, 100]
+        },
+        "source": "CRIC Study - CKD Progression Rates",
+        "doi": "10.1056/NEJMoa1613995",
+        "notes": "CKD stages 3/4 progression ~5-10%/year to kidney failure",
+        "ageRiskMapping": [
+          { "age": 30, "risk": 0.001 },
+          { "age": 50, "risk": 0.005 },
+          { "age": 65, "risk": 0.012 },
+          { "age": 75, "risk": 0.023 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "egfr_ckd",
+      "name": "eGFR (Estimated Glomerular Filtration Rate)",
+      "modifiable": true,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "labTests.kidneyFunction.egfr.mostRecent.value",
+          "alternatives": ["derived_from_creatinine"]
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 10, "hazardRatio": 45.0 },
+          { "value": 15, "hazardRatio": 28.0 },
+          { "value": 20, "hazardRatio": 18.0 },
+          { "value": 25, "hazardRatio": 11.0 },
+          { "value": 30, "hazardRatio": 7.0 },
+          { "value": 40, "hazardRatio": 3.5 },
+          { "value": 50, "hazardRatio": 1.8 },
+          { "value": 60, "hazardRatio": 1.0 },
+          { "value": 90, "hazardRatio": 1.0 }
+        ],
+        "validRange": [5, 150]
+      }
+    },
+    {
+      "factorId": "urine_acr",
+      "name": "Urine Albumin-Creatinine Ratio (ACR)",
+      "modifiable": true,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "labTests.kidneyFunction.urineACR.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 10, "hazardRatio": 1.0 },
+          { "value": 30, "hazardRatio": 1.3 },
+          { "value": 100, "hazardRatio": 2.2 },
+          { "value": 300, "hazardRatio": 3.8 },
+          { "value": 1000, "hazardRatio": 6.5 },
+          { "value": 3000, "hazardRatio": 10.0 }
+        ],
+        "validRange": [0, 5000]
+      }
+    },
+    {
+      "factorId": "diabetes_ckd",
+      "name": "Diabetes",
+      "modifiable": true,
+      "citation": "Diabetes and CKD Progression Meta-analysis",
+      "doi": "10.1016/S0140-6736(15)00097-0",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Diabetes HR~2.0 for CKD progression",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.3,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "hypertension_ckd",
+      "name": "Hypertension",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "biometrics.bloodPressure.mostRecent.value.systolic",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 110, "hazardRatio": 1.0 },
+          { "value": 120, "hazardRatio": 1.1 },
+          { "value": 130, "hazardRatio": 1.25 },
+          { "value": 140, "hazardRatio": 1.45 },
+          { "value": 150, "hazardRatio": 1.7 },
+          { "value": 160, "hazardRatio": 2.0 },
+          { "value": 180, "hazardRatio": 2.5 }
+        ],
+        "validRange": [90, 220]
+      }
+    },
+    {
+      "factorId": "cvd_ckd",
+      "name": "Cardiovascular Disease",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.6,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "bmi_ckd",
+      "name": "Body Mass Index",
+      "modifiable": true,
+      "evidenceLevel": "moderate",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18.5, "hazardRatio": 1.1 },
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.1 },
+          { "value": 30, "hazardRatio": 1.3 },
+          { "value": 35, "hazardRatio": 1.6 },
+          { "value": 40, "hazardRatio": 2.0 }
+        ],
+        "validRange": [15, 50]
+      }
+    }
+  ]
+}

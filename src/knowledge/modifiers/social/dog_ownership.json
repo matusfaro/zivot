@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "id": "dog_ownership",
+    "name": "Dog Ownership",
+    "category": "social",
+    "description": "Owning a dog is associated with reduced cardiovascular and all-cause mortality, likely through increased physical activity, enhanced social interactions, stress reduction, and companionship.",
+    "version": "1.0.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "Kramer CK, Mehmood S, Suen RS. Dog Ownership and Survival: A Systematic Review and Meta-Analysis. Circulation: Cardiovascular Quality and Outcomes. 2019;12:e005554.",
+        "doi": "10.1161/circoutcomes.119.005554",
+        "url": "https://www.ahajournals.org/doi/10.1161/circoutcomes.119.005554",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "mechanismOfAction": "Increased physical activity through dog walking, enhanced social interactions with other dog owners, stress reduction and companionship, improved mental health"
+  },
+  "applicability": {
+    "minimumDuration": 1,
+    "notes": "Most studies assessed sustained dog ownership (>1 year). Effect size based on meta-analysis of 10 studies with 3.8 million participants."
+  },
+  "effectSize": {
+    "hazardRatio": 0.76,
+    "confidenceInterval": [0.67, 0.86],
+    "evidenceLevel": "meta_analysis",
+    "evidenceStrength": "strong",
+    "affectsAllCauseMortality": true,
+    "primaryDiseases": ["cvd_10year", "stroke_10year"]
+  },
+  "requiredFields": [
+    {
+      "path": "social.petOwnership.ownsDog.value",
+      "required": false,
+      "alternatives": ["social.petOwnership.ownsDog"]
+    }
+  ],
+  "mapping": {
+    "type": "boolean",
+    "trueHazardRatio": 0.76,
+    "falseHazardRatio": 1.0,
+    "confidence": [0.67, 0.86]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "id": "social_connections",
+    "name": "Strong Social Connections",
+    "category": "social",
+    "description": "Having strong social relationships and connections is one of the most powerful predictors of longevity. The effect size is comparable to smoking cessation and exceeds many traditional health behaviors.",
+    "version": "1.0.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "Holt-Lunstad J, Smith TB, Layton JB. Social Relationships and Mortality Risk: A Meta-analytic Review. PLOS Medicine. 2010;7(7):e1000316.",
+        "doi": "10.1371/journal.pmed.1000316",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2910600/",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "mechanismOfAction": "Stress buffering, emotional support, health behavior reinforcement, reduced inflammation, enhanced immune function, sense of purpose"
+  },
+  "applicability": {
+    "notes": "Meta-analysis of 148 studies with 308,849 participants. Effects consistent across age, sex, initial health status, and cause of death."
+  },
+  "effectSize": {
+    "hazardRatio": 0.67,
+    "confidenceInterval": [0.63, 0.71],
+    "evidenceLevel": "meta_analysis",
+    "evidenceStrength": "strong",
+    "affectsAllCauseMortality": true,
+    "primaryDiseases": null
+  },
+  "requiredFields": [
+    {
+      "path": "social.connections.strength.value",
+      "required": false,
+      "alternatives": ["social.connections.strength"]
+    }
+  ],
+  "mapping": {
+    "type": "categorical",
+    "categories": [
+      {
+        "value": ["isolated", "weak"],
+        "hazardRatio": 1.5,
+        "confidence": [1.42, 1.58],
+        "citation": "Social isolation associated with 50% increased mortality risk"
+      },
+      {
+        "value": "moderate",
+        "hazardRatio": 1.0,
+        "citation": "Reference category (baseline risk)"
+      },
+      {
+        "value": ["strong", "very_strong"],
+        "hazardRatio": 0.67,
+        "confidence": [0.63, 0.71],
+        "citation": "Strong social connections reduce mortality by 33%"
+      }
+    ],
+    "referenceCategory": "moderate"
+  }
+}

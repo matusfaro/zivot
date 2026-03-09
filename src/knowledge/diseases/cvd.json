@@ -1,0 +1,796 @@
+{
+  "metadata": {
+    "id": "cvd_10year",
+    "name": "Cardiovascular Disease (10-year)",
+    "category": "cardiovascular",
+    "timeframe": 10,
+    "version": "1.0.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "Framingham Heart Study Risk Score",
+        "url": "https://www.framinghamheartstudy.org/fhs-risk-functions/cardiovascular-disease-10-year-risk/",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "ACC/AHA Pooled Cohort Equations (2013)",
+        "doi": "10.1161/01.cir.0000437741.48606.98",
+        "evidenceLevel": "meta_analysis"
+      },
+      {
+        "citation": "Systematic Coronary Risk Evaluation (SCORE)",
+        "url": "https://www.escardio.org/Education/Practice-Tools/CVD-prevention-toolbox/SCORE-Risk-Charts",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of fatal or non-fatal cardiovascular events including myocardial infarction, stroke, heart failure, and cardiovascular death"
+  },
+  "baselineRisk": {
+    "defaultCurve": "white_male_us",
+    "curves": [
+      {
+        "id": "white_male_us",
+        "applicability": {
+          "sex": "male",
+          "ethnicity": ["white"],
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "Framingham Heart Study 30-Year Follow-up & ACC/AHA Pooled Cohort Equations",
+        "doi": "10.1161/01.cir.0000437741.48606.98",
+        "url": "https://www.framinghamheartstudy.org/fhs-risk-functions/cardiovascular-disease-10-year-risk/",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.020, "confidence": [0.015, 0.025] },
+          { "age": 45, "risk": 0.035, "confidence": [0.028, 0.042] },
+          { "age": 50, "risk": 0.055, "confidence": [0.048, 0.062] },
+          { "age": 55, "risk": 0.085, "confidence": [0.076, 0.094] },
+          { "age": 60, "risk": 0.125, "confidence": [0.115, 0.135] },
+          { "age": 65, "risk": 0.175, "confidence": [0.162, 0.188] },
+          { "age": 70, "risk": 0.235, "confidence": [0.218, 0.252] },
+          { "age": 75, "risk": 0.305, "confidence": [0.285, 0.325] }
+        ]
+      },
+      {
+        "id": "white_female_us",
+        "applicability": {
+          "sex": "female",
+          "ethnicity": ["white"],
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "Framingham Heart Study 30-Year Follow-up & ACC/AHA Pooled Cohort Equations",
+        "doi": "10.1161/01.cir.0000437741.48606.98",
+        "url": "https://www.framinghamheartstudy.org/fhs-risk-functions/cardiovascular-disease-10-year-risk/",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.010, "confidence": [0.007, 0.013] },
+          { "age": 45, "risk": 0.018, "confidence": [0.014, 0.022] },
+          { "age": 50, "risk": 0.032, "confidence": [0.027, 0.037] },
+          { "age": 55, "risk": 0.055, "confidence": [0.048, 0.062] },
+          { "age": 60, "risk": 0.088, "confidence": [0.078, 0.098] },
+          { "age": 65, "risk": 0.135, "confidence": [0.122, 0.148] },
+          { "age": 70, "risk": 0.195, "confidence": [0.178, 0.212] },
+          { "age": 75, "risk": 0.265, "confidence": [0.245, 0.285] }
+        ]
+      },
+      {
+        "id": "black_male_us",
+        "applicability": {
+          "sex": "male",
+          "ethnicity": ["black"],
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "ACC/AHA Pooled Cohort Equations (race-stratified analysis)",
+        "doi": "10.1161/01.cir.0000437741.48606.98",
+        "notes": "Based on pooled data from multiple cohorts including ARIC, CARDIA, CHS, and Framingham",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.025, "confidence": [0.020, 0.030] },
+          { "age": 45, "risk": 0.042, "confidence": [0.035, 0.049] },
+          { "age": 50, "risk": 0.068, "confidence": [0.058, 0.078] },
+          { "age": 55, "risk": 0.105, "confidence": [0.093, 0.117] },
+          { "age": 60, "risk": 0.155, "confidence": [0.140, 0.170] },
+          { "age": 65, "risk": 0.215, "confidence": [0.195, 0.235] },
+          { "age": 70, "risk": 0.285, "confidence": [0.260, 0.310] },
+          { "age": 75, "risk": 0.360, "confidence": [0.330, 0.390] }
+        ]
+      },
+      {
+        "id": "black_female_us",
+        "applicability": {
+          "sex": "female",
+          "ethnicity": ["black"],
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "ACC/AHA Pooled Cohort Equations (race-stratified analysis)",
+        "doi": "10.1161/01.cir.0000437741.48606.98",
+        "notes": "Based on pooled data from multiple cohorts including ARIC, CARDIA, CHS, and Framingham",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.015, "confidence": [0.011, 0.019] },
+          { "age": 45, "risk": 0.026, "confidence": [0.021, 0.031] },
+          { "age": 50, "risk": 0.045, "confidence": [0.038, 0.052] },
+          { "age": 55, "risk": 0.075, "confidence": [0.065, 0.085] },
+          { "age": 60, "risk": 0.118, "confidence": [0.105, 0.131] },
+          { "age": 65, "risk": 0.175, "confidence": [0.158, 0.192] },
+          { "age": 70, "risk": 0.245, "confidence": [0.222, 0.268] },
+          { "age": 75, "risk": 0.325, "confidence": [0.295, 0.355] }
+        ]
+      },
+      {
+        "id": "hispanic_male_us",
+        "applicability": {
+          "sex": "male",
+          "ethnicity": ["hispanic", "latino"],
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "ARIC/Framingham Hispanic extensions",
+        "notes": "15-20% lower than non-Hispanic white",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.035 },
+          { "age": 50, "risk": 0.065 },
+          { "age": 60, "risk": 0.120 },
+          { "age": 70, "risk": 0.200 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "ldl_cholesterol",
+      "name": "LDL Cholesterol",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lipids",
+      "modifiable": true,
+      "citation": "Cholesterol Treatment Trialists' (CTT) Collaboration meta-analysis of statin trials",
+      "doi": "10.1016/S0140-6736(10)61350-5",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Each 1 mmol/L (~39 mg/dL) reduction in LDL-C reduces major vascular events by ~22%",
+      "requiredFields": [
+        {
+          "path": "labTests.lipidPanel.ldlCholesterol.value",
+          "required": false,
+          "alternatives": ["labTests.markers.ldl_cholesterol.value"]
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 70, "hazardRatio": 0.75, "confidence": [0.68, 0.82] },
+          { "value": 100, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 130, "hazardRatio": 1.3, "confidence": [1.22, 1.38] },
+          { "value": 160, "hazardRatio": 1.65, "confidence": [1.55, 1.75] },
+          { "value": 190, "hazardRatio": 2.05, "confidence": [1.90, 2.20] },
+          { "value": 220, "hazardRatio": 2.5, "confidence": [2.30, 2.70] }
+        ],
+        "validRange": [40, 300]
+      }
+    },
+    {
+      "factorId": "hdl_cholesterol",
+      "name": "HDL Cholesterol",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lipids",
+      "modifiable": true,
+      "citation": "Framingham Heart Study - Gordon et al. High-density lipoprotein as a protective factor",
+      "doi": "10.1016/0002-9149(77)90874-9",
+      "evidenceLevel": "cohort",
+      "notes": "Higher HDL-C inversely associated with CVD risk; each 1 mg/dL increase associated with ~2-3% risk reduction",
+      "requiredFields": [
+        {
+          "path": "labTests.lipidPanel.hdlCholesterol.value",
+          "required": false,
+          "alternatives": ["labTests.markers.hdl_cholesterol.value"]
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 30, "hazardRatio": 1.5, "confidence": [1.38, 1.62] },
+          { "value": 40, "hazardRatio": 1.2, "confidence": [1.12, 1.28] },
+          { "value": 50, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 60, "hazardRatio": 0.85, "confidence": [0.78, 0.92] },
+          { "value": 70, "hazardRatio": 0.72, "confidence": [0.65, 0.79] },
+          { "value": 80, "hazardRatio": 0.62, "confidence": [0.55, 0.69] }
+        ],
+        "validRange": [20, 100]
+      }
+    },
+    {
+      "factorId": "systolic_bp",
+      "name": "Systolic Blood Pressure",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Vital Signs",
+      "modifiable": true,
+      "citation": "Prospective Studies Collaboration - Lewington et al. Age-specific relevance of usual blood pressure to vascular mortality",
+      "doi": "10.1016/S0140-6736(02)11911-8",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Each 20 mmHg increase in SBP associated with ~2-fold increase in CVD mortality; continuous log-linear relationship",
+      "requiredFields": [
+        {
+          "path": "biometrics.bloodPressure.mostRecent.value.systolic",
+          "required": false,
+          "alternatives": ["biometrics.bloodPressure.dataPoints.0.value.systolic"]
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 100, "hazardRatio": 0.65, "confidence": [0.58, 0.72] },
+          { "value": 110, "hazardRatio": 0.80, "confidence": [0.74, 0.86] },
+          { "value": 120, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 130, "hazardRatio": 1.25, "confidence": [1.18, 1.32] },
+          { "value": 140, "hazardRatio": 1.55, "confidence": [1.46, 1.64] },
+          { "value": 150, "hazardRatio": 1.90, "confidence": [1.78, 2.02] },
+          { "value": 160, "hazardRatio": 2.30, "confidence": [2.15, 2.45] },
+          { "value": 180, "hazardRatio": 3.20, "confidence": [2.95, 3.45] }
+        ],
+        "validRange": [90, 200]
+      }
+    },
+    {
+      "factorId": "total_cholesterol",
+      "name": "Total Cholesterol",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lipids",
+      "modifiable": true,
+      "citation": "Multiple Risk Factor Intervention Trial (MRFIT) - Stamler et al.",
+      "doi": "10.1001/jama.1986.03380220062031",
+      "evidenceLevel": "cohort",
+      "notes": "Continuous graded relationship between total cholesterol and CHD mortality; widely used in Framingham risk equations",
+      "requiredFields": [
+        {
+          "path": "labTests.lipidPanel.totalCholesterol.value",
+          "required": false,
+          "alternatives": ["labTests.markers.total_cholesterol.value"]
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 160, "hazardRatio": 0.80, "confidence": [0.73, 0.87] },
+          { "value": 200, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 240, "hazardRatio": 1.35, "confidence": [1.26, 1.44] },
+          { "value": 280, "hazardRatio": 1.75, "confidence": [1.62, 1.88] },
+          { "value": 320, "hazardRatio": 2.20, "confidence": [2.00, 2.40] }
+        ],
+        "validRange": [120, 400]
+      }
+    },
+    {
+      "factorId": "smoking_status",
+      "name": "Smoking Status",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Framingham Heart Study - Kannel et al. Overall and coronary heart disease mortality rates in relation to major risk factors",
+      "doi": "10.1016/0002-8703(87)90212-5",
+      "evidenceLevel": "cohort",
+      "notes": "Current smoking approximately doubles CVD risk; former smokers have intermediate risk",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "referenceCategory": "never",
+        "categories": [
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "former",
+            "hazardRatio": 1.35,
+            "confidence": [1.25, 1.45]
+          },
+          {
+            "value": "current",
+            "hazardRatio": 2.0,
+            "confidence": [1.85, 2.15]
+          }
+        ]
+      }
+    },
+    {
+      "factorId": "diabetes",
+      "name": "Diabetes Diagnosis",
+      "type": "boolean",
+      "evidenceStrength": "strong",
+      "category": "Medical History",
+      "modifiable": false,
+      "citation": "Framingham Heart Study - Kannel & McGee. Diabetes and cardiovascular disease: The Framingham study",
+      "doi": "10.1001/jama.1979.03290450033020",
+      "evidenceLevel": "cohort",
+      "notes": "Diabetes approximately doubles CVD risk; independent predictor in multivariable models",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.0,
+        "falseHazardRatio": 1.0,
+        "confidence": [1.80, 2.20]
+      }
+    },
+    {
+      "factorId": "family_history_cvd",
+      "name": "Family History of Early CVD",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Family History",
+      "modifiable": false,
+      "citation": "Scheuner et al. Family history: a comprehensive genetic risk assessment method for the chronic conditions of adulthood",
+      "doi": "10.1016/S0002-9343(97)00118-3",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Family history of premature CVD (male <55, female <65) increases risk by ~1.5-2x",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.7,
+        "falseHazardRatio": 1.0,
+        "confidence": [1.50, 1.90]
+      }
+    },
+    {
+      "factorId": "bmi",
+      "name": "Body Mass Index",
+      "type": "continuous",
+      "evidenceStrength": "moderate",
+      "category": "Biometrics",
+      "modifiable": true,
+      "citation": "Prospective Studies Collaboration - Whitlock et al. Body-mass index and cause-specific mortality",
+      "doi": "10.1016/S0140-6736(09)60318-4",
+      "evidenceLevel": "meta_analysis",
+      "notes": "J-shaped relationship; both low (<20) and high (>30) BMI associated with increased CVD mortality",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18.5, "hazardRatio": 1.1, "confidence": [0.98, 1.22] },
+          { "value": 22, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 25, "hazardRatio": 1.1, "confidence": [1.03, 1.17] },
+          { "value": 30, "hazardRatio": 1.4, "confidence": [1.30, 1.50] },
+          { "value": 35, "hazardRatio": 1.8, "confidence": [1.65, 1.95] },
+          { "value": 40, "hazardRatio": 2.3, "confidence": [2.10, 2.50] }
+        ],
+        "validRange": [15, 50]
+      }
+    },
+    {
+      "factorId": "physical_activity",
+      "name": "Physical Activity Level",
+      "type": "continuous",
+      "evidenceStrength": "moderate",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Physical Activity Guidelines Advisory Committee Scientific Report (2018)",
+      "url": "https://health.gov/sites/default/files/2019-09/PAG_Advisory_Committee_Report.pdf",
+      "evidenceLevel": "meta_analysis",
+      "notes": "150 min/week moderate activity reduces CVD risk by ~20-30%; dose-response relationship up to 450+ min/week",
+      "requiredFields": [
+        {
+          "path": "lifestyle.exercise.moderateMinutesPerWeek.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.45, "confidence": [1.32, 1.58] },
+          { "value": 75, "hazardRatio": 1.2, "confidence": [1.10, 1.30] },
+          { "value": 150, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 300, "hazardRatio": 0.80, "confidence": [0.72, 0.88] },
+          { "value": 450, "hazardRatio": 0.68, "confidence": [0.60, 0.76] }
+        ],
+        "validRange": [0, 600]
+      }
+    },
+    {
+      "factorId": "sleep_duration",
+      "name": "Sleep Duration",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Cappuccio et al. Sleep duration and all-cause mortality: a systematic review and meta-analysis of prospective studies. Sleep. 2010;33(5):585-592",
+      "doi": "10.1093/sleep/33.5.585",
+      "evidenceLevel": "meta_analysis",
+      "notes": "U-shaped relationship: both short (<7h) and long (>9h) sleep increase mortality risk. Short sleep HR=1.12, long sleep HR=1.34. Optimal: 7-8 hours",
+      "requiredFields": [
+        {
+          "path": "lifestyle.sleep.averageHoursPerNight.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 4, "hazardRatio": 1.18, "confidence": [1.10, 1.26] },
+          { "value": 5, "hazardRatio": 1.15, "confidence": [1.09, 1.21] },
+          { "value": 6, "hazardRatio": 1.12, "confidence": [1.08, 1.16] },
+          { "value": 7, "hazardRatio": 1.0, "confidence": [0.97, 1.03] },
+          { "value": 8, "hazardRatio": 1.0, "confidence": [0.97, 1.03] },
+          { "value": 9, "hazardRatio": 1.15, "confidence": [1.10, 1.20] },
+          { "value": 10, "hazardRatio": 1.34, "confidence": [1.26, 1.42] },
+          { "value": 11, "hazardRatio": 1.40, "confidence": [1.30, 1.50] }
+        ],
+        "validRange": [3, 12]
+      }
+    },
+    {
+      "factorId": "chronic_stress",
+      "name": "Chronic Psychological Stress",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Psychosocial",
+      "modifiable": true,
+      "citation": "Richardson et al. Meta-analysis of perceived stress and its association with incident coronary heart disease. Am J Cardiol. 2012;110(12):1711-1716",
+      "doi": "10.1016/j.amjcard.2012.08.004",
+      "evidenceLevel": "meta_analysis",
+      "notes": "High perceived stress associated with 27% increased CVD risk. Mechanism: elevated cortisol, inflammation, unhealthy coping behaviors",
+      "requiredFields": [
+        {
+          "path": "lifestyle.stress.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "low", "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": "moderate", "hazardRatio": 1.12, "confidence": [1.05, 1.19] },
+          { "value": "high", "hazardRatio": 1.27, "confidence": [1.12, 1.45] }
+        ]
+      }
+    },
+    {
+      "factorId": "social_isolation",
+      "name": "Social Isolation / Low Social Engagement",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Psychosocial",
+      "modifiable": true,
+      "citation": "Fan et al. Social isolation, loneliness, and all-cause mortality in cohort studies: A meta-analysis. Nat Hum Behav. 2023;7(8):1307-1319",
+      "doi": "10.1038/s41562-023-01617-6",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Social isolation increases mortality risk by 32%, comparable to smoking. Mechanisms: reduced health behaviors, increased inflammation, psychological stress",
+      "requiredFields": [
+        {
+          "path": "lifestyle.socialEngagement.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "low", "hazardRatio": 1.32, "confidence": [1.26, 1.39] },
+          { "value": "moderate", "hazardRatio": 1.15, "confidence": [1.10, 1.20] },
+          { "value": "high", "hazardRatio": 1.0, "confidence": [0.95, 1.05] }
+        ]
+      }
+    },
+    {
+      "factorId": "sedentary_time",
+      "name": "High Sedentary / Screen Time",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Gao et al. Association Between Sitting Time and Mortality. JAMA Netw Open. 2024",
+      "doi": "10.1001/jamanetworkopen.2023.50680",
+      "evidenceLevel": "cohort",
+      "notes": "High occupational sitting time increases mortality risk by 16%, independent of physical activity levels",
+      "requiredFields": [
+        {
+          "path": "lifestyle.screenTime.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "low", "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": "moderate", "hazardRatio": 1.08, "confidence": [1.03, 1.13] },
+          { "value": "high", "hazardRatio": 1.16, "confidence": [1.11, 1.20] }
+        ]
+      }
+    },
+    {
+      "factorId": "periodontal_disease",
+      "name": "Periodontal Disease / Poor Dental Hygiene",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Health Behaviors",
+      "modifiable": true,
+      "citation": "Wang et al. Association between periodontal disease and all-cause and CVD mortality: systematic review and meta-analysis. BMC Oral Health. 2024;24:415",
+      "doi": "10.1186/s12903-024-04123-x",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Periodontal disease increases mortality risk by 31%, likely due to systemic inflammation and bacteremia",
+      "requiredFields": [
+        {
+          "path": "lifestyle.dentalHygiene.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "poor", "hazardRatio": 1.31, "confidence": [1.07, 1.61] },
+          { "value": "fair", "hazardRatio": 1.15, "confidence": [1.05, 1.25] },
+          { "value": "good", "hazardRatio": 1.0, "confidence": [0.95, 1.05] }
+        ]
+      }
+    },
+    {
+      "factorId": "air_pollution_pm25",
+      "name": "Air Pollution (PM2.5 Exposure)",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Environmental",
+      "modifiable": false,
+      "citation": "Chen et al. The impact of long-term PM2.5 exposure on specific causes of death: a 115-million-person study. J Hazard Mater. 2020;391:123282",
+      "doi": "10.1016/j.jhazmat.2020.123282",
+      "evidenceLevel": "meta_analysis",
+      "notes": "PM2.5 exposure shows linear non-threshold dose-response. 8% increase per 10 µg/m³. Major mechanism: systemic inflammation, atherosclerosis",
+      "requiredFields": [
+        {
+          "path": "lifestyle.airQualityExposure.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "good", "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": "moderate", "hazardRatio": 1.04, "confidence": [1.02, 1.06] },
+          { "value": "poor", "hazardRatio": 1.08, "confidence": [1.06, 1.09] }
+        ]
+      }
+    },
+    {
+      "factorId": "statin_use",
+      "name": "Statin Therapy (Primary Prevention)",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Medications",
+      "modifiable": true,
+      "citation": "Yebyo et al. Primary prevention for cardiovascular disease with statins in low-risk adults. BMJ Open. 2018;8(9):e020584",
+      "doi": "10.1136/bmjopen-2018-020584",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Statins reduce all-cause mortality by 10% in primary prevention. Mechanism: LDL reduction, plaque stabilization, anti-inflammatory effects",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.medications.statin.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": true, "hazardRatio": 0.90, "confidence": [0.85, 0.96] }
+        ]
+      }
+    },
+    {
+      "factorId": "dog_ownership",
+      "name": "Dog Ownership",
+      "type": "categorical",
+      "evidenceStrength": "moderate",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "El-Qushayri et al. Association between pet ownership and cardiovascular health: A systematic review and meta-analysis. J Clin Med. 2020",
+      "doi": "10.2459/JCM.0000000000000920",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Dog ownership associated with 23% reduced CVD mortality. Mechanisms: increased physical activity, reduced stress, social connection. Effect strongest in those living alone",
+      "requiredFields": [
+        {
+          "path": "social.petOwnership.ownsDog.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": true, "hazardRatio": 0.77, "confidence": [0.73, 0.80] }
+        ]
+      }
+    },
+    {
+      "factorId": "green_space_exposure",
+      "name": "Nature / Green Space Exposure",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Environmental",
+      "modifiable": true,
+      "citation": "Rojas-Rueda et al. Green spaces and mortality: a systematic review and meta-analysis. Lancet Planet Health. 2019;3(11):e469-e477",
+      "doi": "10.1016/S2542-5196(19)30215-3",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Green space exposure reduces mortality by 4% per 0.1 NDVI increase. Mechanisms: improved air quality, stress reduction, increased physical activity",
+      "requiredFields": [
+        {
+          "path": "lifestyle.outdoorTime.minutesPerWeek.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 60, "hazardRatio": 0.98, "confidence": [0.96, 1.00] },
+          { "value": 120, "hazardRatio": 0.96, "confidence": [0.94, 0.97] },
+          { "value": 240, "hazardRatio": 0.92, "confidence": [0.90, 0.94] }
+        ],
+        "validRange": [0, 1000]
+      }
+    },
+    {
+      "factorId": "noise_pollution",
+      "name": "Chronic Noise Pollution Exposure",
+      "type": "categorical",
+      "evidenceStrength": "moderate",
+      "category": "Environmental",
+      "modifiable": false,
+      "citation": "Hao et al. Long-term exposure to environmental noise and cardiovascular mortality: A systematic review and meta-analysis. Environ Res. 2022",
+      "doi": "10.1016/j.envres.2022.113269",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Traffic noise exposure increases CVD risk by 3% per 10 dB. Mechanisms: sleep disruption, stress response, hypertension",
+      "requiredFields": [
+        {
+          "path": "lifestyle.noiseExposure.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "low", "hazardRatio": 1.0, "confidence": [0.97, 1.03] },
+          { "value": "moderate", "hazardRatio": 1.03, "confidence": [1.00, 1.05] },
+          { "value": "high", "hazardRatio": 1.06, "confidence": [1.01, 1.11] }
+        ]
+      }
+    },
+    {
+      "factorId": "volunteering",
+      "name": "Regular Volunteering / Altruistic Activities",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Psychosocial",
+      "modifiable": true,
+      "citation": "Okun et al. Volunteering by older adults and risk of mortality: a meta-analysis. Psychol Aging. 2013;28(2):564-77",
+      "doi": "10.1037/a0031552",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Regular volunteering reduces all-cause mortality by 24%. Protective effect strongest when motives are 'other-oriented'. Mechanisms: increased social connection, sense of purpose, physical activity, stress reduction",
+      "requiredFields": [
+        {
+          "path": "social.volunteering.active.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": true, "hazardRatio": 0.76, "confidence": [0.69, 0.84] }
+        ]
+      }
+    },
+    {
+      "factorId": "religious_attendance",
+      "name": "Religious Service Attendance",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Psychosocial",
+      "modifiable": true,
+      "citation": "Li et al. Religious Service Attendance and Mortality Among Women. JAMA Intern Med. 2016;176(6):777-85",
+      "doi": "10.1001/jamainternmed.2016.1615",
+      "evidenceLevel": "cohort",
+      "notes": "Weekly religious attendance reduces all-cause mortality by 33%. Large prospective cohort (74,534 women, 16-year follow-up). Mechanisms: social support, health behaviors (less smoking/alcohol), coping resources, sense of meaning",
+      "requiredFields": [
+        {
+          "path": "social.religiousAttendance.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "never", "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": "rarely", "hazardRatio": 0.92, "confidence": [0.85, 0.99] },
+          { "value": "monthly", "hazardRatio": 0.85, "confidence": [0.78, 0.92] },
+          { "value": "weekly", "hazardRatio": 0.67, "confidence": [0.62, 0.71] }
+        ]
+      }
+    },
+    {
+      "factorId": "lpa_levels",
+      "name": "Lipoprotein(a) [Lp(a)]",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lipids",
+      "modifiable": true,
+      "citation": "Burgess S, et al. Association of Lp(a) with risk of cardiovascular disease. Lancet. 2023;401(10373):634-645.",
+      "doi": "10.1016/S0140-6736(22)02423-4",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Independent of LDL-C; HR per 50mg/dL. Mechanism: prothrombotic + atherogenic. PCSK9 inhibitors lower Lp(a) 25%.",
+      "requiredFields": [{"path": "labTests.lipidPanel.lipoproteinA.value", "required": false}],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "linear",
+        "coefficients": {"slope": 0.028, "intercept": 1.0},
+        "validRange": [0, 200]
+      }
+    },
+    {
+      "factorId": "cac_score",
+      "name": "Coronary Artery Calcium Score",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Imaging",
+      "modifiable": false,
+      "citation": "Silverman MG, et al. Association of Coronary Artery Calcium With Long-term, Cause-Specific Mortality. JAMA Cardiol. 2014;156(15):1795-1802.",
+      "doi": "10.1001/jamacardio.2014.332",
+      "evidenceLevel": "cohort",
+      "notes": "MESA study n=6,800; 10-yr CVD mortality.",
+      "requiredFields": [{"path": "medicalHistory.cacScore.value", "required": false}],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          {"value": "0", "hazardRatio": 1.0},
+          {"value": "1-100", "hazardRatio": 2.6, "confidence": [1.5, 4.5]},
+          {"value": "101-400", "hazardRatio": 4.2, "confidence": [2.4, 7.3]},
+          {"value": ">400", "hazardRatio": 7.8, "confidence": [4.5, 13.5]}
+        ]
+      }
+    },
+    {
+      "factorId": "sleep_apnea",
+      "name": "Obstructive Sleep Apnea",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Sleep",
+      "modifiable": true,
+      "citation": "Javaheri S, et al. Sleep Apnea: Types, Mechanisms, and Clinical Cardiovascular Consequences. J Am Coll Cardiol. 2017;69(7):841-858.",
+      "doi": "10.1016/j.jacc.2016.11.069",
+      "evidenceLevel": "meta_analysis",
+      "notes": "CPAP reduces risk 30-50%; mechanism: hypoxia → endothelial dysfunction.",
+      "requiredFields": [{"path": "medicalHistory.sleepApnea.diagnosis.value", "required": false}],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.8,
+        "falseHazardRatio": 1.0,
+        "confidence": [1.4, 2.3]
+      }
+    }
+  ]
+}

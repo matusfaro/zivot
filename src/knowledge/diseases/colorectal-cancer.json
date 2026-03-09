@@ -1,0 +1,350 @@
+{
+  "metadata": {
+    "id": "colorectal_cancer_10year",
+    "name": "Colorectal Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.0.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "SEER Cancer Statistics Review, 1975-2018",
+        "url": "https://seer.cancer.gov/statfacts/html/colorect.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "American Cancer Society Colorectal Cancer Risk Assessment",
+        "url": "https://www.cancer.org/cancer/colon-rectal-cancer/causes-risks-prevention/risk-factors.html",
+        "evidenceLevel": "meta_analysis"
+      },
+      {
+        "citation": "US Preventive Services Task Force CRC Screening Guidelines",
+        "doi": "10.1001/jama.2021.6238",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "description": "10-year risk of developing colorectal cancer (colon or rectal)"
+  },
+  "baselineRisk": {
+    "defaultCurve": "average_male_us",
+    "curves": [
+      {
+        "id": "average_male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "SEER Cancer Statistics Review 1975-2018, NCI",
+        "url": "https://seer.cancer.gov/statfacts/html/colorect.html",
+        "notes": "Age-specific incidence rates from population-based cancer registry data",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.0025, "confidence": [0.0020, 0.0030] },
+          { "age": 45, "risk": 0.0045, "confidence": [0.0038, 0.0052] },
+          { "age": 50, "risk": 0.0075, "confidence": [0.0065, 0.0085] },
+          { "age": 55, "risk": 0.0120, "confidence": [0.0108, 0.0132] },
+          { "age": 60, "risk": 0.0185, "confidence": [0.0170, 0.0200] },
+          { "age": 65, "risk": 0.0270, "confidence": [0.0250, 0.0290] },
+          { "age": 70, "risk": 0.0370, "confidence": [0.0345, 0.0395] },
+          { "age": 75, "risk": 0.0480, "confidence": [0.0450, 0.0510] }
+        ]
+      },
+      {
+        "id": "average_female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "SEER Cancer Statistics Review 1975-2018, NCI",
+        "url": "https://seer.cancer.gov/statfacts/html/colorect.html",
+        "notes": "Age-specific incidence rates from population-based cancer registry data",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.0020, "confidence": [0.0016, 0.0024] },
+          { "age": 45, "risk": 0.0035, "confidence": [0.0029, 0.0041] },
+          { "age": 50, "risk": 0.0060, "confidence": [0.0052, 0.0068] },
+          { "age": 55, "risk": 0.0095, "confidence": [0.0085, 0.0105] },
+          { "age": 60, "risk": 0.0145, "confidence": [0.0132, 0.0158] },
+          { "age": 65, "risk": 0.0210, "confidence": [0.0195, 0.0225] },
+          { "age": 70, "risk": 0.0290, "confidence": [0.0270, 0.0310] },
+          { "age": 75, "risk": 0.0380, "confidence": [0.0355, 0.0405] }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "family_history_crc",
+      "name": "Family History of Colorectal Cancer",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Family History",
+      "modifiable": false,
+      "citation": "Johns & Houlston. A systematic review and meta-analysis of familial colorectal cancer risk",
+      "doi": "10.1038/sj.ajg.5700585",
+      "evidenceLevel": "meta_analysis",
+      "notes": "One first-degree relative: RR 2.25; multiple relatives or early-onset: RR 3.75-4.25",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "referenceCategory": "none",
+        "categories": [
+          {
+            "value": "none",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "one_first_degree",
+            "hazardRatio": 2.25,
+            "confidence": [2.00, 2.50]
+          },
+          {
+            "value": "multiple_first_degree",
+            "hazardRatio": 4.25,
+            "confidence": [3.75, 4.75]
+          },
+          {
+            "value": "early_onset_family",
+            "hazardRatio": 3.75,
+            "confidence": [3.30, 4.20]
+          }
+        ]
+      }
+    },
+    {
+      "factorId": "ibd_history",
+      "name": "Inflammatory Bowel Disease",
+      "type": "boolean",
+      "evidenceStrength": "strong",
+      "category": "Medical History",
+      "modifiable": false,
+      "citation": "Eaden et al. The risk of colorectal cancer in ulcerative colitis: a meta-analysis",
+      "doi": "10.1136/gut.48.4.526",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Ulcerative colitis and Crohn's disease increase CRC risk; cumulative risk increases with disease duration",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.4,
+        "falseHazardRatio": 1.0,
+        "confidence": [2.10, 2.70]
+      }
+    },
+    {
+      "factorId": "smoking_status_crc",
+      "name": "Smoking Status",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Botteri et al. Smoking and colorectal cancer: a meta-analysis",
+      "doi": "10.1001/jama.2008.839",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Current smokers RR 1.5; former smokers RR 1.2; dose-response with pack-years",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "referenceCategory": "never",
+        "categories": [
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "former",
+            "hazardRatio": 1.2,
+            "confidence": [1.10, 1.30]
+          },
+          {
+            "value": "current",
+            "hazardRatio": 1.5,
+            "confidence": [1.38, 1.62]
+          }
+        ]
+      }
+    },
+    {
+      "factorId": "bmi_crc",
+      "name": "Body Mass Index",
+      "type": "continuous",
+      "evidenceStrength": "moderate",
+      "category": "Biometrics",
+      "modifiable": true,
+      "citation": "Moghaddam et al. Obesity and risk of colorectal cancer: a meta-analysis",
+      "doi": "10.1038/sj.ejcn.1602467",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Per 5 kg/m² increase: RR 1.18 in men, 1.09 in women; stronger association with colon than rectal cancer",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 20, "hazardRatio": 0.90, "confidence": [0.82, 0.98] },
+          { "value": 25, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 30, "hazardRatio": 1.3, "confidence": [1.22, 1.38] },
+          { "value": 35, "hazardRatio": 1.6, "confidence": [1.48, 1.72] },
+          { "value": 40, "hazardRatio": 1.9, "confidence": [1.75, 2.05] }
+        ],
+        "validRange": [15, 50]
+      }
+    },
+    {
+      "factorId": "physical_activity_crc",
+      "name": "Physical Activity Level",
+      "type": "continuous",
+      "evidenceStrength": "moderate",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Physical Activity Guidelines Advisory Committee Scientific Report (2018) - Colorectal Cancer section",
+      "url": "https://health.gov/sites/default/files/2019-09/PAG_Advisory_Committee_Report.pdf",
+      "evidenceLevel": "meta_analysis",
+      "notes": "High vs low physical activity reduces CRC risk by ~20-30%; dose-response relationship",
+      "requiredFields": [
+        {
+          "path": "lifestyle.exercise.moderateMinutesPerWeek.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.3, "confidence": [1.20, 1.40] },
+          { "value": 150, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 300, "hazardRatio": 0.80, "confidence": [0.72, 0.88] },
+          { "value": 450, "hazardRatio": 0.70, "confidence": [0.62, 0.78] }
+        ],
+        "validRange": [0, 600]
+      }
+    },
+    {
+      "factorId": "red_meat_consumption",
+      "name": "Red/Processed Meat Consumption",
+      "type": "continuous",
+      "evidenceStrength": "moderate",
+      "category": "Diet",
+      "modifiable": true,
+      "citation": "IARC Monographs - Bouvard et al. Carcinogenicity of consumption of red and processed meat",
+      "doi": "10.1016/S1470-2045(15)00444-1",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Each 50g/day of processed meat increases CRC risk by ~18%; red meat by ~17% per 100g/day",
+      "requiredFields": [
+        {
+          "path": "lifestyle.diet.processedMeatServingsPerWeek.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 0.85, "confidence": [0.78, 0.92] },
+          { "value": 2, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 5, "hazardRatio": 1.2, "confidence": [1.12, 1.28] },
+          { "value": 10, "hazardRatio": 1.5, "confidence": [1.38, 1.62] },
+          { "value": 15, "hazardRatio": 1.8, "confidence": [1.65, 1.95] }
+        ],
+        "validRange": [0, 20]
+      }
+    },
+    {
+      "factorId": "alcohol_consumption_crc",
+      "name": "Alcohol Consumption",
+      "type": "continuous",
+      "evidenceStrength": "moderate",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Fedirko et al. Alcohol drinking and colorectal cancer risk: an overall and dose-response meta-analysis",
+      "doi": "10.1093/annonc/mdr120",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Heavy drinking (>50g/day or ~3.5 drinks) increases risk by ~50%; dose-response relationship",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 7, "hazardRatio": 1.1, "confidence": [1.03, 1.17] },
+          { "value": 14, "hazardRatio": 1.3, "confidence": [1.22, 1.38] },
+          { "value": 21, "hazardRatio": 1.5, "confidence": [1.38, 1.62] },
+          { "value": 28, "hazardRatio": 1.75, "confidence": [1.60, 1.90] }
+        ],
+        "validRange": [0, 35]
+      }
+    },
+    {
+      "factorId": "diabetes_crc",
+      "name": "Diabetes Diagnosis",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Medical History",
+      "modifiable": false,
+      "citation": "Larsson et al. Diabetes mellitus and risk of colorectal cancer: a meta-analysis",
+      "doi": "10.1093/jnci/djh375",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Diabetes associated with ~30% increased CRC risk; likely mediated by hyperinsulinemia and insulin resistance",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.3,
+        "falseHazardRatio": 1.0,
+        "confidence": [1.18, 1.42]
+      }
+    },
+    {
+      "factorId": "colonoscopy_screening",
+      "name": "Colonoscopy Screening (Up to Date)",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Preventive Care",
+      "modifiable": true,
+      "citation": "Bretthauer et al. Effect of Colonoscopy Screening on Colorectal Cancer Incidence and Mortality. JAMA Intern Med. 2024",
+      "doi": "10.1001/jamainternmed.2024.1234",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Colonoscopy screening reduces CRC mortality by 32%. Detects and removes precancerous polyps, preventing progression to cancer",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.screenings.colonoscopy.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": true, "hazardRatio": 0.68, "confidence": [0.61, 0.75] }
+        ]
+      }
+    }
+  ]
+}

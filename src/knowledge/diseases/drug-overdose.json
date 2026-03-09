@@ -1,0 +1,206 @@
+{
+  "metadata": {
+    "id": "drug_overdose_10year",
+    "name": "Drug Overdose (10-year)",
+    "category": "injury",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "CDC WONDER Drug Overdose Mortality Data",
+        "url": "https://wonder.cdc.gov/",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of death from drug overdose, including opioids, stimulants, and other substances"
+  },
+  "baselineRisk": {
+    "defaultCurve": "general_us",
+    "curves": [
+      {
+        "id": "general_us",
+        "applicability": {
+          "region": ["US"],
+          "ageRange": [18, 100]
+        },
+        "source": "CDC WONDER - Drug Overdose Deaths",
+        "url": "https://wonder.cdc.gov/",
+        "notes": "Males 2-3x females in young/middle age groups; opioid epidemic trends",
+        "ageRiskMapping": [
+          { "age": 18, "risk": 0.00200 },
+          { "age": 25, "risk": 0.00313 },
+          { "age": 35, "risk": 0.00400 },
+          { "age": 45, "risk": 0.00350 },
+          { "age": 55, "risk": 0.00250 },
+          { "age": 65, "risk": 0.00150 },
+          { "age": 75, "risk": 0.00080 },
+          { "age": 85, "risk": 0.00050 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "age_inverse",
+      "name": "Age (Younger = Higher Risk)",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "demographics.dateOfBirth.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "age_category_inverse",
+        "categories": [
+          { "ageRange": [18, 24], "hazardRatio": 1.3 },
+          { "ageRange": [25, 44], "hazardRatio": 1.5 },
+          { "ageRange": [45, 64], "hazardRatio": 1.0 },
+          { "ageRange": [65, 100], "hazardRatio": 0.5 }
+        ],
+        "referenceCategory": "45-64",
+        "notes": "Overdose risk peaks in 25-44 age group"
+      }
+    },
+    {
+      "factorId": "prescribed_opioids",
+      "name": "Prescribed Opioids",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.substanceUse.prescribedOpioids.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 4.0,
+        "falseHazardRatio": 1.0,
+        "notes": "Prescription opioid use is major risk factor"
+      }
+    },
+    {
+      "factorId": "opioid_daily_dose",
+      "name": "Opioid Daily Dose (MME)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.substanceUse.opioidDailyDose.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0 },
+          { "value": 50, "hazardRatio": 2.0 },
+          { "value": 90, "hazardRatio": 4.0 },
+          { "value": 200, "hazardRatio": 8.0 }
+        ],
+        "validRange": [0, 500],
+        "notes": "Risk increases dramatically above 90 MME/day"
+      }
+    },
+    {
+      "factorId": "prescribed_benzodiazepines",
+      "name": "Prescribed Benzodiazepines",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.substanceUse.prescribedBenzodiazepines.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 3.0,
+        "falseHazardRatio": 1.0,
+        "notes": "Benzos + opioids = very high risk combination"
+      }
+    },
+    {
+      "factorId": "substance_abuse_history",
+      "name": "Substance Abuse History",
+      "modifiable": false,
+      "citation": "Polysubstance Use and Overdose Risk",
+      "doi": "10.1001/jamapsychiatry.2021.0631",
+      "evidenceLevel": "cohort",
+      "notes": "Polysubstance use OR~4.0 for overdose mortality",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.substanceUse.substanceAbuseHistory.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 6.0,
+        "falseHazardRatio": 1.0,
+        "notes": "History of substance abuse is strongest predictor"
+      }
+    },
+    {
+      "factorId": "prior_overdose",
+      "name": "Prior Overdose",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.substanceUse.priorOverdose.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 10.0,
+        "falseHazardRatio": 1.0,
+        "notes": "Prior overdose dramatically increases future risk"
+      }
+    },
+    {
+      "factorId": "depression",
+      "name": "Depression Diagnosis",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.mentalHealth.depressionDiagnosis.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.5,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "alcohol_consumption",
+      "name": "Alcohol Consumption",
+      "modifiable": true,
+      "evidenceLevel": "medium",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "linear",
+        "coefficients": {
+          "slope": 0.03
+        },
+        "validRange": [0, 50],
+        "notes": "Alcohol mixed with substances increases overdose risk"
+      }
+    }
+  ]
+}

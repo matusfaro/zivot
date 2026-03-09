@@ -1,0 +1,405 @@
+{
+  "metadata": {
+    "id": "alzheimers_dementia_10year",
+    "name": "Alzheimer's / Dementia (10-year)",
+    "category": "other",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "Framingham Study Dementia Incidence",
+        "doi": "10.1212/WNL.0000000000001432",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year dementia risk based on CAIDE and ANU-ADRI models (NOTE: Models have limited predictive accuracy)"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [45, 100]
+        },
+        "source": "Framingham Heart Study Dementia Incidence",
+        "doi": "10.1212/WNL.0000000000001432",
+        "notes": "Incidence ~15/1000 py age 75+; males lower than females.",
+        "ageRiskMapping": [
+          { "age": 45, "risk": 0.005 },
+          { "age": 55, "risk": 0.015 },
+          { "age": 65, "risk": 0.045 },
+          { "age": 75, "risk": 0.125 },
+          { "age": 85, "risk": 0.250 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [45, 100]
+        },
+        "source": "Framingham Heart Study Dementia Incidence",
+        "doi": "10.1212/WNL.0000000000001432",
+        "notes": "Females ~1.5-2x higher incidence post-75.",
+        "ageRiskMapping": [
+          { "age": 45, "risk": 0.004 },
+          { "age": 55, "risk": 0.012 },
+          { "age": 65, "risk": 0.055 },
+          { "age": 75, "risk": 0.155 },
+          { "age": 85, "risk": 0.310 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "education_dementia",
+      "name": "Education Level",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "citation": "Cognitive Reserve (CAIDE study)",
+      "doi": "10.1016/S1474-4422(11)70058-7",
+      "evidenceLevel": "cohort",
+      "notes": "Higher education: HR=0.6-0.8 protective.",
+      "requiredFields": [
+        {
+          "path": "demographics.educationLevel.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": ["less_than_high_school", "elementary"], "hazardRatio": 1.5 },
+          { "value": ["high_school", "hs"], "hazardRatio": 1.2 },
+          { "value": ["some_college", "associate"], "hazardRatio": 1.0 },
+          { "value": ["bachelors", "college"], "hazardRatio": 0.85 },
+          { "value": ["graduate", "masters", "phd"], "hazardRatio": 0.70 }
+        ]
+      }
+    },
+    {
+      "factorId": "cardiovascular_risk_dementia",
+      "name": "Cardiovascular Risk (Composite)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "citation": "Midlife Vascular Risk (Cardiovascular Risk Factors, Aging, and Dementia Study)",
+      "doi": "10.1016/S0140-6736(08)61491-3",
+      "evidenceLevel": "cohort",
+      "notes": "Composite CV risk: HR~2.0.",
+      "requiredFields": [
+        {
+          "path": "biometrics.bloodPressure.mostRecent.value.systolic",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 110, "hazardRatio": 1.0 },
+          { "value": 120, "hazardRatio": 1.1 },
+          { "value": 130, "hazardRatio": 1.25 },
+          { "value": 140, "hazardRatio": 1.45 },
+          { "value": 150, "hazardRatio": 1.7 },
+          { "value": 160, "hazardRatio": 2.0 },
+          { "value": 180, "hazardRatio": 2.5 }
+        ],
+        "validRange": [90, 220]
+      }
+    },
+    {
+      "factorId": "bmi_dementia",
+      "name": "Body Mass Index",
+      "modifiable": true,
+      "evidenceLevel": "moderate",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18, "hazardRatio": 1.4 },
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.1 },
+          { "value": 30, "hazardRatio": 1.4 },
+          { "value": 35, "hazardRatio": 1.8 },
+          { "value": 40, "hazardRatio": 2.3 }
+        ],
+        "validRange": [15, 50]
+      }
+    },
+    {
+      "factorId": "physical_activity_dementia",
+      "name": "Physical Activity",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "citation": "Lancet Neurology Commission on Dementia",
+      "doi": "10.1016/S1474-4422(18)30295-3",
+      "evidenceLevel": "meta_analysis",
+      "notes": "High activity: RR=0.72 (0.60-0.87).",
+      "requiredFields": [
+        {
+          "path": "lifestyle.exercise.moderateMinutesPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.5 },
+          { "value": 60, "hazardRatio": 1.2 },
+          { "value": 150, "hazardRatio": 1.0 },
+          { "value": 300, "hazardRatio": 0.75 },
+          { "value": 450, "hazardRatio": 0.60 }
+        ],
+        "validRange": [0, 1000]
+      }
+    },
+    {
+      "factorId": "diabetes_dementia",
+      "name": "Diabetes",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.6,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "smoking_dementia",
+      "name": "Smoking Status",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "never", "hazardRatio": 1.0 },
+          { "value": "former", "hazardRatio": 1.2 },
+          { "value": "current", "hazardRatio": 1.6 }
+        ]
+      }
+    },
+    {
+      "factorId": "family_history_dementia",
+      "name": "Family History of Dementia",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "none", "hazardRatio": 1.0 },
+          { "value": "one", "hazardRatio": 1.8 },
+          { "value": "two_or_more", "hazardRatio": 3.0 }
+        ]
+      }
+    },
+    {
+      "factorId": "social_engagement",
+      "name": "Social Engagement",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "citation": "Rush Memory and Aging Project",
+      "doi": "10.1212/WNL.0b013e3181fc1a17",
+      "evidenceLevel": "cohort",
+      "notes": "High social engagement protective: HR=0.59 for decline. Low engagement/isolation increases risk by 70%.",
+      "requiredFields": [
+        {
+          "path": "lifestyle.socialEngagement.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "low", "hazardRatio": 1.7, "confidence": [1.50, 1.90] },
+          { "value": "moderate", "hazardRatio": 1.0, "confidence": [0.90, 1.10] },
+          { "value": "high", "hazardRatio": 0.59, "confidence": [0.50, 0.70] }
+        ]
+      }
+    },
+    {
+      "factorId": "creative_hobbies",
+      "name": "Creative Arts Engagement",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Cognitive",
+      "modifiable": true,
+      "citation": "Fancourt et al. Arts engagement and cognitive decline: a prospective cohort study. BMJ. 2019;367:l6377",
+      "doi": "10.1136/bmj.l6377",
+      "evidenceLevel": "cohort",
+      "notes": "Frequent arts engagement (creative hobbies) associated with 31% reduced dementia risk. Mechanisms: cognitive stimulation, social interaction, stress reduction",
+      "requiredFields": [
+        {
+          "path": "social.hobbies.creative.engaged.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": true, "hazardRatio": 0.69, "confidence": [0.59, 0.80] }
+        ]
+      }
+    },
+    {
+      "factorId": "sleep_duration_dementia",
+      "name": "Sleep Duration",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Xu et al. Sleep duration and Alzheimer's disease: a meta-analysis. Sleep Med Rev. 2020;50:101247",
+      "doi": "10.1016/j.smrv.2019.101247",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Both short and long sleep duration increase dementia risk. Short sleep (<7h): HR 1.27. Long sleep (>9h): HR 1.35. Optimal: 7-8 hours",
+      "requiredFields": [
+        {
+          "path": "lifestyle.sleep.averageHoursPerNight.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 4, "hazardRatio": 1.35, "confidence": [1.15, 1.55] },
+          { "value": 5, "hazardRatio": 1.30, "confidence": [1.12, 1.48] },
+          { "value": 6, "hazardRatio": 1.27, "confidence": [1.15, 1.39] },
+          { "value": 7, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 8, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 9, "hazardRatio": 1.15, "confidence": [1.05, 1.25] },
+          { "value": 10, "hazardRatio": 1.35, "confidence": [1.20, 1.50] },
+          { "value": 11, "hazardRatio": 1.45, "confidence": [1.25, 1.65] }
+        ],
+        "validRange": [3, 12]
+      }
+    },
+    {
+      "factorId": "chronic_stress_dementia",
+      "name": "Chronic Psychological Stress",
+      "type": "categorical",
+      "evidenceStrength": "moderate",
+      "category": "Psychosocial",
+      "modifiable": true,
+      "citation": "Johansson et al. Midlife psychological stress and risk of dementia: a 35-year longitudinal population study. Brain. 2010;133(8):2217-24",
+      "doi": "10.1093/brain/awq116",
+      "evidenceLevel": "cohort",
+      "notes": "Chronic midlife stress associated with 21% increased dementia risk. Mechanisms: HPA axis dysregulation, hippocampal atrophy, accelerated cognitive decline",
+      "requiredFields": [
+        {
+          "path": "lifestyle.stress.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "low", "hazardRatio": 1.0, "confidence": [0.90, 1.10] },
+          { "value": "moderate", "hazardRatio": 1.10, "confidence": [1.00, 1.20] },
+          { "value": "high", "hazardRatio": 1.21, "confidence": [1.05, 1.37] }
+        ]
+      }
+    },
+    {
+      "factorId": "intellectual_engagement",
+      "name": "Intellectual Engagement / Regular Reading",
+      "type": "categorical",
+      "evidenceStrength": "moderate",
+      "category": "Cognitive",
+      "modifiable": true,
+      "citation": "Wang et al. Late-life engagement in social and leisure activities is associated with a decreased risk of dementia: a longitudinal study. Am J Epidemiol. 2002;155(12):1081-7",
+      "doi": "10.1093/aje/155.12.1081",
+      "evidenceLevel": "cohort",
+      "notes": "Regular engagement in intellectually stimulating activities (reading, puzzles, games) associated with 23% reduced dementia risk. Mechanisms: cognitive reserve building, neuroplasticity, delayed cognitive decline",
+      "requiredFields": [
+        {
+          "path": "social.hobbies.intellectual.engaged.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": true, "hazardRatio": 0.77, "confidence": [0.68, 0.88] }
+        ]
+      }
+    },
+    {
+      "factorId": "apoe_e4",
+      "name": "APOE-ε4 Genetic Status",
+      "modifiable": false,
+      "evidenceLevel": "very_high",
+      "citation": "APOE and Alzheimer's Meta-analysis",
+      "doi": "10.1001/jamaneurol.2013.5991",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Heterozygous HR~3.0 (2.6-3.5); homozygous ~12.0.",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.geneticFactors.apoeE4Status.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": ["none", "negative"], "hazardRatio": 1.0 },
+          { "value": ["one_copy", "heterozygous"], "hazardRatio": 3.2 },
+          { "value": ["two_copies", "homozygous"], "hazardRatio": 12.0 }
+        ]
+      }
+    },
+    {
+      "factorId": "hearing_loss",
+      "name": "Untreated Hearing Loss",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Sensory",
+      "modifiable": true,
+      "citation": "Livingston G, et al. Dementia prevention, intervention, and care: 2020 report of the Lancet Commission. Lancet. 2020;396(10248):413-446.",
+      "doi": "10.1016/S0140-6736(20)30367-6",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Midlife hearing loss HR 1.9; hearing aids mitigate ~75%. Mechanism: cognitive load + social isolation.",
+      "requiredFields": [{"path": "medicalHistory.hearingLoss.treated.value", "required": false}],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          {"value": "none_or_treated", "hazardRatio": 1.0},
+          {"value": "untreated_mild", "hazardRatio": 1.3},
+          {"value": "untreated_moderate_severe", "hazardRatio": 1.9, "confidence": [1.6, 2.3]}
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,2786 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { UserProfile } from '../../types/user';
+import { createUserDataPoint, addToTimeSeries, TimeSeries } from '../../types/common/datapoint';
+
+// Helper functions to manage conditions as an array
+function hasConditionInProfile(profile: UserProfile, conditionId: string): boolean {
+  const conditions = profile.medicalHistory?.conditions;
+  if (!conditions) return false;
+
+  // Support both old object format and new array format
+  if (Array.isArray(conditions)) {
+    return conditions.some((c: any) => c.conditionId === conditionId);
+  } else {
+    // Old object format: {diabetes: true/false}
+    return (conditions as any)[conditionId] === true;
+  }
+}
+
+function setCondition(profile: UserProfile, conditionId: string, hasCondition: boolean): UserProfile {
+  let conditions = profile.medicalHistory?.conditions || [];
+
+  // Migrate old object format to array
+  if (!Array.isArray(conditions)) {
+    conditions = [];
+  }
+
+  if (hasCondition) {
+    // Add condition if not already present
+    const existing = conditions.find((c: any) => c.conditionId === conditionId);
+    if (!existing) {
+      conditions = [
+        ...conditions,
+        {
+          conditionId,
+          name: conditionId,
+          status: 'active' as const,
+          diagnosisDate: new Date().toISOString()
+        }
+      ];
+    }
+  } else {
+    // Remove condition
+    conditions = conditions.filter((c: any) => c.conditionId !== conditionId);
+  }
+
+  return {
+    ...profile,
+    medicalHistory: {
+      ...profile.medicalHistory,
+      conditions
+    }
+  };
+}
+
+// Helper function to create TimeSeries from a single value
+function createTimeSeries<T>(value: T): TimeSeries<T> {
+  const dataPoint = createUserDataPoint(value);
+  return {
+    dataPoints: [dataPoint],
+    mostRecent: dataPoint
+  };
+}
+
+interface SwipeQuestion {
+  id: string;
+  question: string;
+  category: string;
+  leftOption: {
+    label: string;
+    emoji: string;
+    mortalityImpact: number; // Always positive (increases risk)
+    profileUpdate: (profile: UserProfile) => UserProfile;
+  };
+  rightOption: {
+    label: string;
+    emoji: string;
+    mortalityImpact: number; // Always negative or zero (decreases risk)
+    profileUpdate: (profile: UserProfile) => UserProfile;
+  };
+}
+
+interface SwipeSurveyProps {
+  profile: UserProfile | null;
+  onProfileChange: (profile: UserProfile) => void;
+}
+
+// Check if a question has already been answered in the profile
+function isQuestionAnswered(question: SwipeQuestion, profile: UserProfile): boolean {
+  switch (question.id) {
+    case 'smoking':
+      return !!profile.lifestyle?.smoking?.status;
+    case 'exercise':
+      return profile.lifestyle?.exercise?.moderateMinutesPerWeek !== undefined;
+    case 'alcohol':
+      return profile.lifestyle?.alcohol?.drinksPerWeek !== undefined;
+    case 'diet':
+      return profile.lifestyle?.diet?.vegetableServingsPerDay !== undefined;
+    case 'sleep':
+      return profile.lifestyle?.sleep?.averageHoursPerNight !== undefined;
+    case 'biologicalSex':
+      return !!profile.demographics?.biologicalSex?.value;
+    case 'diabetes':
+      return hasConditionInProfile(profile, 'diabetes');
+    case 'hypertension':
+      return hasConditionInProfile(profile, 'hypertension');
+    case 'familyHeartDisease':
+      return profile.medicalHistory?.familyHistory?.heartDisease !== undefined;
+    case 'familyCancer':
+      return profile.medicalHistory?.familyHistory?.cancer !== undefined;
+    case 'statin':
+      return profile.medicalHistory?.medications?.statin !== undefined;
+    case 'bloodPressureMeds':
+      return profile.medicalHistory?.medications?.bloodPressureMeds !== undefined;
+    case 'aspirin':
+      return profile.medicalHistory?.medications?.aspirin !== undefined;
+    case 'highCholesterol':
+      return profile.labTests?.cholesterol?.total !== undefined;
+    case 'prediabetic':
+      return profile.labTests?.glucose?.fasting !== undefined || profile.labTests?.hba1c !== undefined;
+    case 'obesity':
+      return profile.biometrics?.bmi !== undefined;
+    case 'stress':
+      return profile.lifestyle?.stress !== undefined;
+    case 'socialConnection':
+      return profile.lifestyle?.socialConnection !== undefined;
+    case 'sunExposure':
+      return profile.lifestyle?.sunExposure !== undefined;
+    case 'occupationalHazards':
+      return profile.lifestyle?.occupationalHazards !== undefined;
+    case 'depression':
+      return hasConditionInProfile(profile, "depression");
+    case 'cancer':
+      return hasConditionInProfile(profile, "cancer");
+    case 'heartDisease':
+      return hasConditionInProfile(profile, "heartDisease");
+    case 'stroke':
+      return hasConditionInProfile(profile, "stroke");
+    case 'kidneyDisease':
+      return hasConditionInProfile(profile, "kidneyDisease");
+    case 'liverDisease':
+      return hasConditionInProfile(profile, "liverDisease");
+    case 'copd':
+      return hasConditionInProfile(profile, "copd");
+    case 'asthma':
+      return hasConditionInProfile(profile, "asthma");
+    case 'fluVaccine':
+      return profile.medicalHistory?.vaccinations?.fluVaccine !== undefined;
+    case 'colonoscopy':
+      return profile.medicalHistory?.screenings?.colonoscopy !== undefined;
+    case 'mammogram':
+      return profile.medicalHistory?.screenings?.mammogram !== undefined;
+    case 'seatbelt':
+      return profile.lifestyle?.seatbeltUse !== undefined;
+    case 'texting':
+      return profile.lifestyle?.textingWhileDriving !== undefined;
+    case 'speeding':
+      return profile.lifestyle?.speeding !== undefined;
+    case 'helmet':
+      return profile.lifestyle?.helmetUse !== undefined;
+    case 'drugs':
+      return profile.lifestyle?.recreationalDrugs !== undefined;
+    case 'opioids':
+      return profile.lifestyle?.opioidUse !== undefined;
+    case 'marijuana':
+      return profile.lifestyle?.marijuana !== undefined;
+    case 'airQuality':
+      return profile.lifestyle?.airQualityExposure !== undefined;
+    case 'waterQuality':
+      return profile.lifestyle?.waterQuality !== undefined;
+    case 'pesticides':
+      return profile.lifestyle?.pesticideExposure !== undefined;
+    case 'radiation':
+      return profile.lifestyle?.radiationExposure !== undefined;
+    case 'anxiety':
+      return hasConditionInProfile(profile, "anxiety");
+    case 'bipolar':
+      return hasConditionInProfile(profile, "bipolar");
+    case 'ptsd':
+      return hasConditionInProfile(profile, "ptsd");
+    case 'eatingDisorder':
+      return hasConditionInProfile(profile, "eatingDisorder");
+    case 'pregnancy':
+      return profile.reproductiveHistory?.currentlyPregnant !== undefined;
+    case 'breastfeeding':
+      return profile.reproductiveHistory?.breastfeedingHistory !== undefined;
+    case 'menopause':
+      return profile.reproductiveHistory?.menopauseStatus !== undefined;
+    case 'hrt':
+      return profile.medicalHistory?.medications?.hrt !== undefined;
+    case 'contraception':
+      return profile.reproductiveHistory?.contraceptionUse !== undefined;
+    case 'teeth':
+      return profile.lifestyle?.dentalHygiene !== undefined;
+    case 'floss':
+      return profile.lifestyle?.flossing !== undefined;
+    case 'dentist':
+      return profile.medicalHistory?.screenings?.dental !== undefined;
+    case 'vision':
+      return profile.medicalHistory?.screenings?.vision !== undefined;
+    case 'hearing':
+      return profile.medicalHistory?.screenings?.hearing !== undefined;
+    case 'bloodDonation':
+      return profile.lifestyle?.bloodDonation !== undefined;
+    case 'volunteering':
+      return profile.social?.volunteering?.active?.value !== undefined;
+    case 'dog_ownership':
+      return profile.social?.petOwnership?.ownsDog?.value !== undefined;
+    case 'social_connections':
+      return profile.social?.connections?.strength?.value !== undefined;
+    case 'creative_hobbies':
+      return profile.social?.hobbies?.creative?.engaged?.value !== undefined;
+    case 'religious_attendance':
+      return profile.social?.religiousAttendance?.value !== undefined;
+    case 'music':
+      return profile.lifestyle?.musicListening !== undefined;
+    case 'reading':
+      return profile.lifestyle?.reading !== undefined;
+    case 'gaming':
+      return profile.lifestyle?.gaming !== undefined;
+    case 'screenTime':
+      return profile.lifestyle?.screenTime !== undefined;
+    case 'nature_exposure':
+      return profile.lifestyle?.outdoorTime?.minutesPerWeek !== undefined;
+    case 'pollution':
+      return profile.lifestyle?.pollutionExposure !== undefined;
+    case 'noise':
+      return profile.lifestyle?.noiseExposure !== undefined;
+    case 'mold':
+      return profile.lifestyle?.moldExposure !== undefined;
+    case 'leadPaint':
+      return profile.lifestyle?.leadExposure !== undefined;
+    case 'asbestos':
+      return profile.lifestyle?.asbestosExposure !== undefined;
+    default:
+      return false;
+  }
+}
+
+interface HistoryEntry {
+  questionIndex: number;
+  previousProfile: UserProfile;
+  direction: 'left' | 'right';
+}
+
+export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChange }) => {
+  const [questions, setQuestions] = useState<SwipeQuestion[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [isAppearing, setIsAppearing] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const startXRef = useRef(0);
+  const questionsInitialized = useRef(false);
+
+  // Generate and shuffle questions once on mount
+  useEffect(() => {
+    if (!profile || questionsInitialized.current) return;
+
+    const allQuestions = generateQuestions();
+    // Filter out questions that have already been answered
+    const unanswered = allQuestions.filter(q => !isQuestionAnswered(q, profile));
+    // Shuffle questions once for randomization
+    const shuffled = [...unanswered].sort(() => Math.random() - 0.5);
+    setQuestions(shuffled);
+    questionsInitialized.current = true;
+  }, [profile]);
+
+  const currentQuestion = questions[currentIndex];
+
+  const handleSwipe = (direction: 'left' | 'right') => {
+    if (!currentQuestion || !profile) return;
+
+    setSwipeDirection(direction);
+
+    // Save current state to history
+    setHistory(prev => {
+      const newEntry: HistoryEntry = {
+        questionIndex: currentIndex,
+        previousProfile: JSON.parse(JSON.stringify(profile)), // Deep copy to preserve state
+        direction
+      };
+      return [...prev, newEntry];
+    });
+
+    // Apply the profile update
+    const option = direction === 'left' ? currentQuestion.leftOption : currentQuestion.rightOption;
+    const updatedProfile = option.profileUpdate(profile);
+    onProfileChange(updatedProfile);
+
+    // Move to next question after animation
+    setTimeout(() => {
+      setSwipeDirection(null);
+      setDragOffset(0);
+      setCurrentIndex(prev => prev + 1);
+    }, 300);
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+
+    // Get the last history entry
+    const lastEntry = history[history.length - 1];
+
+    // Restore the previous profile
+    onProfileChange(lastEntry.previousProfile);
+
+    // Go back to that question
+    setCurrentIndex(lastEntry.questionIndex);
+
+    // Remove this entry from history
+    setHistory(prev => prev.slice(0, -1));
+  };
+
+  // Trigger fade-in animation when currentIndex changes (but not on initial load)
+  useEffect(() => {
+    // Skip animation on the very first question
+    if (currentIndex === 0 && history.length === 0) {
+      return;
+    }
+
+    setIsAppearing(true);
+    const timer = setTimeout(() => {
+      setIsAppearing(false);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    startXRef.current = e.clientX;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const offset = e.clientX - startXRef.current;
+    setDragOffset(offset);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+
+    if (Math.abs(dragOffset) > 100) {
+      handleSwipe(dragOffset > 0 ? 'right' : 'left');
+    } else {
+      setDragOffset(0);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    startXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const offset = e.touches[0].clientX - startXRef.current;
+    setDragOffset(offset);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+
+    if (Math.abs(dragOffset) > 100) {
+      handleSwipe(dragOffset > 0 ? 'right' : 'left');
+    } else {
+      setDragOffset(0);
+    }
+  };
+
+  if (!currentQuestion) {
+    return (
+      <div className="swipe-survey">
+        <div className="survey-complete">
+          <h2>🎉 Survey Complete!</h2>
+          <p>You've answered all available questions.</p>
+          <button
+            onClick={() => {
+              setCurrentIndex(0);
+              setHistory([]); // Clear history when restarting
+              questionsInitialized.current = false; // Allow re-initialization
+            }}
+            className="restart-button"
+          >
+            Start Over
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const rotation = dragOffset / 20;
+  const opacity = 1 - Math.abs(dragOffset) / 300;
+
+  return (
+    <div className="swipe-survey">
+      <div className="survey-header">
+        <h2>Swipe Survey</h2>
+        <p className="survey-progress">
+          {currentIndex + 1} / {questions.length}
+        </p>
+      </div>
+
+      <div className="survey-instructions">
+        <div className="instruction left">
+          <span className="arrow">←</span>
+          <span>Higher Risk</span>
+        </div>
+        <div className="instruction right">
+          <span>Lower Risk</span>
+          <span className="arrow">→</span>
+        </div>
+      </div>
+
+      <div className="card-container">
+        {/* Current card */}
+        <div
+          ref={cardRef}
+          className={`card card-active ${swipeDirection ? `swiping-${swipeDirection}` : ''} ${isAppearing ? 'appearing' : ''}`}
+          style={{
+            transform: `translateX(${dragOffset}px) rotate(${rotation}deg)`,
+            opacity: swipeDirection ? 0 : (isAppearing ? undefined : opacity),
+            cursor: isDragging ? 'grabbing' : 'grab',
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className="card-category">{currentQuestion.category}</div>
+          <div className="card-question">{currentQuestion.question}</div>
+
+          <div className="card-options">
+            <div className="option option-left">
+              <div className="option-emoji">{currentQuestion.leftOption.emoji}</div>
+              <div className="option-label">{currentQuestion.leftOption.label}</div>
+              <div className="option-impact bad">
+                +{currentQuestion.leftOption.mortalityImpact.toFixed(1)}%
+              </div>
+            </div>
+
+            <div className="option option-right">
+              <div className="option-emoji">{currentQuestion.rightOption.emoji}</div>
+              <div className="option-label">{currentQuestion.rightOption.label}</div>
+              <div className="option-impact good">
+                {currentQuestion.rightOption.mortalityImpact.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+
+          {/* Swipe indicators */}
+          {dragOffset < -50 && (
+            <div className="swipe-indicator swipe-left">
+              <span className="indicator-emoji">💀</span>
+              <span className="indicator-text">HIGHER RISK</span>
+            </div>
+          )}
+          {dragOffset > 50 && (
+            <div className="swipe-indicator swipe-right">
+              <span className="indicator-emoji">💚</span>
+              <span className="indicator-text">LOWER RISK</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Button controls */}
+      <div className="button-container">
+        <div className="swipe-buttons">
+          <button
+            className="swipe-button swipe-button-left"
+            onClick={() => handleSwipe('left')}
+            title="Swipe left (higher risk)"
+          >
+            <span className="button-emoji">💀</span>
+          </button>
+          <button
+            className="swipe-button swipe-button-right"
+            onClick={() => handleSwipe('right')}
+            title="Swipe right (lower risk)"
+          >
+            <span className="button-emoji">💚</span>
+          </button>
+        </div>
+        <button
+          className="undo-button"
+          onClick={handleUndo}
+          disabled={history.length === 0}
+          title="Undo last answer"
+        >
+          <span className="button-emoji">↩️</span>
+        </button>
+      </div>
+
+      <style>{`
+        .swipe-survey {
+          width: 100%;
+          margin: 0;
+          padding: var(--spacing-md);
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          font-family: 'Courier New', monospace;
+        }
+
+        .survey-header {
+          text-align: center;
+          margin-bottom: var(--spacing-sm);
+          padding-bottom: var(--spacing-xs);
+          border-bottom: 2px solid var(--color-border);
+        }
+
+        .survey-header h2 {
+          margin: 0 0 var(--spacing-xs) 0;
+          font-size: 0.85rem;
+          color: var(--color-text);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-family: 'Courier New', monospace;
+        }
+
+        .survey-progress {
+          font-size: 0.7rem;
+          color: var(--color-text-secondary);
+          font-weight: 700;
+          font-family: 'Courier New', monospace;
+        }
+
+        .survey-instructions {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: var(--spacing-sm);
+          padding: 0 var(--spacing-sm);
+        }
+
+        .instruction {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+          font-size: 0.65rem;
+          font-weight: 700;
+          color: var(--color-text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-family: 'Courier New', monospace;
+        }
+
+        .instruction.left {
+          color: var(--color-danger);
+        }
+
+        .instruction.right {
+          color: var(--color-success);
+        }
+
+        .arrow {
+          font-size: 0.9rem;
+        }
+
+        .card-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: var(--spacing-sm);
+          min-height: 280px;
+        }
+
+        .card {
+          position: absolute;
+          width: 100%;
+          max-width: 420px;
+          background: white;
+          border: 2px solid var(--color-border);
+          box-shadow: inset 0 0 0 1px rgba(163, 155, 139, 0.2);
+          padding: var(--spacing-md);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+          user-select: none;
+          z-index: 2;
+        }
+
+        .card.appearing {
+          animation: fadeIn 0.45s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+          0% {
+            opacity: 0;
+            transform: translateX(0) rotate(0deg) scale(0.92);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0) rotate(0deg) scale(1);
+          }
+        }
+
+        .card.swiping-left {
+          transform: translateX(-600px) rotate(-30deg) !important;
+          transition: all 0.3s ease;
+        }
+
+        .card.swiping-right {
+          transform: translateX(600px) rotate(30deg) !important;
+          transition: all 0.3s ease;
+        }
+
+        .card-category {
+          font-size: 0.65rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          color: var(--color-text-secondary);
+          letter-spacing: 0.5px;
+          margin-bottom: var(--spacing-xs);
+          font-family: 'Courier New', monospace;
+        }
+
+        .card-question {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: var(--color-text);
+          margin-bottom: var(--spacing-md);
+          line-height: 1.3;
+          font-family: 'Courier New', monospace;
+        }
+
+        .card-options {
+          display: flex;
+          gap: var(--spacing-sm);
+        }
+
+        .option {
+          flex: 1;
+          text-align: center;
+          padding: var(--spacing-sm);
+          background: var(--color-bg-secondary);
+          border: 2px solid var(--color-border);
+        }
+
+        .option-left {
+          border-left: 4px solid var(--color-danger);
+          background: var(--color-bg);
+        }
+
+        .option-right {
+          border-left: 4px solid var(--color-success);
+          background: var(--color-bg);
+        }
+
+        .option-emoji {
+          font-size: 2rem;
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .option-label {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: var(--color-text);
+          margin-bottom: var(--spacing-xs);
+          font-family: 'Courier New', monospace;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .option-impact {
+          font-size: 0.85rem;
+          font-weight: 700;
+          font-family: 'Courier New', monospace;
+        }
+
+        .option-impact.bad {
+          color: var(--color-danger);
+        }
+
+        .option-impact.good {
+          color: var(--color-success);
+        }
+
+        .swipe-indicator {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 0.8rem;
+          font-weight: 700;
+          padding: var(--spacing-sm);
+          border: 3px solid;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--spacing-xs);
+          font-family: 'Courier New', monospace;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .swipe-left {
+          left: var(--spacing-sm);
+          background: var(--color-danger);
+          color: white;
+          border-color: var(--color-primary-dark);
+        }
+
+        .swipe-right {
+          right: var(--spacing-sm);
+          background: var(--color-success);
+          color: white;
+          border-color: var(--color-primary-dark);
+        }
+
+        .indicator-emoji {
+          font-size: 1.5rem;
+        }
+
+        .indicator-text {
+          font-size: 0.65rem;
+          letter-spacing: 1px;
+        }
+
+        .button-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 0 var(--spacing-md);
+          position: relative;
+        }
+
+        .swipe-buttons {
+          display: flex;
+          gap: var(--spacing-sm);
+          justify-content: center;
+          align-items: center;
+        }
+
+        .swipe-button {
+          width: 48px;
+          height: 48px;
+          border: 3px solid;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .swipe-button:hover {
+          transform: scale(1.05);
+        }
+
+        .swipe-button:active {
+          transform: scale(0.95);
+        }
+
+        .swipe-button-left {
+          background: var(--color-danger);
+          border-color: var(--color-primary-dark);
+        }
+
+        .swipe-button-right {
+          background: var(--color-success);
+          border-color: var(--color-primary-dark);
+        }
+
+        .undo-button {
+          position: absolute;
+          right: var(--spacing-md);
+          width: 32px;
+          height: 32px;
+          border: 2px solid var(--color-warning);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          background: var(--color-warning);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .undo-button:hover:not(:disabled) {
+          transform: scale(1.05);
+        }
+
+        .undo-button:active:not(:disabled) {
+          transform: scale(0.95);
+        }
+
+        .undo-button:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        .button-emoji {
+          font-size: 1.5rem;
+        }
+
+        .undo-button .button-emoji {
+          font-size: 1rem;
+        }
+
+        .survey-complete {
+          text-align: center;
+          padding: var(--spacing-xl) var(--spacing-md);
+        }
+
+        .survey-complete h2 {
+          font-size: 1.2rem;
+          margin-bottom: var(--spacing-sm);
+          font-family: 'Courier New', monospace;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .survey-complete p {
+          font-size: 0.75rem;
+          color: var(--color-text-secondary);
+          margin-bottom: var(--spacing-md);
+          font-family: 'Courier New', monospace;
+        }
+
+        .restart-button {
+          padding: var(--spacing-sm) var(--spacing-md);
+          font-size: 0.7rem;
+          font-weight: 700;
+          background: var(--color-primary);
+          color: white;
+          border: 2px solid var(--color-primary-dark);
+          cursor: pointer;
+          transition: background 0.2s;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-family: 'Courier New', monospace;
+        }
+
+        .restart-button:hover {
+          background: var(--color-primary-dark);
+        }
+
+        @media (max-width: 640px) {
+          .card-question {
+            font-size: 0.85rem;
+          }
+
+          .card-options {
+            flex-direction: column;
+          }
+
+          .swipe-buttons {
+            gap: var(--spacing-xs);
+          }
+
+          .swipe-button {
+            width: 40px;
+            height: 40px;
+          }
+
+          .button-emoji {
+            font-size: 1.2rem;
+          }
+
+          .undo-button {
+            width: 28px;
+            height: 28px;
+            right: var(--spacing-sm);
+          }
+
+          .undo-button .button-emoji {
+            font-size: 0.85rem;
+          }
+
+          .card-container {
+            min-height: 320px;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// Generate survey questions
+function generateQuestions(): SwipeQuestion[] {
+  return [
+    // LIFESTYLE
+    {
+      id: 'smoking',
+      question: 'Do you smoke cigarettes?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'Yes, I smoke',
+        emoji: '🚬',
+        mortalityImpact: 2.5,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            smoking: {
+              ...p.lifestyle?.smoking,
+              status: createUserDataPoint('current' as const),
+              packsPerDay: createTimeSeries(0.5), // 10 cigarettes = 0.5 packs
+              packYears: createUserDataPoint(5) // Estimated
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No, I don\'t smoke',
+        emoji: '🌬️',
+        mortalityImpact: -0.5,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            smoking: {
+              ...p.lifestyle?.smoking,
+              status: createUserDataPoint('never' as const)
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'exercise',
+      question: 'Do you exercise regularly?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'No exercise',
+        emoji: '🛋️',
+        mortalityImpact: 1.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            exercise: {
+              ...p.lifestyle?.exercise,
+              moderateMinutesPerWeek: createTimeSeries(0),
+              vigorousMinutesPerWeek: createTimeSeries(0)
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regularly',
+        emoji: '🏃',
+        mortalityImpact: -0.8,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            exercise: {
+              ...p.lifestyle?.exercise,
+              moderateMinutesPerWeek: createTimeSeries(150),
+              vigorousMinutesPerWeek: createTimeSeries(0)
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'alcohol',
+      question: 'Do you drink alcohol heavily?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'Heavy drinking',
+        emoji: '🍺',
+        mortalityImpact: 1.8,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            alcohol: {
+              ...p.lifestyle?.alcohol,
+              drinksPerWeek: createTimeSeries(20),
+              bingeDrinking: createUserDataPoint(true),
+              pattern: createUserDataPoint('heavy' as const)
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Moderate/None',
+        emoji: '💧',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            alcohol: {
+              ...p.lifestyle?.alcohol,
+              drinksPerWeek: createTimeSeries(3),
+              bingeDrinking: createUserDataPoint(false),
+              pattern: createUserDataPoint('moderate' as const)
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'diet',
+      question: 'Do you eat a healthy diet?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'Mostly junk food',
+        emoji: '🍔',
+        mortalityImpact: 0.9,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            diet: {
+              ...p.lifestyle?.diet,
+              vegetableServingsPerDay: createTimeSeries(1),
+              fruitServingsPerDay: createTimeSeries(1),
+              processedMeatServingsPerWeek: createTimeSeries(7),
+              pattern: createUserDataPoint('western' as const)
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Healthy diet',
+        emoji: '🥗',
+        mortalityImpact: -0.6,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            diet: {
+              ...p.lifestyle?.diet,
+              vegetableServingsPerDay: createTimeSeries(5),
+              fruitServingsPerDay: createTimeSeries(3),
+              processedMeatServingsPerWeek: createTimeSeries(0),
+              pattern: createUserDataPoint('mediterranean' as const)
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'sleep',
+      question: 'Do you get enough sleep?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'Poor sleep (<6 hrs)',
+        emoji: '😴',
+        mortalityImpact: 0.7,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            sleep: {
+              ...p.lifestyle?.sleep,
+              averageHoursPerNight: createTimeSeries(5),
+              sleepQuality: createTimeSeries(3) // 1-10 scale, 3 = poor
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Good sleep (7-9 hrs)',
+        emoji: '😊',
+        mortalityImpact: -0.4,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            sleep: {
+              ...p.lifestyle?.sleep,
+              averageHoursPerNight: createTimeSeries(8),
+              sleepQuality: createTimeSeries(8) // 1-10 scale, 8 = good
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'stress',
+      question: 'Are you under chronic stress?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'High stress',
+        emoji: '😰',
+        mortalityImpact: 0.6,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, stress: createUserDataPoint('high') } as any
+        })
+      },
+      rightOption: {
+        label: 'Low stress',
+        emoji: '😌',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, stress: createUserDataPoint('low') } as any
+        })
+      }
+    },
+    {
+      id: 'socialConnection',
+      question: 'Do you have strong social connections?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'Socially isolated',
+        emoji: '😔',
+        mortalityImpact: 0.8,
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            connections: {
+              ...p.social?.connections,
+              strength: createUserDataPoint('isolated' as const)
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Strong connections',
+        emoji: '👥',
+        mortalityImpact: -0.4,
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            connections: {
+              ...p.social?.connections,
+              strength: createUserDataPoint('strong' as const)
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'sunExposure',
+      question: 'Do you get excessive sun exposure?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'Excessive sun',
+        emoji: '☀️',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, sunExposure: createUserDataPoint('excessive') } as any
+        })
+      },
+      rightOption: {
+        label: 'Protected/Moderate',
+        emoji: '🧴',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, sunExposure: 'moderate' }
+        })
+      }
+    },
+    {
+      id: 'occupationalHazards',
+      question: 'Are you exposed to workplace hazards?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'High exposure',
+        emoji: '⚠️',
+        mortalityImpact: 0.5,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            occupationalExposures: createUserDataPoint(true)
+          }
+        })
+      },
+      rightOption: {
+        label: 'Low/No exposure',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            occupationalExposures: createUserDataPoint(false)
+          }
+        })
+      }
+    },
+
+    // DEMOGRAPHICS
+    {
+      id: 'biologicalSex',
+      question: 'What is your biological sex?',
+      category: 'Demographics',
+      leftOption: {
+        label: 'Male',
+        emoji: '♂️',
+        mortalityImpact: 0.8,
+        profileUpdate: (p) => ({
+          ...p,
+          demographics: {
+            ...p.demographics,
+            biologicalSex: createUserDataPoint('male' as const)
+          }
+        })
+      },
+      rightOption: {
+        label: 'Female',
+        emoji: '♀️',
+        mortalityImpact: -0.8,
+        profileUpdate: (p) => ({
+          ...p,
+          demographics: {
+            ...p.demographics,
+            biologicalSex: createUserDataPoint('female' as const)
+          }
+        })
+      }
+    },
+
+    // MEDICAL CONDITIONS
+    {
+      id: 'diabetes',
+      question: 'Do you have diabetes?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '💉',
+        mortalityImpact: 1.5,
+        profileUpdate: (p) => setCondition(p, 'diabetes', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'diabetes', false)
+      }
+    },
+    {
+      id: 'hypertension',
+      question: 'Do you have high blood pressure?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '📈',
+        mortalityImpact: 1.3,
+        profileUpdate: (p) => setCondition(p, 'hypertension', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'hypertension', false)
+      }
+    },
+    {
+      id: 'heartDisease',
+      question: 'Do you have heart disease?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '💔',
+        mortalityImpact: 2.0,
+        profileUpdate: (p) => setCondition(p, 'heartDisease', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '❤️',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'heartDisease', false)
+      }
+    },
+    {
+      id: 'stroke',
+      question: 'Have you had a stroke?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🧠',
+        mortalityImpact: 1.8,
+        profileUpdate: (p) => setCondition(p, 'stroke', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'stroke', false)
+      }
+    },
+    {
+      id: 'cancer',
+      question: 'Have you had cancer?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🎗️',
+        mortalityImpact: 1.6,
+        profileUpdate: (p) => setCondition(p, 'cancer', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'cancer', false)
+      }
+    },
+    {
+      id: 'copd',
+      question: 'Do you have COPD or emphysema?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🫁',
+        mortalityImpact: 1.7,
+        profileUpdate: (p) => setCondition(p, 'copd', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'copd', false)
+      }
+    },
+    {
+      id: 'kidneyDisease',
+      question: 'Do you have kidney disease?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🩺',
+        mortalityImpact: 1.4,
+        profileUpdate: (p) => setCondition(p, 'kidneyDisease', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'kidneyDisease', false)
+      }
+    },
+    {
+      id: 'liverDisease',
+      question: 'Do you have liver disease?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🫀',
+        mortalityImpact: 1.6,
+        profileUpdate: (p) => setCondition(p, 'liverDisease', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'liverDisease', false)
+      }
+    },
+    {
+      id: 'depression',
+      question: 'Do you have depression?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '😢',
+        mortalityImpact: 0.5,
+        profileUpdate: (p) => setCondition(p, 'depression', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '😊',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'depression', false)
+      }
+    },
+    {
+      id: 'asthma',
+      question: 'Do you have asthma?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '😮‍💨',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => setCondition(p, 'asthma', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'asthma', false)
+      }
+    },
+
+    // FAMILY HISTORY
+    {
+      id: 'familyHeartDisease',
+      question: 'Family history of heart disease?',
+      category: 'Family History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '👨‍👩‍👧‍👦💔',
+        mortalityImpact: 0.6,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            familyHistory: { ...(p.medicalHistory?.familyHistory || {}), heartDisease: true }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            familyHistory: { ...(p.medicalHistory?.familyHistory || {}), heartDisease: false }
+          }
+        })
+      }
+    },
+    {
+      id: 'familyCancer',
+      question: 'Family history of cancer?',
+      category: 'Family History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '👨‍👩‍👧‍👦🎗️',
+        mortalityImpact: 0.4,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            familyHistory: { ...(p.medicalHistory?.familyHistory || {}), cancer: true }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            familyHistory: { ...(p.medicalHistory?.familyHistory || {}), cancer: false }
+          }
+        })
+      }
+    },
+
+    // MEDICATIONS
+    {
+      id: 'statin',
+      question: 'Are you taking a statin?',
+      category: 'Medications',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), statin: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes',
+        emoji: '💊',
+        mortalityImpact: -0.4,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), statin: true }
+          }
+        })
+      }
+    },
+    {
+      id: 'bloodPressureMeds',
+      question: 'Taking blood pressure medication?',
+      category: 'Medications',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.4,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), bloodPressureMeds: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes',
+        emoji: '💊',
+        mortalityImpact: -0.5,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), bloodPressureMeds: true }
+          }
+        })
+      }
+    },
+    {
+      id: 'aspirin',
+      question: 'Taking daily aspirin?',
+      category: 'Medications',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), aspirin: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes',
+        emoji: '💊',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), aspirin: true }
+          }
+        })
+      }
+    },
+
+    // BIOMETRICS / LAB-STYLE
+    {
+      id: 'obesity',
+      question: 'Are you significantly overweight?',
+      category: 'Biometrics',
+      leftOption: {
+        label: 'Yes (BMI > 30)',
+        emoji: '⚖️',
+        mortalityImpact: 1.1,
+        profileUpdate: (p) => ({
+          ...p,
+          biometrics: {
+            ...p.biometrics,
+            // BMI 32 = ~92kg at 170cm height
+            height: p.biometrics?.height || createUserDataPoint(170),
+            weight: createTimeSeries({ value: 92, unit: 'kg' as const })
+          }
+        })
+      },
+      rightOption: {
+        label: 'No (Healthy weight)',
+        emoji: '✅',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          biometrics: {
+            ...p.biometrics,
+            // BMI 23 = ~66.5kg at 170cm height
+            height: p.biometrics?.height || createUserDataPoint(170),
+            weight: createTimeSeries({ value: 66.5, unit: 'kg' as const })
+          }
+        })
+      }
+    },
+    {
+      id: 'highCholesterol',
+      question: 'Do you have high cholesterol?',
+      category: 'Lab Tests',
+      leftOption: {
+        label: 'Yes',
+        emoji: '📊',
+        mortalityImpact: 0.7,
+        profileUpdate: (p) => ({
+          ...p,
+          labTests: {
+            ...p.labTests,
+            lipidPanel: {
+              ...p.labTests?.lipidPanel,
+              totalCholesterol: createUserDataPoint(260),
+              ldlCholesterol: createUserDataPoint(160)
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          labTests: {
+            ...p.labTests,
+            lipidPanel: {
+              ...p.labTests?.lipidPanel,
+              totalCholesterol: createUserDataPoint(180),
+              ldlCholesterol: createUserDataPoint(100)
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'prediabetic',
+      question: 'Are you pre-diabetic?',
+      category: 'Lab Tests',
+      leftOption: {
+        label: 'Yes',
+        emoji: '⚠️',
+        mortalityImpact: 0.5,
+        profileUpdate: (p) => ({
+          ...p,
+          labTests: {
+            ...p.labTests,
+            metabolicPanel: {
+              ...p.labTests?.metabolicPanel,
+              hba1c: createUserDataPoint(6.0)
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          labTests: {
+            ...p.labTests,
+            metabolicPanel: {
+              ...p.labTests?.metabolicPanel,
+              hba1c: createUserDataPoint(5.2)
+            }
+          }
+        })
+      }
+    },
+
+    // PREVENTIVE CARE & VACCINATIONS
+    {
+      id: 'fluVaccine',
+      question: 'Do you get annual flu vaccine?',
+      category: 'Preventive Care',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            vaccinations: { ...(p.medicalHistory?.vaccinations || {}), fluVaccine: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, annually',
+        emoji: '💉',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            vaccinations: { ...(p.medicalHistory?.vaccinations || {}), fluVaccine: true }
+          }
+        })
+      }
+    },
+    {
+      id: 'colonoscopy',
+      question: 'Have you had a colonoscopy (if over 45)?',
+      category: 'Preventive Care',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), colonoscopy: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, up to date',
+        emoji: '✅',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), colonoscopy: true }
+          }
+        })
+      }
+    },
+    {
+      id: 'mammogram',
+      question: 'Regular mammograms (if female)?',
+      category: 'Preventive Care',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), mammogram: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regular',
+        emoji: '✅',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), mammogram: true }
+          }
+        })
+      }
+    },
+    {
+      id: 'dentist',
+      question: 'Do you visit dentist regularly?',
+      category: 'Preventive Care',
+      leftOption: {
+        label: 'Rarely/Never',
+        emoji: '🦷',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), dental: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Twice yearly',
+        emoji: '😁',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), dental: true }
+          }
+        })
+      }
+    },
+    {
+      id: 'vision',
+      question: 'Regular vision checkups?',
+      category: 'Preventive Care',
+      leftOption: {
+        label: 'No',
+        emoji: '👓',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), vision: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regular',
+        emoji: '👁️',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            screenings: { ...(p.medicalHistory?.screenings || {}), vision: true }
+          }
+        })
+      }
+    },
+
+    // SAFETY BEHAVIORS
+    {
+      id: 'seatbelt',
+      question: 'Do you always wear a seatbelt?',
+      category: 'Safety',
+      leftOption: {
+        label: 'Rarely/Sometimes',
+        emoji: '🚗',
+        mortalityImpact: 0.4,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, seatbeltUse: false }
+        })
+      },
+      rightOption: {
+        label: 'Always',
+        emoji: '🔒',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, seatbeltUse: true }
+        })
+      }
+    },
+    {
+      id: 'texting',
+      question: 'Do you text while driving?',
+      category: 'Safety',
+      leftOption: {
+        label: 'Yes',
+        emoji: '📱',
+        mortalityImpact: 0.6,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, textingWhileDriving: true }
+        })
+      },
+      rightOption: {
+        label: 'Never',
+        emoji: '🚫',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, textingWhileDriving: false }
+        })
+      }
+    },
+    {
+      id: 'speeding',
+      question: 'Do you regularly speed?',
+      category: 'Safety',
+      leftOption: {
+        label: 'Yes, often',
+        emoji: '🏎️',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, speeding: true }
+        })
+      },
+      rightOption: {
+        label: 'No, drive safely',
+        emoji: '🚙',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, speeding: false }
+        })
+      }
+    },
+    {
+      id: 'helmet',
+      question: 'Wear helmet when biking/motorcycling?',
+      category: 'Safety',
+      leftOption: {
+        label: 'No',
+        emoji: '🚴',
+        mortalityImpact: 0.5,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, helmetUse: false }
+        })
+      },
+      rightOption: {
+        label: 'Always',
+        emoji: '⛑️',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, helmetUse: true }
+        })
+      }
+    },
+
+    // SUBSTANCE USE
+    {
+      id: 'drugs',
+      question: 'Do you use recreational drugs?',
+      category: 'Substance Use',
+      leftOption: {
+        label: 'Yes, regularly',
+        emoji: '💊',
+        mortalityImpact: 1.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, recreationalDrugs: true }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, recreationalDrugs: false }
+        })
+      }
+    },
+    {
+      id: 'opioids',
+      question: 'Do you use opioid painkillers?',
+      category: 'Substance Use',
+      leftOption: {
+        label: 'Yes, regularly',
+        emoji: '💊',
+        mortalityImpact: 0.8,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, opioidUse: true }
+        })
+      },
+      rightOption: {
+        label: 'No/As prescribed',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, opioidUse: false }
+        })
+      }
+    },
+    {
+      id: 'marijuana',
+      question: 'Do you use marijuana regularly?',
+      category: 'Substance Use',
+      leftOption: {
+        label: 'Yes, daily',
+        emoji: '🌿',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, marijuana: 'daily' }
+        })
+      },
+      rightOption: {
+        label: 'No/Occasionally',
+        emoji: '🚫',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, marijuana: 'none' }
+        })
+      }
+    },
+
+    // ENVIRONMENTAL EXPOSURES
+    {
+      id: 'airQuality',
+      question: 'Do you live in area with poor air quality?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes, high pollution',
+        emoji: '🏭',
+        mortalityImpact: 0.4,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, airQualityExposure: 'poor' }
+        })
+      },
+      rightOption: {
+        label: 'No, clean air',
+        emoji: '🌲',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, airQualityExposure: 'good' }
+        })
+      }
+    },
+    {
+      id: 'waterQuality',
+      question: 'Do you have clean drinking water?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Poor quality',
+        emoji: '🚰',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, waterQuality: 'poor' }
+        })
+      },
+      rightOption: {
+        label: 'Clean water',
+        emoji: '💧',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, waterQuality: 'good' }
+        })
+      }
+    },
+    {
+      id: 'pesticides',
+      question: 'Regular pesticide exposure?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes, regular',
+        emoji: '🌾',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, pesticideExposure: true }
+        })
+      },
+      rightOption: {
+        label: 'No/Minimal',
+        emoji: '🥬',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, pesticideExposure: false }
+        })
+      }
+    },
+    {
+      id: 'radiation',
+      question: 'Occupational radiation exposure?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes',
+        emoji: '☢️',
+        mortalityImpact: 0.5,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, radiationExposure: true }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, radiationExposure: false }
+        })
+      }
+    },
+    {
+      id: 'pollution',
+      question: 'Live near major pollution source?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes (highway, factory)',
+        emoji: '🏭',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, pollutionExposure: 'high' }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🏡',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, pollutionExposure: 'low' }
+        })
+      }
+    },
+    {
+      id: 'noise',
+      question: 'Chronic noise pollution exposure?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes, very loud',
+        emoji: '🔊',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, noiseExposure: 'high' }
+        })
+      },
+      rightOption: {
+        label: 'No, quiet',
+        emoji: '🤫',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, noiseExposure: 'low' }
+        })
+      }
+    },
+    {
+      id: 'mold',
+      question: 'Mold exposure in home/work?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes, significant',
+        emoji: '🦠',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, moldExposure: true }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, moldExposure: false }
+        })
+      }
+    },
+    {
+      id: 'leadPaint',
+      question: 'Lead paint exposure (old building)?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes, possible',
+        emoji: '🎨',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, leadExposure: true }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, leadExposure: false }
+        })
+      }
+    },
+    {
+      id: 'asbestos',
+      question: 'Asbestos exposure?',
+      category: 'Environment',
+      leftOption: {
+        label: 'Yes, occupational',
+        emoji: '🏗️',
+        mortalityImpact: 0.6,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, asbestosExposure: true }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, asbestosExposure: false }
+        })
+      }
+    },
+
+    // MENTAL HEALTH (Additional)
+    {
+      id: 'anxiety',
+      question: 'Do you have anxiety disorder?',
+      category: 'Mental Health',
+      leftOption: {
+        label: 'Yes',
+        emoji: '😰',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => setCondition(p, 'anxiety', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '😌',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'anxiety', false)
+      }
+    },
+    {
+      id: 'bipolar',
+      question: 'Do you have bipolar disorder?',
+      category: 'Mental Health',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🎭',
+        mortalityImpact: 0.4,
+        profileUpdate: (p) => setCondition(p, 'bipolar', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'bipolar', false)
+      }
+    },
+    {
+      id: 'ptsd',
+      question: 'Do you have PTSD?',
+      category: 'Mental Health',
+      leftOption: {
+        label: 'Yes',
+        emoji: '😔',
+        mortalityImpact: 0.4,
+        profileUpdate: (p) => setCondition(p, 'ptsd', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'ptsd', false)
+      }
+    },
+    {
+      id: 'eatingDisorder',
+      question: 'Do you have an eating disorder?',
+      category: 'Mental Health',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🍽️',
+        mortalityImpact: 0.6,
+        profileUpdate: (p) => setCondition(p, 'eatingDisorder', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        mortalityImpact: 0,
+        profileUpdate: (p) => setCondition(p, 'eatingDisorder', false)
+      }
+    },
+
+    // REPRODUCTIVE HEALTH
+    {
+      id: 'hrt',
+      question: 'Are you on hormone replacement therapy?',
+      category: 'Reproductive Health',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), hrt: false }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes',
+        emoji: '💊',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...(p.medicalHistory?.medications || {}), hrt: true }
+          }
+        })
+      }
+    },
+    {
+      id: 'contraception',
+      question: 'Do you use hormonal contraception?',
+      category: 'Reproductive Health',
+      leftOption: {
+        label: 'Yes, long-term',
+        emoji: '💊',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          reproductiveHistory: { ...p.reproductiveHistory, contraceptionUse: true }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          reproductiveHistory: { ...p.reproductiveHistory, contraceptionUse: false }
+        })
+      }
+    },
+
+    // DENTAL HEALTH
+    {
+      id: 'teeth',
+      question: 'Do you brush teeth twice daily?',
+      category: 'Dental Health',
+      leftOption: {
+        label: 'No/Rarely',
+        emoji: '🦷',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, dentalHygiene: 'poor' }
+        })
+      },
+      rightOption: {
+        label: 'Yes, twice daily',
+        emoji: '🪥',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, dentalHygiene: 'good' }
+        })
+      }
+    },
+    {
+      id: 'floss',
+      question: 'Do you floss regularly?',
+      category: 'Dental Health',
+      leftOption: {
+        label: 'No',
+        emoji: '🦷',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, flossing: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes, daily',
+        emoji: '🧵',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, flossing: true }
+        })
+      }
+    },
+
+    // LIFESTYLE & WELLBEING
+    {
+      id: 'pets',
+      question: 'Do you have pets?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, pets: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes',
+        emoji: '🐕',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, pets: true }
+        })
+      }
+    },
+    {
+      id: 'volunteering',
+      question: 'Do you volunteer or help others?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, volunteering: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regularly',
+        emoji: '🤝',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, volunteering: true }
+        })
+      }
+    },
+    {
+      id: 'hobbies',
+      question: 'Do you have engaging hobbies?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'No, not really',
+        emoji: '📺',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, hobbies: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes, several',
+        emoji: '🎨',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, hobbies: true }
+        })
+      }
+    },
+    {
+      id: 'religion',
+      question: 'Do you attend religious services?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, religiousActivity: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regularly',
+        emoji: '🕊️',
+        mortalityImpact: -0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, religiousActivity: true }
+        })
+      }
+    },
+    {
+      id: 'music',
+      question: 'Do you listen to music regularly?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'Rarely',
+        emoji: '🔇',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, musicListening: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes, often',
+        emoji: '🎵',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, musicListening: true }
+        })
+      }
+    },
+    {
+      id: 'reading',
+      question: 'Do you read books regularly?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'No',
+        emoji: '📱',
+        mortalityImpact: 0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, reading: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regularly',
+        emoji: '📚',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, reading: true }
+        })
+      }
+    },
+    {
+      id: 'screenTime',
+      question: 'Excessive screen time (>6 hrs/day)?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'Yes, very high',
+        emoji: '📱',
+        mortalityImpact: 0.3,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, screenTime: 'high' }
+        })
+      },
+      rightOption: {
+        label: 'No, moderate',
+        emoji: '📵',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, screenTime: 'moderate' }
+        })
+      }
+    },
+    {
+      id: 'outdoorTime',
+      question: 'Do you spend time outdoors daily?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'Rarely',
+        emoji: '🏠',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, outdoorTime: 'low' }
+        })
+      },
+      rightOption: {
+        label: 'Yes, daily',
+        emoji: '🌳',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, outdoorTime: 'high' }
+        })
+      }
+    },
+    {
+      id: 'nature',
+      question: 'Regular exposure to nature/greenspace?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'No, mostly urban',
+        emoji: '🏙️',
+        mortalityImpact: 0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, natureExposure: 'low' }
+        })
+      },
+      rightOption: {
+        label: 'Yes, frequent',
+        emoji: '🌲',
+        mortalityImpact: -0.2,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, natureExposure: 'high' }
+        })
+      }
+    },
+    {
+      id: 'bloodDonation',
+      question: 'Do you donate blood?',
+      category: 'Wellbeing',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 0,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, bloodDonation: false }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regularly',
+        emoji: '🩸',
+        mortalityImpact: -0.1,
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: { ...p.lifestyle, bloodDonation: true }
+        })
+      }
+    },
+
+    // MORTALITY MODIFIERS (Evidence-Based)
+    {
+      id: 'dog_ownership',
+      question: 'Do you own a dog?',
+      category: 'Social',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 2.4, // Not having protective factor
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            petOwnership: {
+              ...p.social?.petOwnership,
+              ownsDog: { value: false, provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, I have a dog',
+        emoji: '🐕',
+        mortalityImpact: -2.4, // HR 0.76 = 24% mortality reduction
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            petOwnership: {
+              ...p.social?.petOwnership,
+              ownsDog: { value: true, provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'social_connections',
+      question: 'How strong are your social connections?',
+      category: 'Social',
+      leftOption: {
+        label: 'Weak/Isolated',
+        emoji: '😔',
+        mortalityImpact: 5.0, // Social isolation = 50% increased risk
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            connections: {
+              ...p.social?.connections,
+              strength: { value: 'weak', provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Strong',
+        emoji: '💚',
+        mortalityImpact: -3.3, // HR 0.67 = 33% mortality reduction
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            connections: {
+              ...p.social?.connections,
+              strength: { value: 'strong', provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'religious_attendance',
+      question: 'Do you attend religious services?',
+      category: 'Cultural',
+      leftOption: {
+        label: 'Never/Rarely',
+        emoji: '🚫',
+        mortalityImpact: 0, // Reference category
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            religiousAttendance: { value: 'never', provenance: 'user_input', timestamp: Date.now() }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Weekly+',
+        emoji: '⛪',
+        mortalityImpact: -2.7, // HR 0.73 = 27% mortality reduction
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            religiousAttendance: { value: 'weekly', provenance: 'user_input', timestamp: Date.now() }
+          }
+        })
+      }
+    },
+    {
+      id: 'nature_exposure',
+      question: 'Time spent in nature per week?',
+      category: 'Environmental',
+      leftOption: {
+        label: 'Little/None',
+        emoji: '🏢',
+        mortalityImpact: 1.6, // Not having protective factor
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            outdoorTime: {
+              ...p.lifestyle?.outdoorTime,
+              minutesPerWeek: { value: [{ timestamp: Date.now(), value: 30 }], provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: '2+ hours',
+        emoji: '🌳',
+        mortalityImpact: -1.6, // HR 0.84 = 16% mortality reduction
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            outdoorTime: {
+              ...p.lifestyle?.outdoorTime,
+              minutesPerWeek: { value: [{ timestamp: Date.now(), value: 150 }], provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'creative_hobbies',
+      question: 'Do you engage in creative hobbies?',
+      category: 'Cultural',
+      leftOption: {
+        label: 'No',
+        emoji: '📺',
+        mortalityImpact: 2.9, // Not having protective factor
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            hobbies: {
+              ...p.social?.hobbies,
+              creative: {
+                ...p.social?.hobbies?.creative,
+                engaged: { value: false, provenance: 'user_input', timestamp: Date.now() }
+              }
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regularly',
+        emoji: '🎨',
+        mortalityImpact: -2.9, // HR 0.71 = 29% mortality reduction
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            hobbies: {
+              ...p.social?.hobbies,
+              creative: {
+                ...p.social?.hobbies?.creative,
+                engaged: { value: true, provenance: 'user_input', timestamp: Date.now() }
+              }
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'volunteering',
+      question: 'Do you volunteer or do community service?',
+      category: 'Social',
+      leftOption: {
+        label: 'No',
+        emoji: '🚫',
+        mortalityImpact: 2.2, // Not having protective factor
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            volunteering: {
+              ...p.social?.volunteering,
+              active: { value: false, provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, regularly',
+        emoji: '🤝',
+        mortalityImpact: -2.2, // HR 0.78 = 22% mortality reduction
+        profileUpdate: (p) => ({
+          ...p,
+          social: {
+            ...p.social,
+            volunteering: {
+              ...p.social?.volunteering,
+              active: { value: true, provenance: 'user_input', timestamp: Date.now() }
+            }
+          }
+        })
+      }
+    }
+  ];
+}

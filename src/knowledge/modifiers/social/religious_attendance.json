@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "id": "religious_attendance",
+    "name": "Religious Service Attendance",
+    "category": "cultural",
+    "description": "Regular attendance at religious services is associated with substantially reduced mortality through social support, health-promoting behaviors, psychological resilience, and sense of meaning and purpose.",
+    "version": "1.0.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "Li S, Stampfer MJ, Williams DR, VanderWeele TJ. Association of Religious Service Attendance With Mortality Among Women. JAMA Internal Medicine. 2016;176(6):777-785.",
+        "doi": "10.1001/jamainternmed.2016.1615",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5503841/",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Chida Y, Steptoe A, Powell LH. Religiosity/Spirituality and Mortality: A Meta-analysis. Psychotherapy and Psychosomatics. 2009;78:81-90.",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "mechanismOfAction": "Social support networks, health-promoting behaviors (less smoking/drinking), stress buffering, sense of meaning and purpose, meditation/prayer effects"
+  },
+  "applicability": {
+    "ageRange": [18, 100],
+    "notes": "Based on Nurses' Health Study (N=74,534) with 16-year follow-up. Effects observed across denominations."
+  },
+  "effectSize": {
+    "hazardRatio": 0.73,
+    "confidenceInterval": [0.62, 0.85],
+    "evidenceLevel": "cohort",
+    "evidenceStrength": "strong",
+    "affectsAllCauseMortality": true,
+    "doseResponse": {
+      "type": "threshold",
+      "points": [
+        {
+          "dose": 0,
+          "hazardRatio": 1.0,
+          "citation": "Never or rarely attend services (reference)"
+        },
+        {
+          "dose": 1,
+          "hazardRatio": 0.82,
+          "confidence": [0.71, 0.94],
+          "citation": "Weekly attendance reduces mortality by 18%"
+        },
+        {
+          "dose": 2,
+          "hazardRatio": 0.73,
+          "confidence": [0.62, 0.85],
+          "citation": "Multiple times per week reduces mortality by 27%"
+        }
+      ],
+      "unit": "times per week"
+    }
+  },
+  "requiredFields": [
+    {
+      "path": "social.religiousAttendance.value",
+      "required": false,
+      "alternatives": ["social.religiousAttendance"]
+    }
+  ],
+  "mapping": {
+    "type": "categorical",
+    "categories": [
+      {
+        "value": ["never", "rarely"],
+        "hazardRatio": 1.0,
+        "citation": "Reference category"
+      },
+      {
+        "value": "monthly",
+        "hazardRatio": 0.9,
+        "citation": "Monthly attendance shows modest benefit"
+      },
+      {
+        "value": "weekly",
+        "hazardRatio": 0.82,
+        "confidence": [0.71, 0.94],
+        "citation": "Weekly attendance"
+      },
+      {
+        "value": ["multiple_weekly", "daily"],
+        "hazardRatio": 0.73,
+        "confidence": [0.62, 0.85],
+        "citation": "Multiple times per week"
+      }
+    ],
+    "referenceCategory": "never"
+  }
+}

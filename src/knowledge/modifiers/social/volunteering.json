@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "id": "volunteering",
+    "name": "Volunteering and Community Service",
+    "category": "social",
+    "description": "Regular volunteering is associated with reduced mortality through social connections, sense of purpose, physical activity, and psychological well-being.",
+    "version": "1.0.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "Jenkinson CE, Dickens AP, Jones K, et al. Is volunteering a public health intervention? A systematic review and meta-analysis of the health and survival of volunteers. BMC Public Health. 2013;13:773.",
+        "doi": "10.1186/1471-2458-13-773",
+        "evidenceLevel": "meta_analysis"
+      },
+      {
+        "citation": "Anderson ND, Damianakis T, Kröger E, et al. The benefits associated with volunteering among seniors: a critical review and recommendations for future research. Psychological Bulletin. 2014;140(6):1505-1533.",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "mechanismOfAction": "Enhanced social connections, sense of purpose and meaning, increased physical activity, improved mental health, reduced depression and anxiety"
+  },
+  "applicability": {
+    "ageRange": [18, 100],
+    "notes": "Meta-analysis of 40 studies. Benefits strongest in older adults (65+) but observed across age groups."
+  },
+  "effectSize": {
+    "hazardRatio": 0.78,
+    "confidenceInterval": [0.70, 0.88],
+    "evidenceLevel": "meta_analysis",
+    "evidenceStrength": "strong",
+    "affectsAllCauseMortality": true,
+    "primaryDiseases": null
+  },
+  "requiredFields": [
+    {
+      "path": "social.volunteering.active.value",
+      "required": false,
+      "alternatives": ["social.volunteering.active"]
+    }
+  ],
+  "mapping": {
+    "type": "boolean",
+    "trueHazardRatio": 0.78,
+    "falseHazardRatio": 1.0,
+    "confidence": [0.70, 0.88]
+  }
+}

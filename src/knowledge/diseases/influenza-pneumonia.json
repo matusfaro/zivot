@@ -1,0 +1,184 @@
+{
+  "metadata": {
+    "id": "influenza_pneumonia_10year",
+    "name": "Influenza & Pneumonia (10-year)",
+    "category": "infectious",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "CDC FluSurv-NET Surveillance",
+        "url": "https://www.cdc.gov/flu/weekly/",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of death from influenza and pneumonia, primarily affecting elderly and immunocompromised individuals"
+  },
+  "baselineRisk": {
+    "defaultCurve": "general_us",
+    "curves": [
+      {
+        "id": "general_us",
+        "applicability": {
+          "region": ["US"],
+          "ageRange": [18, 100]
+        },
+        "source": "CDC FluSurv-NET and National Vital Statistics",
+        "url": "https://www.cdc.gov/flu/weekly/",
+        "notes": "Influenza and pneumonia mortality rates by age/sex from national surveillance",
+        "ageRiskMapping": [
+          { "age": 18, "risk": 0.00007 },
+          { "age": 30, "risk": 0.00007 },
+          { "age": 40, "risk": 0.00010 },
+          { "age": 50, "risk": 0.00020 },
+          { "age": 60, "risk": 0.00050 },
+          { "age": 65, "risk": 0.00266 },
+          { "age": 70, "risk": 0.00500 },
+          { "age": 75, "risk": 0.01000 },
+          { "age": 80, "risk": 0.01800 },
+          { "age": 85, "risk": 0.03000 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "age_65plus",
+      "name": "Age 65 and Older",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "demographics.dateOfBirth.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "age_threshold",
+        "threshold": 65,
+        "aboveThresholdHR": 3.8,
+        "belowThresholdHR": 1.0,
+        "notes": "70-85% of flu deaths occur in those 65+"
+      }
+    },
+    {
+      "factorId": "flu_vaccine_current_year",
+      "name": "Flu Vaccination (Current Year)",
+      "modifiable": true,
+      "citation": "Influenza Vaccine Effectiveness Meta-analysis",
+      "doi": "10.1016/S1473-3099(20)30823-2",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Vaccine effectiveness ~40-60% against mortality; varies by season and strain match",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.vaccinations.fluVaccineCurrentYear.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 0.5,
+        "falseHazardRatio": 1.0,
+        "notes": "Flu vaccine reduces mortality risk by ~40-60%"
+      }
+    },
+    {
+      "factorId": "pneumococcal_vaccine",
+      "name": "Pneumococcal Vaccination",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.vaccinations.pneumococcalVaccine.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 0.6,
+        "falseHazardRatio": 1.0,
+        "notes": "Pneumococcal vaccine reduces pneumonia mortality"
+      }
+    },
+    {
+      "factorId": "immunocompromised",
+      "name": "Immunocompromised Status",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.immuneStatus.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "normal", "hazardRatio": 1.0 },
+          { "value": "immunocompromised", "hazardRatio": 3.5 }
+        ],
+        "referenceCategory": "normal"
+      }
+    },
+    {
+      "factorId": "chronic_lung_disease",
+      "name": "Chronic Lung Disease (COPD)",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "has_condition",
+        "conditionId": "copd",
+        "presentHR": 2.5,
+        "absentHR": 1.0
+      }
+    },
+    {
+      "factorId": "diabetes",
+      "name": "Diabetes",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "has_condition",
+        "conditionId": "type2_diabetes",
+        "presentHR": 1.8,
+        "absentHR": 1.0
+      }
+    },
+    {
+      "factorId": "heart_disease",
+      "name": "Heart Disease",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "has_condition",
+        "conditionId": "cvd",
+        "presentHR": 2.0,
+        "absentHR": 1.0
+      }
+    }
+  ]
+}

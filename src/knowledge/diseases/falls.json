@@ -1,0 +1,225 @@
+{
+  "metadata": {
+    "id": "falls_10year",
+    "name": "Falls (10-year)",
+    "category": "injury",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "CDC STEADI Falls Guidelines",
+        "url": "https://www.cdc.gov/steadi/index.html",
+        "evidenceLevel": "expert_opinion"
+      }
+    ],
+    "description": "10-year risk of death from unintentional falls, primarily affecting older adults"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "CDC National Vital Statistics (Fall Deaths 2021)",
+        "url": "https://www.cdc.gov/injury/wisqars",
+        "notes": "~36k deaths/year; rates 70/100k age 75+ males.",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00002 },
+          { "age": 50, "risk": 0.00005 },
+          { "age": 60, "risk": 0.00015 },
+          { "age": 65, "risk": 0.00247 },
+          { "age": 70, "risk": 0.00500 },
+          { "age": 75, "risk": 0.01000 },
+          { "age": 80, "risk": 0.02000 },
+          { "age": 85, "risk": 0.03733 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "CDC National Vital Statistics (Fall Deaths 2021)",
+        "url": "https://www.cdc.gov/injury/wisqars",
+        "notes": "Females ~20-30% higher rates.",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00001 },
+          { "age": 50, "risk": 0.00003 },
+          { "age": 60, "risk": 0.00010 },
+          { "age": 65, "risk": 0.00142 },
+          { "age": 70, "risk": 0.00300 },
+          { "age": 75, "risk": 0.00650 },
+          { "age": 80, "risk": 0.01500 },
+          { "age": 85, "risk": 0.03197 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "age_continuous",
+      "name": "Age (65+ Risk Multiplier)",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "citation": "CDC Falls Data",
+      "url": "https://www.cdc.gov/falls/data/index.html",
+      "evidenceLevel": "cohort",
+      "notes": "Rates double every decade post-65.",
+      "requiredFields": [
+        {
+          "path": "demographics.dateOfBirth.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "exponential_age_65plus",
+        "coefficients": {
+          "slope": 0.15
+        },
+        "validRange": [40, 100]
+      }
+    },
+    {
+      "factorId": "falls_past_year",
+      "name": "Falls in Past Year",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "citation": "STRATIFY Fall Risk Score",
+      "doi": "10.1111/j.1532-5415.2004.52505.x",
+      "evidenceLevel": "cohort",
+      "notes": "Prior fall: OR~3.0.",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.fallHistory.fallsPastYear.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0 },
+          { "value": 1, "hazardRatio": 2.0 },
+          { "value": 2, "hazardRatio": 3.5 },
+          { "value": 3, "hazardRatio": 5.0 }
+        ],
+        "validRange": [0, 10]
+      }
+    },
+    {
+      "factorId": "balance_problems",
+      "name": "Balance Problems",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "citation": "FES-I Validation (meta-analysis)",
+      "doi": "10.1093/ageing/afq064",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Gait/balance issues: OR~3.0.",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.fallHistory.balanceProblems.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.0,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "dizziness_when_standing",
+      "name": "Dizziness When Standing (Orthostatic Hypotension)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.fallHistory.dizzinessWhenStanding.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.7,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "medication_count",
+      "name": "Number of Medications (Polypharmacy)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "citation": "Polypharmacy and Falls (Systematic Review)",
+      "doi": "10.1001/jamainternmed.2013.9066",
+      "evidenceLevel": "meta_analysis",
+      "notes": ">4 meds: OR=1.5-2.0.",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.medications.totalMedicationCount.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0 },
+          { "value": 4, "hazardRatio": 1.2 },
+          { "value": 5, "hazardRatio": 1.5 },
+          { "value": 10, "hazardRatio": 2.0 }
+        ],
+        "validRange": [0, 30]
+      }
+    },
+    {
+      "factorId": "blood_pressure_meds",
+      "name": "Blood Pressure Medications",
+      "modifiable": false,
+      "evidenceLevel": "medium",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.medications.takesBloodPressureMeds.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.3,
+        "falseHazardRatio": 1.0,
+        "notes": "Can cause orthostatic hypotension"
+      }
+    },
+    {
+      "factorId": "vitamin_d_level",
+      "name": "Vitamin D Level",
+      "modifiable": true,
+      "evidenceLevel": "medium",
+      "requiredFields": [
+        {
+          "path": "labTests.vitaminD.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 10, "hazardRatio": 1.5 },
+          { "value": 20, "hazardRatio": 1.2 },
+          { "value": 30, "hazardRatio": 1.0 },
+          { "value": 50, "hazardRatio": 0.9 }
+        ],
+        "validRange": [5, 100],
+        "notes": "Low vitamin D associated with muscle weakness and falls"
+      }
+    }
+  ]
+}

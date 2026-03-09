@@ -1,0 +1,214 @@
+{
+  "metadata": {
+    "id": "nafld_cirrhosis_10year",
+    "name": "Liver Disease (10-year)",
+    "category": "other",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "NAFLD to Cirrhosis Progression Study",
+        "doi": "10.1016/S0168-8278(18)30275-3",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "FIB-4 Score, NAFLD Fibrosis Score",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of NAFLD progression to cirrhosis and liver-related mortality. Progression driven by metabolic syndrome components (obesity, diabetes, dyslipidemia)"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "NAFLD Progression Cohort Studies",
+        "doi": "10.1016/S0168-8278(18)30275-3",
+        "notes": "NAFLD to cirrhosis progression 1-5%/year; depends on fibrosis stage and metabolic factors",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.003 },
+          { "age": 50, "risk": 0.008 },
+          { "age": 60, "risk": 0.018 },
+          { "age": 70, "risk": 0.035 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "NAFLD Progression Cohort Studies",
+        "doi": "10.1016/S0168-8278(18)30275-3",
+        "notes": "NAFLD to cirrhosis progression 1-5%/year; depends on fibrosis stage and metabolic factors",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.002 },
+          { "age": 50, "risk": 0.005 },
+          { "age": 60, "risk": 0.012 },
+          { "age": 70, "risk": 0.025 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "fib4_score",
+      "name": "FIB-4 Score (Derived from Age, AST, ALT, Platelets)",
+      "modifiable": false,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "derived_fib4",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0.5, "hazardRatio": 1.0 },
+          { "value": 1.3, "hazardRatio": 1.0 },
+          { "value": 1.5, "hazardRatio": 1.4 },
+          { "value": 2.0, "hazardRatio": 2.5 },
+          { "value": 2.67, "hazardRatio": 4.5 },
+          { "value": 3.5, "hazardRatio": 7.5 },
+          { "value": 5.0, "hazardRatio": 12.0 }
+        ],
+        "validRange": [0, 10]
+      }
+    },
+    {
+      "factorId": "bmi_nafld",
+      "name": "Body Mass Index",
+      "modifiable": true,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18.5, "hazardRatio": 0.7 },
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.5 },
+          { "value": 30, "hazardRatio": 3.0 },
+          { "value": 35, "hazardRatio": 5.5 },
+          { "value": 40, "hazardRatio": 8.5 }
+        ],
+        "validRange": [15, 50]
+      }
+    },
+    {
+      "factorId": "diabetes_nafld",
+      "name": "Type 2 Diabetes",
+      "modifiable": true,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.8,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "dyslipidemia_nafld",
+      "name": "Dyslipidemia (High Triglycerides, Low HDL)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "labTests.lipidPanel.triglycerides.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 100, "hazardRatio": 1.0 },
+          { "value": 150, "hazardRatio": 1.3 },
+          { "value": 200, "hazardRatio": 1.8 },
+          { "value": 300, "hazardRatio": 2.5 },
+          { "value": 500, "hazardRatio": 3.5 }
+        ],
+        "validRange": [50, 1000]
+      }
+    },
+    {
+      "factorId": "alcohol_nafld",
+      "name": "Alcohol Consumption",
+      "modifiable": true,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0 },
+          { "value": 7, "hazardRatio": 1.2 },
+          { "value": 14, "hazardRatio": 1.6 },
+          { "value": 21, "hazardRatio": 2.3 },
+          { "value": 35, "hazardRatio": 3.8 },
+          { "value": 50, "hazardRatio": 6.0 }
+        ],
+        "validRange": [0, 100]
+      }
+    },
+    {
+      "factorId": "nafld_diagnosis",
+      "name": "NAFLD or NASH Diagnosis",
+      "modifiable": false,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 4.0,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "cirrhosis_diagnosis",
+      "name": "Cirrhosis Diagnosis",
+      "modifiable": false,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 12.0,
+        "falseHazardRatio": 1.0
+      }
+    }
+  ]
+}

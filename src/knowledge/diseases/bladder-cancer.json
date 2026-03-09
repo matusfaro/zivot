@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "id": "bladder_cancer_10year",
+    "name": "Bladder Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "SEER Cancer Statistics: Bladder Cancer 2018-2023",
+        "url": "https://seer.cancer.gov/statfacts/html/urinb.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Epidemiology of Bladder Cancer",
+        "doi": "10.3390/cancers12061562",
+        "evidenceLevel": "meta_analysis"
+      },
+      {
+        "citation": "Smoking and Bladder Cancer Meta-analysis",
+        "doi": "10.1016/S1470-2045(14)70468-1",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "description": "10-year risk of bladder cancer (urothelial carcinoma)"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Bladder Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/urinb.html",
+        "notes": "Bladder cancer incidence; males 3-4x higher than females; strongly linked to smoking",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00030 },
+          { "age": 50, "risk": 0.00070 },
+          { "age": 60, "risk": 0.00150 },
+          { "age": 70, "risk": 0.00280 },
+          { "age": 80, "risk": 0.00380 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Bladder Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/urinb.html",
+        "notes": "Bladder cancer incidence; males 3-4x higher than females; strongly linked to smoking",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00010 },
+          { "age": 50, "risk": 0.00025 },
+          { "age": 60, "risk": 0.00050 },
+          { "age": 70, "risk": 0.00095 },
+          { "age": 80, "risk": 0.00130 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "sex",
+      "name": "Biological Sex",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "demographics.biologicalSex.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "male", "hazardRatio": 3.5 },
+          { "value": "female", "hazardRatio": 1.0 }
+        ],
+        "referenceCategory": "female",
+        "notes": "Males have 3-4x higher risk"
+      }
+    },
+    {
+      "factorId": "smoking_status",
+      "name": "Smoking Status",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "citation": "Smoking and Bladder Cancer Meta-analysis",
+      "doi": "10.1016/S1470-2045(14)70468-1",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Smoking HR~3-4 for bladder cancer; primary modifiable risk factor",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "never", "hazardRatio": 1.0 },
+          { "value": "former", "hazardRatio": 2.0 },
+          { "value": "current", "hazardRatio": 3.5 }
+        ],
+        "referenceCategory": "never"
+      }
+    },
+    {
+      "factorId": "pack_years",
+      "name": "Smoking Pack-Years",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.packYears.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "linear",
+        "coefficients": {
+          "slope": 0.02
+        },
+        "validRange": [0, 100],
+        "notes": "Risk increases with cumulative smoking exposure"
+      }
+    },
+    {
+      "factorId": "occupational_exposures",
+      "name": "Occupational Chemical Exposures",
+      "modifiable": false,
+      "evidenceLevel": "medium",
+      "requiredFields": [
+        {
+          "path": "lifestyle.occupationalExposures.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.8,
+        "falseHazardRatio": 1.0,
+        "notes": "Exposure to aromatic amines, dyes, chemicals"
+      }
+    }
+  ]
+}

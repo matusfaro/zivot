@@ -1,0 +1,248 @@
+{
+  "metadata": {
+    "id": "stroke_10year",
+    "name": "Stroke (10-year)",
+    "category": "cardiovascular",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "Global Burden of Disease Study 2019 - Stroke",
+        "doi": "10.1016/S1474-4422(21)00252-0",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8443449/",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "American Heart Association/American Stroke Association Guidelines (2021)",
+        "doi": "10.1161/STR.0000000000000375",
+        "evidenceLevel": "expert_opinion"
+      }
+    ],
+    "description": "Cerebrovascular accident - blockage or rupture of blood vessels in the brain"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "Global Burden of Disease Study 2019 (US-specific stroke incidence rates)",
+        "doi": "10.1016/S1474-4422(21)00252-0",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8443449/",
+        "notes": "Age-standardized incidence declining 20-30% since 1990 but absolute cases rising; male rates higher than females across ages 50+; derived from 29-year US data showing exponential increase with age.",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.018 },
+          { "age": 50, "risk": 0.042 },
+          { "age": 60, "risk": 0.084 },
+          { "age": 70, "risk": 0.145 },
+          { "age": 80, "risk": 0.210 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "Global Burden of Disease Study 2019 (US-specific stroke incidence rates)",
+        "doi": "10.1016/S1474-4422(21)00252-0",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8443449/",
+        "notes": "Female rates lower than males but increasing in <50s; 2019 US estimates: ~460k incident strokes, 2/3 ischemic.",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.012 },
+          { "age": 50, "risk": 0.028 },
+          { "age": 60, "risk": 0.061 },
+          { "age": 70, "risk": 0.115 },
+          { "age": 80, "risk": 0.180 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "hypertension_stroke",
+      "name": "Hypertension",
+      "modifiable": true,
+      "evidenceLevel": "meta_analysis",
+      "citation": "Blood Pressure and Stroke (Prospective Studies Collaboration meta-analysis)",
+      "doi": "10.1161/01.str.0000116869.64771.5a",
+      "url": "https://www.ahajournals.org/doi/10.1161/01.str.0000116869.64771.5a",
+      "notes": "Per 10 mmHg higher SBP: ~33% higher stroke risk; log-linear from 115 mmHg; consistent across subtypes.",
+      "requiredFields": [
+        {
+          "path": "biometrics.bloodPressure.mostRecent.value.systolic",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 110, "hazardRatio": 1.0 },
+          { "value": 120, "hazardRatio": 1.15 },
+          { "value": 130, "hazardRatio": 1.35 },
+          { "value": 140, "hazardRatio": 1.60 },
+          { "value": 150, "hazardRatio": 1.90 },
+          { "value": 160, "hazardRatio": 2.25 },
+          { "value": 170, "hazardRatio": 2.65 },
+          { "value": 180, "hazardRatio": 3.10 }
+        ],
+        "validRange": [90, 220]
+      }
+    },
+    {
+      "factorId": "diabetes_stroke",
+      "name": "Diabetes",
+      "modifiable": true,
+      "evidenceLevel": "cohort",
+      "citation": "Global Burden of Disease Stroke Risk Factors 1990-2019",
+      "doi": "10.1016/S1474-4422(21)00252-0",
+      "notes": "Diabetes attributable fraction ~10-15% strokes; HR ~2.0 in meta-analyses (e.g., Framingham-derived).",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.0,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "smoking_stroke",
+      "name": "Current Smoking",
+      "modifiable": true,
+      "evidenceLevel": "meta_analysis",
+      "citation": "GBD 2019 Smoking and Stroke Risk",
+      "doi": "10.1016/S1474-4422(21)00252-0",
+      "notes": "Current: HR~2.0, former: HR~1.3 vs never; dose-response with pack-years.",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "never", "hazardRatio": 1.0 },
+          { "value": "former", "hazardRatio": 1.3 },
+          { "value": "current", "hazardRatio": 2.0 }
+        ]
+      }
+    },
+    {
+      "factorId": "atrial_fibrillation",
+      "name": "Atrial Fibrillation",
+      "modifiable": false,
+      "evidenceLevel": "meta_analysis",
+      "citation": "Atrial fibrillation burden and stroke risk: systematic review and dose-response meta-analysis",
+      "doi": "10.3748/wjg.v28.4.498",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8790433/",
+      "notes": "AF burden >5 min: adjusted RR=2.49 (95% CI 1.79-3.47); dose-response: 2% increased risk per hour; aligns with ~5.0 HR in CHA2DS2-VASc scoring.",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.6,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "cvd_history_stroke",
+      "name": "History of Cardiovascular Disease",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.6,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "prior_stroke_tia",
+      "name": "Prior Stroke or TIA",
+      "modifiable": false,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 3.2,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "cholesterol_hdl_stroke",
+      "name": "HDL Cholesterol (Protective)",
+      "modifiable": true,
+      "evidenceLevel": "moderate",
+      "requiredFields": [
+        {
+          "path": "labTests.lipidPanel.hdlCholesterol.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 30, "hazardRatio": 1.3 },
+          { "value": 40, "hazardRatio": 1.15 },
+          { "value": 50, "hazardRatio": 1.0 },
+          { "value": 60, "hazardRatio": 0.9 },
+          { "value": 70, "hazardRatio": 0.82 },
+          { "value": 80, "hazardRatio": 0.75 }
+        ],
+        "validRange": [20, 100]
+      }
+    },
+    {
+      "factorId": "bmi_stroke",
+      "name": "Body Mass Index",
+      "modifiable": true,
+      "evidenceLevel": "moderate",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18.5, "hazardRatio": 1.1 },
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.05 },
+          { "value": 30, "hazardRatio": 1.2 },
+          { "value": 35, "hazardRatio": 1.4 },
+          { "value": 40, "hazardRatio": 1.65 }
+        ],
+        "validRange": [15, 50]
+      }
+    }
+  ]
+}

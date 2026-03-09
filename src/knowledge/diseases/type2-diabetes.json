@@ -1,0 +1,367 @@
+{
+  "metadata": {
+    "id": "type2_diabetes_10year",
+    "name": "Type 2 Diabetes (10-year)",
+    "category": "metabolic",
+    "timeframe": 10,
+    "version": "1.0.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "American Diabetes Association Risk Test",
+        "url": "https://diabetes.org/risk-test",
+        "evidenceLevel": "expert_opinion"
+      },
+      {
+        "citation": "Framingham Offspring Study Diabetes Risk Score",
+        "doi": "10.2337/dc07-0954",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Finnish Diabetes Risk Score (FINDRISC)",
+        "doi": "10.1007/s001250051591",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of developing type 2 diabetes mellitus"
+  },
+  "baselineRisk": {
+    "defaultCurve": "average_male_us",
+    "curves": [
+      {
+        "id": "average_male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [30, 79]
+        },
+        "source": "Framingham Offspring Study Diabetes Risk Score",
+        "doi": "10.2337/dc07-0954",
+        "notes": "Based on 8-year follow-up data from Framingham Offspring Study; extrapolated to 10-year risk",
+        "ageRiskMapping": [
+          { "age": 30, "risk": 0.035, "confidence": [0.028, 0.042] },
+          { "age": 35, "risk": 0.045, "confidence": [0.038, 0.052] },
+          { "age": 40, "risk": 0.060, "confidence": [0.052, 0.068] },
+          { "age": 45, "risk": 0.080, "confidence": [0.072, 0.088] },
+          { "age": 50, "risk": 0.105, "confidence": [0.095, 0.115] },
+          { "age": 55, "risk": 0.135, "confidence": [0.122, 0.148] },
+          { "age": 60, "risk": 0.165, "confidence": [0.150, 0.180] },
+          { "age": 65, "risk": 0.195, "confidence": [0.178, 0.212] },
+          { "age": 70, "risk": 0.220, "confidence": [0.202, 0.238] },
+          { "age": 75, "risk": 0.240, "confidence": [0.220, 0.260] }
+        ]
+      },
+      {
+        "id": "average_female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [30, 79]
+        },
+        "source": "Framingham Offspring Study Diabetes Risk Score",
+        "doi": "10.2337/dc07-0954",
+        "notes": "Based on 8-year follow-up data from Framingham Offspring Study; extrapolated to 10-year risk",
+        "ageRiskMapping": [
+          { "age": 30, "risk": 0.040, "confidence": [0.033, 0.047] },
+          { "age": 35, "risk": 0.052, "confidence": [0.045, 0.059] },
+          { "age": 40, "risk": 0.070, "confidence": [0.062, 0.078] },
+          { "age": 45, "risk": 0.092, "confidence": [0.083, 0.101] },
+          { "age": 50, "risk": 0.120, "confidence": [0.108, 0.132] },
+          { "age": 55, "risk": 0.152, "confidence": [0.138, 0.166] },
+          { "age": 60, "risk": 0.185, "confidence": [0.168, 0.202] },
+          { "age": 65, "risk": 0.215, "confidence": [0.195, 0.235] },
+          { "age": 70, "risk": 0.240, "confidence": [0.218, 0.262] },
+          { "age": 75, "risk": 0.260, "confidence": [0.238, 0.282] }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "bmi_diabetes",
+      "name": "Body Mass Index",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Biometrics",
+      "modifiable": true,
+      "citation": "Nurses' Health Study & Health Professionals Follow-up Study - Colditz et al.",
+      "doi": "10.7326/0003-4819-124-1_Part_2-199601011-00002",
+      "evidenceLevel": "cohort",
+      "notes": "Strongest modifiable risk factor; BMI 30-35 increases risk ~8x, BMI >40 increases risk ~20x compared to BMI <23",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 20, "hazardRatio": 0.50, "confidence": [0.42, 0.58] },
+          { "value": 23, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 27, "hazardRatio": 2.5, "confidence": [2.30, 2.70] },
+          { "value": 30, "hazardRatio": 4.0, "confidence": [3.70, 4.30] },
+          { "value": 35, "hazardRatio": 8.0, "confidence": [7.40, 8.60] },
+          { "value": 40, "hazardRatio": 14.0, "confidence": [13.0, 15.0] },
+          { "value": 45, "hazardRatio": 20.0, "confidence": [18.5, 21.5] }
+        ],
+        "validRange": [15, 50]
+      }
+    },
+    {
+      "factorId": "waist_circumference",
+      "name": "Waist Circumference",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Biometrics",
+      "modifiable": true,
+      "citation": "InterAct Consortium - Langenberg et al. Long-term risk of incident type 2 diabetes and measures of overall and regional obesity",
+      "doi": "10.1371/journal.pmed.1001230",
+      "evidenceLevel": "cohort",
+      "notes": "Waist circumference predicts diabetes independent of BMI; reflects visceral adiposity",
+      "requiredFields": [
+        {
+          "path": "biometrics.waistCircumference.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 80, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 90, "hazardRatio": 1.5, "confidence": [1.38, 1.62] },
+          { "value": 100, "hazardRatio": 2.5, "confidence": [2.30, 2.70] },
+          { "value": 110, "hazardRatio": 4.0, "confidence": [3.70, 4.30] },
+          { "value": 120, "hazardRatio": 6.0, "confidence": [5.50, 6.50] }
+        ],
+        "validRange": [60, 150]
+      }
+    },
+    {
+      "factorId": "family_history_diabetes",
+      "name": "Family History of Diabetes",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Family History",
+      "modifiable": false,
+      "citation": "InterAct Consortium - Scott et al. The link between family history and risk of type 2 diabetes is not explained by anthropometric, lifestyle, or genetic risk factors",
+      "doi": "10.2337/dc12-1099",
+      "evidenceLevel": "cohort",
+      "notes": "One parent: RR ~2.3; both parents: RR ~5.0; reflects both genetic and shared environmental factors",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "referenceCategory": "none",
+        "categories": [
+          {
+            "value": "none",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "one_parent",
+            "hazardRatio": 2.3,
+            "confidence": [2.10, 2.50]
+          },
+          {
+            "value": "both_parents",
+            "hazardRatio": 5.0,
+            "confidence": [4.50, 5.50]
+          },
+          {
+            "value": "sibling",
+            "hazardRatio": 2.5,
+            "confidence": [2.30, 2.70]
+          }
+        ]
+      }
+    },
+    {
+      "factorId": "physical_activity_diabetes",
+      "name": "Physical Activity Level",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Physical Activity Guidelines Advisory Committee Scientific Report (2018) - Type 2 Diabetes section",
+      "url": "https://health.gov/sites/default/files/2019-09/PAG_Advisory_Committee_Report.pdf",
+      "evidenceLevel": "meta_analysis",
+      "notes": "150 min/week moderate activity reduces risk ~30%; greater benefits with higher volumes; independent of BMI",
+      "requiredFields": [
+        {
+          "path": "lifestyle.exercise.moderateMinutesPerWeek.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.8, "confidence": [1.65, 1.95] },
+          { "value": 30, "hazardRatio": 1.4, "confidence": [1.30, 1.50] },
+          { "value": 75, "hazardRatio": 1.15, "confidence": [1.08, 1.22] },
+          { "value": 150, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 300, "hazardRatio": 0.75, "confidence": [0.68, 0.82] },
+          { "value": 450, "hazardRatio": 0.60, "confidence": [0.52, 0.68] }
+        ],
+        "validRange": [0, 600]
+      }
+    },
+    {
+      "factorId": "prediabetes",
+      "name": "Prediabetes (Impaired Fasting Glucose)",
+      "type": "boolean",
+      "evidenceStrength": "strong",
+      "category": "Lab Results",
+      "modifiable": true,
+      "citation": "American Diabetes Association - Nathan et al. Impaired fasting glucose and impaired glucose tolerance",
+      "doi": "10.2337/diacare.30.3.753",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Prediabetes (FPG 100-125 mg/dL or A1C 5.7-6.4%) increases progression to diabetes ~5-10x; modifiable with lifestyle",
+      "requiredFields": [
+        {
+          "path": "labTests.metabolicPanel.glucose.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 5.5,
+        "falseHazardRatio": 1.0,
+        "confidence": [5.00, 6.00]
+      }
+    },
+    {
+      "factorId": "hypertension_diabetes",
+      "name": "High Blood Pressure",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Medical History",
+      "modifiable": true,
+      "citation": "Gress et al. Hypertension and antihypertensive therapy as risk factors for type 2 diabetes mellitus",
+      "doi": "10.1056/NEJM200003303421301",
+      "evidenceLevel": "cohort",
+      "notes": "Hypertension increases diabetes risk ~2.5x; shared pathophysiology including insulin resistance",
+      "requiredFields": [
+        {
+          "path": "biometrics.bloodPressure.mostRecent.value.systolic",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.5,
+        "falseHazardRatio": 1.0,
+        "confidence": [2.30, 2.70]
+      }
+    },
+    {
+      "factorId": "gestational_diabetes",
+      "name": "History of Gestational Diabetes",
+      "type": "boolean",
+      "evidenceStrength": "strong",
+      "category": "Medical History",
+      "modifiable": false,
+      "citation": "Bellamy et al. Type 2 diabetes mellitus after gestational diabetes: a systematic review and meta-analysis",
+      "doi": "10.1016/S0140-6736(09)60731-5",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Women with history of GDM have ~7.5x increased risk; risk highest in first 5 years postpartum",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 7.5,
+        "falseHazardRatio": 1.0,
+        "confidence": [6.80, 8.20]
+      }
+    },
+    {
+      "factorId": "pcos",
+      "name": "Polycystic Ovary Syndrome",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Medical History",
+      "modifiable": false,
+      "citation": "Moran et al. Impaired glucose tolerance, type 2 diabetes and metabolic syndrome in polycystic ovary syndrome",
+      "doi": "10.1093/humupd/dmq001",
+      "evidenceLevel": "meta_analysis",
+      "notes": "PCOS increases diabetes risk ~2.5x; mediated by insulin resistance and hyperandrogenism",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.5,
+        "falseHazardRatio": 1.0,
+        "confidence": [2.25, 2.75]
+      }
+    },
+    {
+      "factorId": "diet_quality",
+      "name": "Diet Quality (Vegetables/Fruits Daily)",
+      "type": "continuous",
+      "evidenceStrength": "moderate",
+      "category": "Diet",
+      "modifiable": true,
+      "citation": "Carter et al. Fruit and vegetable intake and incidence of type 2 diabetes mellitus: systematic review and meta-analysis",
+      "doi": "10.1136/bmj.c4229",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Higher fruit/vegetable intake associated with reduced diabetes risk; dose-response relationship; ~14% risk reduction with high intake",
+      "requiredFields": [
+        {
+          "path": "lifestyle.diet.vegetableServingsPerDay.mostRecent.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.4, "confidence": [1.30, 1.50] },
+          { "value": 1, "hazardRatio": 1.2, "confidence": [1.12, 1.28] },
+          { "value": 3, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 5, "hazardRatio": 0.85, "confidence": [0.78, 0.92] },
+          { "value": 7, "hazardRatio": 0.72, "confidence": [0.65, 0.79] }
+        ],
+        "validRange": [0, 10]
+      }
+    },
+    {
+      "factorId": "sleep_duration",
+      "name": "Sleep Duration (hours/night)",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Shan Z, et al. Sleep Duration and Risk of Type 2 Diabetes: A Meta-analysis of Prospective Studies. Diabetes Care. 2015;38(3):529-537.",
+      "doi": "10.2337/dc14-2073",
+      "evidenceLevel": "meta_analysis",
+      "notes": "U-shaped curve: <6h or >8h increases risk. 7h optimal.",
+      "requiredFields": [{"path": "lifestyle.sleep.averageHoursPerNight.mostRecent.value", "required": false}],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          {"value": 7, "hazardRatio": 1.0},
+          {"value": 5, "hazardRatio": 1.5, "confidence": [1.3, 1.7]},
+          {"value": 4, "hazardRatio": 2.1},
+          {"value": 9, "hazardRatio": 1.4}
+        ],
+        "validRange": [3, 12]
+      }
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "metadata": {
+    "id": "prostate_cancer_10year",
+    "name": "Prostate Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "SEER Prostate Cancer Incidence (1975-2021)",
+        "url": "https://seer.cancer.gov/statfacts/html/prost.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Johns Hopkins Family History Study",
+        "doi": "10.1093/jnci/91.5.487",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "Prostate cancer risk for men based on PCPT model"
+  },
+  "baselineRisk": {
+    "defaultCurve": "white_male_us",
+    "curves": [
+      {
+        "id": "white_male_us",
+        "applicability": {
+          "sex": "male",
+          "ethnicity": ["white"],
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Prostate Cancer Incidence (1975-2021)",
+        "url": "https://seer.cancer.gov/statfacts/html/prost.html",
+        "notes": "Age-specific: rises exponentially post-50; ~100/100k age-adjusted.",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.008 },
+          { "age": 50, "risk": 0.025 },
+          { "age": 60, "risk": 0.055 },
+          { "age": 70, "risk": 0.085 },
+          { "age": 80, "risk": 0.095 }
+        ]
+      },
+      {
+        "id": "black_male_us",
+        "applicability": {
+          "sex": "male",
+          "ethnicity": ["black"],
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Incidence by Race/Ethnicity",
+        "url": "https://seer.cancer.gov/statfacts/html/prost.html",
+        "notes": "African American males: 1.7x higher incidence vs White; RR~1.6-1.8.",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.016 },
+          { "age": 50, "risk": 0.050 },
+          { "age": 60, "risk": 0.110 },
+          { "age": 70, "risk": 0.170 },
+          { "age": 80, "risk": 0.190 }
+        ]
+      },
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Prostate Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/prost.html",
+        "notes": "Overall US male population incidence; accounts for all ethnicities.",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.010 },
+          { "age": 50, "risk": 0.030 },
+          { "age": 60, "risk": 0.070 },
+          { "age": 70, "risk": 0.110 },
+          { "age": 80, "risk": 0.125 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "family_history_prostate",
+      "name": "Family History of Prostate Cancer",
+      "modifiable": false,
+      "evidenceLevel": "cohort",
+      "citation": "Johns Hopkins Family History Study",
+      "doi": "10.1093/jnci/91.5.487",
+      "notes": "First-degree: RR~2.5 (95% CI 2.0-3.0).",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "none", "hazardRatio": 1.0 },
+          { "value": "one", "hazardRatio": 2.5 },
+          { "value": "two_or_more", "hazardRatio": 3.5 }
+        ]
+      }
+    },
+    {
+      "factorId": "psa_level",
+      "name": "PSA Level (ng/mL)",
+      "modifiable": false,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "labTests.psa.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0.5, "hazardRatio": 0.5 },
+          { "value": 1.0, "hazardRatio": 1.0 },
+          { "value": 2.0, "hazardRatio": 1.8 },
+          { "value": 3.0, "hazardRatio": 2.5 },
+          { "value": 4.0, "hazardRatio": 3.2 },
+          { "value": 5.0, "hazardRatio": 4.0 },
+          { "value": 10.0, "hazardRatio": 6.5 }
+        ],
+        "validRange": [0, 100]
+      }
+    },
+    {
+      "factorId": "prior_negative_biopsy",
+      "name": "Prior Negative Prostate Biopsy",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.urinaryHistory.priorNegativeBiopsy.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 0.6,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "bmi_prostate",
+      "name": "Body Mass Index",
+      "modifiable": true,
+      "evidenceLevel": "moderate",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18.5, "hazardRatio": 0.95 },
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.05 },
+          { "value": 30, "hazardRatio": 1.15 },
+          { "value": 35, "hazardRatio": 1.25 },
+          { "value": 40, "hazardRatio": 1.35 }
+        ],
+        "validRange": [15, 50]
+      }
+    }
+  ]
+}

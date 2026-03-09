@@ -1,0 +1,163 @@
+/**
+ * Day Detail Panel Styles
+ */
+
+.day-detail-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.day-detail-panel {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 0;
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  box-shadow: 8px 8px 0 #000;
+}
+
+.day-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 3px solid #000;
+  background: #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.day-detail-header h3 {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.today-badge {
+  font-size: 0.7rem;
+  background: #4ECDC4;
+  color: #fff;
+  padding: 0.2rem 0.5rem;
+  border: 2px solid #000;
+  border-radius: 0;
+}
+
+.close-btn {
+  background: none;
+  border: 2px solid #000;
+  border-radius: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  color: #000;
+}
+
+.close-btn:hover {
+  background: #e0e0e0;
+}
+
+.day-detail-content {
+  padding: 1rem;
+}
+
+.day-detail-section {
+  margin-bottom: 1.5rem;
+}
+
+.day-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.day-detail-section h4 {
+  font-size: 0.95rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ddd;
+  color: #000;
+}
+
+/* Existing Events List */
+.existing-events-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.existing-event-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f9f9f9;
+  border: 2px solid #ddd;
+  border-radius: 0;
+}
+
+.existing-event-item:hover {
+  background: #f0f0f0;
+}
+
+.event-icon {
+  font-size: 1.25rem;
+}
+
+.event-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #000;
+}
+
+.event-value {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #666;
+}
+
+.delete-btn {
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: bold;
+  padding: 0;
+  color: #000;
+}
+
+.delete-btn:hover {
+  background: #f8d7da;
+  border-color: #E74C3C;
+  color: #E74C3C;
+}
+
+.no-events-message {
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  border: 2px dashed #ddd;
+  border-radius: 0;
+}

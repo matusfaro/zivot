@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "id": "nature_exposure",
+    "name": "Time Spent in Nature",
+    "category": "environmental",
+    "description": "Regular exposure to natural environments (greenspace) is associated with reduced cardiovascular and all-cause mortality, with optimal benefits at 120-300 minutes per week.",
+    "version": "1.0.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "Twohig-Bennett C, Jones A. The health benefits of the great outdoors: A systematic review and meta-analysis of greenspace exposure and health outcomes. Environmental Research. 2018;166:628-637.",
+        "doi": "10.1016/j.envres.2018.06.030",
+        "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6562165/",
+        "evidenceLevel": "meta_analysis"
+      },
+      {
+        "citation": "White MP, et al. Spending at least 120 minutes a week in nature is associated with good health and wellbeing. Scientific Reports. 2019;9:7730.",
+        "doi": "10.1038/s41598-019-44097-3",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "mechanismOfAction": "Reduced inflammation, stress reduction through cortisol regulation, increased physical activity, improved immune function, air quality benefits, psychological restoration"
+  },
+  "applicability": {
+    "notes": "Meta-analysis of 143 studies. Benefits observed across urban parks, nature trails, and wilderness settings."
+  },
+  "effectSize": {
+    "hazardRatio": 0.84,
+    "confidenceInterval": [0.76, 0.93],
+    "evidenceLevel": "meta_analysis",
+    "evidenceStrength": "strong",
+    "affectsAllCauseMortality": true,
+    "primaryDiseases": ["cvd_10year"],
+    "doseResponse": {
+      "type": "saturation",
+      "points": [
+        {
+          "dose": 0,
+          "hazardRatio": 1.0,
+          "citation": "No regular nature exposure (reference)"
+        },
+        {
+          "dose": 60,
+          "hazardRatio": 0.95,
+          "citation": "1 hour per week shows modest benefit"
+        },
+        {
+          "dose": 120,
+          "hazardRatio": 0.84,
+          "confidence": [0.76, 0.93],
+          "citation": "2 hours per week (threshold for significant benefit)"
+        },
+        {
+          "dose": 200,
+          "hazardRatio": 0.80,
+          "citation": "3+ hours per week (optimal benefit)"
+        },
+        {
+          "dose": 300,
+          "hazardRatio": 0.78,
+          "citation": "5 hours per week (saturation point)"
+        },
+        {
+          "dose": 400,
+          "hazardRatio": 0.78,
+          "citation": "Additional time shows minimal added benefit"
+        }
+      ],
+      "optimalDose": 200,
+      "unit": "minutes per week"
+    }
+  },
+  "requiredFields": [
+    {
+      "path": "lifestyle.outdoorTime.minutesPerWeek.mostRecent.value",
+      "required": false,
+      "alternatives": ["lifestyle.outdoorTime.minutesPerWeek"]
+    }
+  ],
+  "mapping": {
+    "type": "continuous",
+    "strategy": "lookup",
+    "points": [
+      {"value": 0, "hazardRatio": 1.0},
+      {"value": 60, "hazardRatio": 0.95},
+      {"value": 120, "hazardRatio": 0.84, "confidence": [0.76, 0.93]},
+      {"value": 200, "hazardRatio": 0.80},
+      {"value": 300, "hazardRatio": 0.78},
+      {"value": 400, "hazardRatio": 0.78}
+    ],
+    "validRange": [0, 600]
+  }
+}

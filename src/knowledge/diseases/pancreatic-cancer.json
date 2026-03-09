@@ -1,0 +1,193 @@
+{
+  "metadata": {
+    "id": "pancreatic_cancer_10year",
+    "name": "Pancreatic Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "SEER Pancreatic Cancer Statistics",
+        "url": "https://seer.cancer.gov/statfacts/html/pancreas.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "YourDiseaseRisk Pancreatic Model, NHS/HPFS cohorts",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year pancreatic cancer risk based on validated prediction models"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Pancreatic Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/pancreas.html",
+        "notes": "Pancreatic cancer incidence by age/sex; poor prognosis disease",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.0008 },
+          { "age": 50, "risk": 0.0025 },
+          { "age": 60, "risk": 0.0055 },
+          { "age": 70, "risk": 0.0095 },
+          { "age": 80, "risk": 0.0115 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 100]
+        },
+        "source": "SEER Pancreatic Cancer Incidence",
+        "url": "https://seer.cancer.gov/statfacts/html/pancreas.html",
+        "notes": "Pancreatic cancer incidence by age/sex; poor prognosis disease",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.0006 },
+          { "age": 50, "risk": 0.0020 },
+          { "age": 60, "risk": 0.0045 },
+          { "age": 70, "risk": 0.0078 },
+          { "age": 80, "risk": 0.0095 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "smoking_pancreatic",
+      "name": "Smoking Status",
+      "modifiable": true,
+      "evidenceLevel": "very_high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "never", "hazardRatio": 1.0 },
+          { "value": "former", "hazardRatio": 1.2 },
+          { "value": "current", "hazardRatio": 1.8 }
+        ]
+      }
+    },
+    {
+      "factorId": "diabetes_pancreatic",
+      "name": "Diabetes (especially new-onset)",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.0,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "bmi_pancreatic",
+      "name": "Body Mass Index",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18.5, "hazardRatio": 0.95 },
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.1 },
+          { "value": 30, "hazardRatio": 1.3 },
+          { "value": 35, "hazardRatio": 1.55 },
+          { "value": 40, "hazardRatio": 1.85 }
+        ],
+        "validRange": [15, 50]
+      }
+    },
+    {
+      "factorId": "family_history_pancreatic",
+      "name": "Family History of Pancreatic Cancer",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "none", "hazardRatio": 1.0 },
+          { "value": "one", "hazardRatio": 2.3 },
+          { "value": "two_or_more", "hazardRatio": 4.5 }
+        ]
+      }
+    },
+    {
+      "factorId": "chronic_pancreatitis",
+      "name": "Chronic Pancreatitis",
+      "modifiable": false,
+      "evidenceLevel": "very_high",
+      "citation": "Chronic Pancreatitis and Pancreatic Cancer Risk",
+      "doi": "10.1056/NEJM199902113400701",
+      "evidenceLevel": "cohort",
+      "notes": "Chronic pancreatitis HR~13 confirmed; plausible per longitudinal evidence",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 5.5,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "alcohol_pancreatic",
+      "name": "Heavy Alcohol Use",
+      "modifiable": true,
+      "evidenceLevel": "moderate",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0 },
+          { "value": 7, "hazardRatio": 1.05 },
+          { "value": 14, "hazardRatio": 1.15 },
+          { "value": 21, "hazardRatio": 1.3 },
+          { "value": 35, "hazardRatio": 1.6 },
+          { "value": 50, "hazardRatio": 2.0 }
+        ],
+        "validRange": [0, 100]
+      }
+    }
+  ]
+}

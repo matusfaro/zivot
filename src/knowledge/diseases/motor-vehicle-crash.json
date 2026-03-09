@@ -1,0 +1,238 @@
+{
+  "metadata": {
+    "id": "motor_vehicle_crash_10year",
+    "name": "Motor Vehicle Crash (10-year)",
+    "category": "injury",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-03",
+    "sources": [
+      {
+        "citation": "NHTSA Traffic Safety Facts 2023-2024",
+        "url": "https://crashstats.nhtsa.dot.gov/",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "CDC WISQARS Fatal Injury Data",
+        "url": "https://wisqars.cdc.gov/",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "NHTSA Fatality Analysis Reporting System (FARS)",
+        "url": "https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "10-year risk of death from motor vehicle traffic crashes"
+  },
+  "baselineRisk": {
+    "defaultCurve": "male_us",
+    "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [16, 100]
+        },
+        "source": "NHTSA FARS Database",
+        "url": "https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars",
+        "notes": "National crash fatality rates by age/sex; young males 3x baseline risk",
+        "ageRiskMapping": [
+          { "age": 16, "risk": 0.0015 },
+          { "age": 20, "risk": 0.00133 },
+          { "age": 25, "risk": 0.00100 },
+          { "age": 35, "risk": 0.00080 },
+          { "age": 45, "risk": 0.00070 },
+          { "age": 55, "risk": 0.00060 },
+          { "age": 65, "risk": 0.00055 },
+          { "age": 75, "risk": 0.00070 },
+          { "age": 85, "risk": 0.00090 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [16, 100]
+        },
+        "source": "NHTSA FARS Database",
+        "url": "https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars",
+        "notes": "National crash fatality rates by age/sex; young males 3x baseline risk",
+        "ageRiskMapping": [
+          { "age": 16, "risk": 0.00070 },
+          { "age": 20, "risk": 0.00049 },
+          { "age": 25, "risk": 0.00040 },
+          { "age": 35, "risk": 0.00035 },
+          { "age": 45, "risk": 0.00030 },
+          { "age": 55, "risk": 0.00028 },
+          { "age": 65, "risk": 0.00030 },
+          { "age": 75, "risk": 0.00040 },
+          { "age": 85, "risk": 0.00050 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "age_category",
+      "name": "Age Category",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "demographics.dateOfBirth.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "derived_from_age",
+        "categories": [
+          { "ageRange": [16, 19], "hazardRatio": 3.0 },
+          { "ageRange": [20, 24], "hazardRatio": 2.5 },
+          { "ageRange": [25, 64], "hazardRatio": 1.0 },
+          { "ageRange": [65, 74], "hazardRatio": 1.1 },
+          { "ageRange": [75, 100], "hazardRatio": 1.5 }
+        ],
+        "referenceCategory": "25-64"
+      }
+    },
+    {
+      "factorId": "miles_per_year",
+      "name": "Annual Miles Driven",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.drivingHabits.milesPerYear.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "log_linear",
+        "coefficients": {
+          "slope": 0.00003
+        },
+        "validRange": [0, 50000],
+        "notes": "HR increases logarithmically with exposure (miles driven)"
+      }
+    },
+    {
+      "factorId": "seat_belt_use",
+      "name": "Seat Belt Use",
+      "modifiable": true,
+      "citation": "Seatbelt Effectiveness Meta-analysis",
+      "doi": "10.1016/S0140-6736(02)11721-2",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Seatbelt use OR=0.5 (50% risk reduction)",
+      "requiredFields": [
+        {
+          "path": "lifestyle.drivingHabits.seatBeltUse.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "always", "hazardRatio": 1.0 },
+          { "value": "usually", "hazardRatio": 1.5 },
+          { "value": "sometimes", "hazardRatio": 2.5 },
+          { "value": "never", "hazardRatio": 4.0 }
+        ],
+        "referenceCategory": "always"
+      }
+    },
+    {
+      "factorId": "alcohol_consumption",
+      "name": "Alcohol Consumption",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "linear",
+        "coefficients": {
+          "slope": 0.05
+        },
+        "validRange": [0, 50],
+        "notes": "HR increases with drinking due to impaired driving risk"
+      }
+    },
+    {
+      "factorId": "traffic_violations",
+      "name": "Traffic Violations (Past 3 Years)",
+      "modifiable": true,
+      "evidenceLevel": "medium",
+      "requiredFields": [
+        {
+          "path": "lifestyle.drivingHabits.trafficViolationsPast3Years.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "linear",
+        "coefficients": {
+          "slope": 0.20
+        },
+        "validRange": [0, 10],
+        "notes": "Each violation increases risk by ~20%"
+      }
+    },
+    {
+      "factorId": "phone_use_while_driving",
+      "name": "Phone Use While Driving",
+      "modifiable": true,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "lifestyle.drivingHabits.phoneUseWhileDriving.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "never", "hazardRatio": 1.0 },
+          { "value": "rare", "hazardRatio": 1.2 },
+          { "value": "occasional", "hazardRatio": 1.5 },
+          { "value": "frequent", "hazardRatio": 2.0 }
+        ],
+        "referenceCategory": "never"
+      }
+    },
+    {
+      "factorId": "driving_setting",
+      "name": "Driving Environment",
+      "modifiable": false,
+      "evidenceLevel": "medium",
+      "requiredFields": [
+        {
+          "path": "lifestyle.drivingHabits.drivingSetting.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "strategy": "lookup",
+        "categories": [
+          { "value": "urban", "hazardRatio": 0.8 },
+          { "value": "suburban", "hazardRatio": 1.0 },
+          { "value": "rural", "hazardRatio": 1.3 },
+          { "value": "mixed", "hazardRatio": 1.0 }
+        ],
+        "referenceCategory": "suburban"
+      }
+    }
+  ]
+}

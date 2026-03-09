@@ -1,0 +1,209 @@
+/**
+ * Quick Log Modal Styles
+ * Brutalist modal with impact feedback
+ */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.quick-log-modal {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 0;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  box-shadow: 8px 8px 0 #000;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 3px solid #000;
+  background: #f0f0f0;
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+}
+
+.close-button {
+  background: none;
+  border: 2px solid #000;
+  border-radius: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  color: #000;
+}
+
+.close-button:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.close-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Event Types */
+.event-types {
+  padding: 1.5rem;
+}
+
+.event-type-section {
+  margin-bottom: 2rem;
+}
+
+.event-type-section:last-child {
+  margin-bottom: 0;
+}
+
+.event-type-section h4 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ccc;
+  color: #000;
+}
+
+.quick-log-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.quick-log-btn {
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  padding: 0.75rem 1.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #000;
+}
+
+.quick-log-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: translate(-2px, -2px);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.quick-log-btn:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.quick-log-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.detailed-form-hint {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Success Message */
+.success-message {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 4rem;
+  color: #27AE60;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  border: 3px solid #27AE60;
+  border-radius: 0;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.success-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #000;
+}
+
+/* Impact Display */
+.impact-display {
+  margin-top: 1rem;
+}
+
+.impact-message {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  color: #000;
+}
+
+.impact-total {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 0.75rem;
+}
+
+.impact-delta {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 3px solid #000;
+  border-radius: 0;
+}
+
+.impact-delta.positive {
+  background: #d4edda;
+  border-color: #27AE60;
+  color: #155724;
+}
+
+.impact-delta.negative {
+  background: #f8d7da;
+  border-color: #E74C3C;
+  color: #721c24;
+}
+
+.impact-delta.neutral {
+  background: #f0f0f0;
+  border-color: #000;
+  color: #000;
+}
+
+.confidence-indicator {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.5rem;
+}

@@ -1,0 +1,276 @@
+{
+  "metadata": {
+    "id": "lung_cancer_10year",
+    "name": "Lung Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.0.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "SEER Cancer Statistics Review, Lung and Bronchus",
+        "url": "https://seer.cancer.gov/statfacts/html/lungb.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Bach et al. Variations in Lung Cancer Risk Among Smokers",
+        "doi": "10.1093/jnci/djg226",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "US Preventive Services Task Force Lung Cancer Screening",
+        "doi": "10.1001/jama.2021.1117",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "description": "10-year risk of developing lung cancer (all histological types)"
+  },
+  "baselineRisk": {
+    "defaultCurve": "never_smoker_male",
+    "curves": [
+      {
+        "id": "never_smoker_male",
+        "applicability": {
+          "sex": "male",
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "SEER Cancer Statistics Review - Lung and Bronchus Cancer, NCI",
+        "url": "https://seer.cancer.gov/statfacts/html/lungb.html",
+        "notes": "Never-smoker baseline rates extrapolated from population data accounting for smoking prevalence",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00015, "confidence": [0.00010, 0.00020] },
+          { "age": 45, "risk": 0.00025, "confidence": [0.00018, 0.00032] },
+          { "age": 50, "risk": 0.00040, "confidence": [0.00032, 0.00048] },
+          { "age": 55, "risk": 0.00065, "confidence": [0.00055, 0.00075] },
+          { "age": 60, "risk": 0.00100, "confidence": [0.00088, 0.00112] },
+          { "age": 65, "risk": 0.00145, "confidence": [0.00130, 0.00160] },
+          { "age": 70, "risk": 0.00200, "confidence": [0.00182, 0.00218] },
+          { "age": 75, "risk": 0.00265, "confidence": [0.00245, 0.00285] }
+        ]
+      },
+      {
+        "id": "never_smoker_female",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [40, 79]
+        },
+        "source": "SEER Cancer Statistics Review - Lung and Bronchus Cancer, NCI",
+        "url": "https://seer.cancer.gov/statfacts/html/lungb.html",
+        "notes": "Never-smoker baseline rates extrapolated from population data accounting for smoking prevalence",
+        "ageRiskMapping": [
+          { "age": 40, "risk": 0.00020, "confidence": [0.00014, 0.00026] },
+          { "age": 45, "risk": 0.00032, "confidence": [0.00025, 0.00039] },
+          { "age": 50, "risk": 0.00052, "confidence": [0.00044, 0.00060] },
+          { "age": 55, "risk": 0.00080, "confidence": [0.00070, 0.00090] },
+          { "age": 60, "risk": 0.00120, "confidence": [0.00108, 0.00132] },
+          { "age": 65, "risk": 0.00170, "confidence": [0.00155, 0.00185] },
+          { "age": 70, "risk": 0.00230, "confidence": [0.00212, 0.00248] },
+          { "age": 75, "risk": 0.00300, "confidence": [0.00278, 0.00322] }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "pack_years",
+      "name": "Smoking Pack-Years",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Smoking",
+      "modifiable": false,
+      "citation": "Bach et al. Variations in lung cancer risk among smokers",
+      "doi": "10.1093/jnci/djg226",
+      "evidenceLevel": "cohort",
+      "notes": "Strong dose-response relationship; 20 pack-years increases risk ~12-fold, 40 pack-years ~28-fold",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.packYears.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 10, "hazardRatio": 5.0, "confidence": [4.50, 5.50] },
+          { "value": 20, "hazardRatio": 12.0, "confidence": [11.0, 13.0] },
+          { "value": 30, "hazardRatio": 20.0, "confidence": [18.5, 21.5] },
+          { "value": 40, "hazardRatio": 28.0, "confidence": [26.0, 30.0] },
+          { "value": 50, "hazardRatio": 35.0, "confidence": [32.5, 37.5] },
+          { "value": 60, "hazardRatio": 40.0, "confidence": [37.0, 43.0] }
+        ],
+        "validRange": [0, 100]
+      }
+    },
+    {
+      "factorId": "current_smoking",
+      "name": "Current Smoking Status",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Smoking",
+      "modifiable": true,
+      "citation": "US Surgeon General's Report - The Health Consequences of Smoking",
+      "url": "https://www.cdc.gov/tobacco/data_statistics/sgr/index.htm",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Current smokers ~15-25x higher risk than never smokers; former smokers intermediate at ~8-10x",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.status.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "referenceCategory": "never",
+        "categories": [
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "former",
+            "hazardRatio": 8.5,
+            "confidence": [7.80, 9.20]
+          },
+          {
+            "value": "current",
+            "hazardRatio": 18.0,
+            "confidence": [16.5, 19.5]
+          }
+        ]
+      }
+    },
+    {
+      "factorId": "years_since_quit",
+      "name": "Years Since Quitting Smoking",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Smoking",
+      "modifiable": false,
+      "citation": "Peto et al. Smoking, smoking cessation, and lung cancer in the UK since 1950",
+      "doi": "10.1136/bmj.321.7257.323",
+      "evidenceLevel": "cohort",
+      "notes": "Risk declines progressively after quitting; ~50% reduction at 10 years, ~70% at 20 years (but never reaches never-smoker levels)",
+      "requiredFields": [
+        {
+          "path": "lifestyle.smoking.quitDate.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": 5, "hazardRatio": 0.75, "confidence": [0.68, 0.82] },
+          { "value": 10, "hazardRatio": 0.55, "confidence": [0.48, 0.62] },
+          { "value": 15, "hazardRatio": 0.40, "confidence": [0.34, 0.46] },
+          { "value": 20, "hazardRatio": 0.30, "confidence": [0.25, 0.35] },
+          { "value": 25, "hazardRatio": 0.25, "confidence": [0.20, 0.30] }
+        ],
+        "validRange": [0, 50]
+      }
+    },
+    {
+      "factorId": "family_history_lung",
+      "name": "Family History of Lung Cancer",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Family History",
+      "modifiable": false,
+      "citation": "Matakidou et al. Systematic review of the relationship between family history and lung cancer risk",
+      "doi": "10.1038/sj.bjc.6602769",
+      "evidenceLevel": "meta_analysis",
+      "notes": "First-degree relative with lung cancer increases risk by ~1.5-2x; may reflect shared genetic and environmental factors",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.8,
+        "falseHazardRatio": 1.0,
+        "confidence": [1.60, 2.00]
+      }
+    },
+    {
+      "factorId": "copd_diagnosis",
+      "name": "COPD or Emphysema Diagnosis",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Medical History",
+      "modifiable": false,
+      "citation": "Wasswa-Kintu et al. Relationship between reduced forced expiratory volume in one second and the risk of lung cancer",
+      "doi": "10.1164/rccm.200404-463OC",
+      "evidenceLevel": "cohort",
+      "notes": "COPD increases lung cancer risk ~2-5x; independent of smoking, likely due to chronic inflammation",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.5,
+        "falseHazardRatio": 1.0,
+        "confidence": [2.25, 2.75]
+      }
+    },
+    {
+      "factorId": "asbestos_exposure",
+      "name": "Occupational Asbestos Exposure",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Environmental",
+      "modifiable": false,
+      "citation": "IARC Monographs - Asbestos and lung cancer",
+      "doi": "10.1016/j.canep.2012.02.001",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Asbestos exposure increases lung cancer risk ~1.5x; synergistic effect with smoking (multiplicative interaction)",
+      "requiredFields": [
+        {
+          "path": "customFields.asbestosExposure",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.5,
+        "falseHazardRatio": 1.0,
+        "confidence": [1.35, 1.65]
+      }
+    },
+    {
+      "factorId": "air_pollution_pm25_lung",
+      "name": "Air Pollution (PM2.5 Exposure)",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Environmental",
+      "modifiable": false,
+      "citation": "Hamra et al. Outdoor particulate matter exposure and lung cancer: a systematic review and meta-analysis. Environ Health Perspect. 2014;122(9):906-11",
+      "doi": "10.1289/ehp.1408092",
+      "evidenceLevel": "meta_analysis",
+      "notes": "PM2.5 exposure increases lung cancer risk by ~9% per 10 µg/m³ increase. Mechanisms: DNA damage, oxidative stress, chronic inflammation",
+      "requiredFields": [
+        {
+          "path": "lifestyle.airQualityExposure.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "good", "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": "moderate", "hazardRatio": 1.04, "confidence": [1.01, 1.07] },
+          { "value": "poor", "hazardRatio": 1.09, "confidence": [1.04, 1.14] }
+        ]
+      }
+    }
+  ]
+}

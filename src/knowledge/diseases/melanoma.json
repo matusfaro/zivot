@@ -1,0 +1,126 @@
+{
+  "metadata": {
+    "id": "melanoma_10year",
+    "name": "Melanoma Skin Cancer (10-year mortality)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.0.0",
+    "lastUpdated": "2026-01-04",
+    "sources": [
+      {
+        "citation": "SEER Cancer Statistics Review, 1975-2021. National Cancer Institute.",
+        "url": "https://seer.cancer.gov/statfacts/html/melan.html",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "Gandini S, et al. Meta-analysis of risk factors for cutaneous melanoma: III. Family history, actinic damage and phenotypic factors. Eur J Cancer. 2005;41(14):2040-59.",
+        "doi": "10.1016/j.ejca.2005.03.034",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "description": "10-year mortality risk from cutaneous malignant melanoma based on incidence, stage-adjusted survival"
+  },
+  "baselineRisk": {
+    "defaultCurve": "white_us",
+    "curves": [
+      {
+        "id": "white_us",
+        "applicability": {
+          "sex": "both",
+          "ethnicity": ["white", "caucasian"],
+          "region": ["US"],
+          "ageRange": [30, 85]
+        },
+        "source": "SEER 21 2017-2021; 10-yr relative survival 93% localized → 0.7% incidence to mortality conversion",
+        "url": "https://seer.cancer.gov/statfacts/html/melan.html",
+        "notes": "Whites 25x higher incidence than other groups",
+        "ageRiskMapping": [
+          {"age": 30, "risk": 0.0002},
+          {"age": 40, "risk": 0.0004},
+          {"age": 50, "risk": 0.0007},
+          {"age": 60, "risk": 0.0010},
+          {"age": 70, "risk": 0.0013},
+          {"age": 80, "risk": 0.0015}
+        ]
+      },
+      {
+        "id": "hispanic_us",
+        "applicability": {
+          "sex": "both",
+          "ethnicity": ["hispanic"],
+          "region": ["US"],
+          "ageRange": [30, 85]
+        },
+        "source": "SEER Hispanic rates",
+        "url": "https://seer.cancer.gov/statfacts/html/melan.html",
+        "ageRiskMapping": [
+          {"age": 30, "risk": 0.00005},
+          {"age": 50, "risk": 0.0001},
+          {"age": 70, "risk": 0.00015}
+        ]
+      },
+      {
+        "id": "asian_us",
+        "applicability": {
+          "sex": "both",
+          "ethnicity": ["asian"],
+          "region": ["US"],
+          "ageRange": [30, 85]
+        },
+        "source": "SEER Asian/Pacific Islander",
+        "url": "https://seer.cancer.gov/statfacts/html/melan.html",
+        "notes": "Acral lentiginous subtype more common",
+        "ageRiskMapping": [
+          {"age": 30, "risk": 0.00002},
+          {"age": 50, "risk": 0.00004},
+          {"age": 70, "risk": 0.00006}
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "family_history_melanoma",
+      "name": "Family History of Melanoma (1st degree)",
+      "type": "boolean",
+      "evidenceStrength": "strong",
+      "category": "Genetic",
+      "modifiable": false,
+      "citation": "Gandini S, et al. Meta-analysis of risk factors for cutaneous melanoma: III. Family history... Eur J Cancer. 2005;41(14):2040-59.",
+      "doi": "10.1016/j.ejca.2005.03.034",
+      "evidenceLevel": "meta_analysis",
+      "notes": "9 studies, n=12k cases; adjusted for sun exposure/phenotype. Mechanism: CDKN2A germline mutations.",
+      "requiredFields": [{"path": "medicalHistory.familyHistory", "required": false}],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 2.0,
+        "falseHazardRatio": 1.0,
+        "confidence": [1.6, 2.5]
+      }
+    },
+    {
+      "factorId": "severe_sunburns",
+      "name": "Lifetime Severe Sunburns",
+      "type": "continuous",
+      "evidenceStrength": "strong",
+      "category": "Environmental",
+      "modifiable": true,
+      "citation": "Dennis LK, et al. Sunburns and risk of cutaneous melanoma: does age matter: a comprehensive meta-analysis. Int J Clin Exp Med. 2008;1(4):337-64.",
+      "doi": "10.1016/j.annepidem.2008.04.006",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Each sunburn HR 1.6-2.0; childhood sunburns strongest effect.",
+      "requiredFields": [{"path": "medicalHistory.sunExposure.sunburns.value", "required": false}],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          {"value": 0, "hazardRatio": 1.0},
+          {"value": 2, "hazardRatio": 1.5},
+          {"value": 5, "hazardRatio": 2.0},
+          {"value": 10, "hazardRatio": 2.5}
+        ],
+        "validRange": [0, 50]
+      }
+    }
+  ]
+}

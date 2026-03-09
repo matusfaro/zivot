@@ -1,0 +1,298 @@
+{
+  "metadata": {
+    "id": "breast_cancer_10year",
+    "name": "Breast Cancer (10-year)",
+    "category": "cancer",
+    "timeframe": 10,
+    "version": "1.1.0",
+    "lastUpdated": "2025-01-03",
+    "sources": [
+      {
+        "citation": "Gail Model: Cancer Risk Assessment (NEJM 2001)",
+        "doi": "10.1056/NEJM200102013440601",
+        "evidenceLevel": "cohort"
+      },
+      {
+        "citation": "SEER Cancer Statistics Review (1975-2021)",
+        "url": "https://seer.cancer.gov/statfacts/html/breast.html",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "Breast cancer risk for women based on BCRAT/Gail model"
+  },
+  "baselineRisk": {
+    "defaultCurve": "white_female_us",
+    "curves": [
+      {
+        "id": "white_female_us",
+        "applicability": {
+          "sex": "female",
+          "ethnicity": ["white"],
+          "region": ["US"],
+          "ageRange": [35, 100]
+        },
+        "source": "SEER Cancer Statistics Review (1975-2021)",
+        "url": "https://seer.cancer.gov/statfacts/html/breast.html",
+        "notes": "Age-specific incidence peaks 60-69; ~128/100k age-adjusted; exponential rise post-30.",
+        "ageRiskMapping": [
+          { "age": 35, "risk": 0.005 },
+          { "age": 40, "risk": 0.014 },
+          { "age": 50, "risk": 0.024 },
+          { "age": 60, "risk": 0.034 },
+          { "age": 70, "risk": 0.038 }
+        ]
+      },
+      {
+        "id": "black_female_us",
+        "applicability": {
+          "sex": "female",
+          "ethnicity": ["black"],
+          "region": ["US"],
+          "ageRange": [35, 100]
+        },
+        "source": "SEER Cancer Statistics Review (1975-2021)",
+        "url": "https://seer.cancer.gov/statfacts/html/breast.html",
+        "notes": "Slightly lower overall incidence than White females but higher mortality; younger age at diagnosis.",
+        "ageRiskMapping": [
+          { "age": 35, "risk": 0.004 },
+          { "age": 40, "risk": 0.012 },
+          { "age": 50, "risk": 0.020 },
+          { "age": 60, "risk": 0.027 },
+          { "age": 70, "risk": 0.030 }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "sex": "female",
+          "region": ["US"],
+          "ageRange": [35, 100]
+        },
+        "source": "SEER Cancer Statistics Review (1975-2021)",
+        "url": "https://seer.cancer.gov/statfacts/html/breast.html",
+        "notes": "Overall US female population incidence; accounts for all ethnicities.",
+        "ageRiskMapping": [
+          { "age": 35, "risk": 0.005 },
+          { "age": 40, "risk": 0.013 },
+          { "age": 50, "risk": 0.023 },
+          { "age": 60, "risk": 0.032 },
+          { "age": 70, "risk": 0.036 }
+        ]
+      }
+    ]
+  },
+  "riskFactors": [
+    {
+      "factorId": "age_first_period",
+      "name": "Age at First Menstrual Period",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.reproductiveHistory.ageAtMenarche.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 11, "hazardRatio": 1.15 },
+          { "value": 12, "hazardRatio": 1.10 },
+          { "value": 13, "hazardRatio": 1.0 },
+          { "value": 14, "hazardRatio": 0.93 },
+          { "value": 15, "hazardRatio": 0.87 },
+          { "value": 16, "hazardRatio": 0.82 }
+        ],
+        "validRange": [8, 20]
+      }
+    },
+    {
+      "factorId": "age_first_birth",
+      "name": "Age at First Live Birth",
+      "modifiable": false,
+      "evidenceLevel": "meta_analysis",
+      "citation": "Collaborative Group on Hormonal Factors in Breast Cancer (meta-analysis)",
+      "doi": "10.1016/S1470-2045(02)00754-0",
+      "notes": "First birth >30 vs <20: RR=1.8 (95% CI 1.6-2.0). Nulliparity: RR=1.3; each birth protective (RR=0.9).",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.reproductiveHistory.ageAtFirstBirth.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": ["nulliparous", "never"], "hazardRatio": 1.3 },
+          { "value": ["under_20", "<20"], "hazardRatio": 0.75 },
+          { "value": ["20_24", "20-24"], "hazardRatio": 0.90 },
+          { "value": ["25_29", "25-29"], "hazardRatio": 1.0 },
+          { "value": ["30_34", "30-34"], "hazardRatio": 1.25 },
+          { "value": ["35_plus", "35+"], "hazardRatio": 1.8 }
+        ]
+      }
+    },
+    {
+      "factorId": "family_history_breast",
+      "name": "First-Degree Relatives with Breast Cancer",
+      "modifiable": false,
+      "evidenceLevel": "cohort",
+      "citation": "Gail Model Validation (BCSC)",
+      "doi": "10.1056/NEJM200102013440601",
+      "notes": "First-degree relative: HR~2.0.",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": "none", "hazardRatio": 1.0 },
+          { "value": "one", "hazardRatio": 2.0 },
+          { "value": "two_or_more", "hazardRatio": 2.9 }
+        ]
+      }
+    },
+    {
+      "factorId": "breast_biopsies",
+      "name": "Number of Breast Biopsies",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.reproductiveHistory.breastBiopsies.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": ["0", "none"], "hazardRatio": 1.0 },
+          { "value": ["1"], "hazardRatio": 1.4 },
+          { "value": ["2", "2+", "multiple"], "hazardRatio": 1.9 }
+        ]
+      }
+    },
+    {
+      "factorId": "atypical_hyperplasia",
+      "name": "Atypical Hyperplasia on Biopsy",
+      "modifiable": false,
+      "evidenceLevel": "high",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.reproductiveHistory.atypicalHyperplasia.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 1.8,
+        "falseHazardRatio": 1.0
+      }
+    },
+    {
+      "factorId": "bmi_breast",
+      "name": "Body Mass Index (Postmenopausal)",
+      "modifiable": true,
+      "evidenceLevel": "cohort",
+      "citation": "Postmenopausal BMI and Breast Cancer (EPIC cohort)",
+      "doi": "10.1056/NEJMoa0807647",
+      "notes": "Per 5kg/m²: HR=1.12 (1.06-1.18).",
+      "requiredFields": [
+        {
+          "path": "biometrics.weight.mostRecent.value.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 18.5, "hazardRatio": 0.85 },
+          { "value": 22, "hazardRatio": 1.0 },
+          { "value": 25, "hazardRatio": 1.08 },
+          { "value": 30, "hazardRatio": 1.25 },
+          { "value": 35, "hazardRatio": 1.45 },
+          { "value": 40, "hazardRatio": 1.65 }
+        ],
+        "validRange": [15, 50]
+      }
+    },
+    {
+      "factorId": "alcohol_breast",
+      "name": "Alcohol Consumption",
+      "modifiable": true,
+      "evidenceLevel": "meta_analysis",
+      "citation": "Alcohol and Breast Cancer: Meta-analysis (2016)",
+      "doi": "10.1093/ije/dyw112",
+      "notes": "Per 10g/day: RR=1.09 (1.07-1.10); dose-response linear.",
+      "requiredFields": [
+        {
+          "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "linear",
+        "coefficients": {
+          "slope": 0.009,
+          "intercept": 0
+        },
+        "validRange": [0, 50]
+      }
+    },
+    {
+      "factorId": "exercise_breast",
+      "name": "Physical Activity",
+      "modifiable": true,
+      "evidenceLevel": "moderate",
+      "requiredFields": [
+        {
+          "path": "lifestyle.exercise.moderateMinutesPerWeek.mostRecent.value",
+          "alternatives": []
+        }
+      ],
+      "mapping": {
+        "type": "continuous",
+        "strategy": "lookup",
+        "points": [
+          { "value": 0, "hazardRatio": 1.2 },
+          { "value": 60, "hazardRatio": 1.1 },
+          { "value": 150, "hazardRatio": 1.0 },
+          { "value": 300, "hazardRatio": 0.88 },
+          { "value": 450, "hazardRatio": 0.80 }
+        ],
+        "validRange": [0, 1000]
+      }
+    },
+    {
+      "factorId": "mammography_screening",
+      "name": "Mammography Screening (Regular)",
+      "type": "categorical",
+      "evidenceStrength": "strong",
+      "category": "Preventive Care",
+      "modifiable": true,
+      "citation": "Dibden et al. Worldwide Review and Meta-Analysis of Cohort Studies Measuring the Effect of Mammography Screening Programmes on Breast Cancer Mortality. Cancers. 2020;12(4):962",
+      "doi": "10.3390/cancers12040962",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Regular mammography screening reduces breast cancer mortality by 22%. Early detection allows for less invasive treatment and better outcomes",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.screenings.mammogram.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "categorical",
+        "categories": [
+          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
+          { "value": true, "hazardRatio": 0.78, "confidence": [0.75, 0.82] }
+        ]
+      }
+    }
+  ]
+}

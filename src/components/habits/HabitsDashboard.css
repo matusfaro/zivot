@@ -1,0 +1,177 @@
+/**
+ * Habits Dashboard Styles - Compact Event Buttons
+ */
+
+.habits-dashboard {
+  margin: 2rem 0;
+  font-family: 'Courier New', monospace;
+}
+
+.habits-header {
+  margin-bottom: 1rem;
+}
+
+.habits-header h2 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+}
+
+/* Event Buttons Grid */
+.event-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Incremental Event Button */
+.event-btn.incremental {
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s;
+  position: relative;
+  min-height: 44px;
+}
+
+.event-btn.incremental:hover {
+  background: #f0f0f0;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.event-btn.incremental:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
+
+.event-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.event-label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #000;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-action {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #666;
+  background: #f0f0f0;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid #ccc;
+  flex-shrink: 0;
+}
+
+.event-count {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  background: #4ECDC4;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 0.1rem 0.3rem;
+  border: 2px solid #000;
+}
+
+/* Split Button (for sleep) */
+.event-btn.split-btn {
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 44px;
+}
+
+.split-btn-info {
+  flex: 1;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.event-value {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #4ECDC4;
+  margin-left: auto;
+}
+
+.split-btn-actions {
+  display: flex;
+  flex-direction: column;
+  border-left: 2px solid #000;
+}
+
+.split-btn-minus,
+.split-btn-plus {
+  background: #f0f0f0;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  width: 28px;
+  height: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.split-btn-plus {
+  border-top: 1px solid #000;
+}
+
+.split-btn-minus:hover:not(:disabled),
+.split-btn-plus:hover {
+  background: #e0e0e0;
+}
+
+.split-btn-minus:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .event-buttons {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .event-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .event-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+ 
