@@ -49,15 +49,15 @@ export function getDataPointValue<T>(profile: UserProfile, path: string): T | nu
 
   // If it's already a primitive, return it
   if (typeof dataPoint !== 'object') {
-    return dataPoint;
+    return dataPoint as T;
   }
 
   // If it's a DataPoint, unwrap the value
   if ('value' in dataPoint && 'provenance' in dataPoint) {
-    return dataPoint.value;
+    return (dataPoint as DataPoint<T>).value;
   }
 
-  return dataPoint;
+  return dataPoint as T;
 }
 
 /**

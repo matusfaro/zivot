@@ -13,7 +13,7 @@ export class ZivotDB extends Dexie {
   profiles!: Table<UserProfileRecord, string>;
   riskCalculations!: Table<RiskCalculationRecord, string>;
   habitEvents!: Table<HabitEventRecord, string>;
-  habitTracking!: Table<HabitTrackingRecord, string>;
+  habitTracking!: Table<HabitTrackingRecord, number>;
 
   constructor() {
     super('ZivotDB');

@@ -19,8 +19,8 @@ const updateField = (
   if (!profile) return;
 
   const updatedProfile = { ...profile };
-  if (!updatedProfile[section]) {
-    updatedProfile[section] = {} as any;
+  if (!(updatedProfile as any)[section]) {
+    (updatedProfile as any)[section] = {};
   }
 
   const sectionData: any = updatedProfile[section];
@@ -259,10 +259,10 @@ export const ProfileDemographics: React.FC<ProfileSectionProps> = ({ profile, on
                   if (!updatedProfile.demographics) {
                     updatedProfile.demographics = {} as any;
                   }
-                  updatedProfile.demographics.dateOfBirth = {
+                  updatedProfile.demographics!.dateOfBirth = {
                     value: dob,
                     provenance: {
-                      source: 'user_input',
+                      source: 'user_input' as any,
                       timestamp: Date.now()
                     }
                   };

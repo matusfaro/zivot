@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from 'react';
  * Simple ref wrapper for mutable values
  */
 class Bag<T> {
-  constructor(private value: T) {}
+  private value: T;
+
+  constructor(value: T) {
+    this.value = value;
+  }
 
   get(): T {
     return this.value;
@@ -22,7 +26,7 @@ function debounce<T extends (...args: any[]) => any>(
   fn: T,
   delay: number
 ): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout | null = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   return (...args: Parameters<T>) => {
     if (timeoutId) {
@@ -80,7 +84,7 @@ export const useDebounceProp = <T,>(
 
   // Track if user is actively editing
   const [isEditing, setIsEditing] = useState(false);
-  const editingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const editingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Track the last value we saved to distinguish our saves from external changes
   const lastSavedValue = useRef<string | null>(null);

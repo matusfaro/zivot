@@ -14,6 +14,7 @@ interface MortalityRiskChartProps {
  * Custom tooltip showing calculation details
  */
 interface CustomTooltipProps extends TooltipProps<number, string> {
+  payload?: any[];
   tenYearRisk: number;
   tenYearAverage: number;
   currentAge: number;

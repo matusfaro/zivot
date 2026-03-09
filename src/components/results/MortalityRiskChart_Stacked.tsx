@@ -93,7 +93,7 @@ export const MortalityRiskChart: React.FC<MortalityRiskChartProps> = React.memo(
           />
           <Tooltip
             contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-            formatter={(value: number) => `${value.toFixed(1)}%`}
+            formatter={(value: number | undefined) => value !== undefined ? `${value.toFixed(1)}%` : ''}
           />
           <Legend />
 
