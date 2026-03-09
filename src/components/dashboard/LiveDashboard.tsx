@@ -90,6 +90,12 @@ export const LiveDashboard: React.FC = () => {
       profileId: 'default',
       version: '1.0.0',
       lastUpdated: Date.now(),
+      demographics: {
+        dateOfBirth: {
+          value: `${new Date().getFullYear() - 40}-01-01`,
+          provenance: { source: 'default' as any, timestamp: Date.now() },
+        },
+      },
     },
     saveProfile,
     () => console.log('[PROFILE] User started editing')
