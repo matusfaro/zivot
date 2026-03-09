@@ -154,9 +154,13 @@ export function buildGraphLayout(
     });
   }
 
-  const elements = [...nodes, ...edges];
+  // Filter out edges whose source or target node doesn't exist
+  const nodeIds = new Set(nodes.map(n => n.data.id));
+  const validEdges = edges.filter(e => nodeIds.has(e.data.source) && nodeIds.has(e.data.target));
 
-  console.log(`[GraphLayout] Created ${nodes.length} nodes and ${edges.length} edges for Cytoscape`);
+  const elements = [...nodes, ...validEdges];
+
+  console.log(`[GraphLayout] Created ${nodes.length} nodes and ${validEdges.length} edges (${edges.length - validEdges.length} filtered) for Cytoscape`);
 
   return {
     elements,
