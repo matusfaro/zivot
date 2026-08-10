@@ -161,8 +161,6 @@ export const HabitsDashboard: React.FC = () => {
         profileId={profile.profileId}
         selectedDate={selectedDate}
         onDateSelected={setSelectedDate}
-        onEventLogged={logEvent}
-        onEventDeleted={async () => {}}
         refreshTrigger={refreshKey}
       />
 

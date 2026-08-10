@@ -56,7 +56,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ profile, result, onClose
   const handleProfileJsonChange = (newJson: string) => {
     setProfileJson(newJson);
     try {
-      const parsed = JSON.parse(newJson);
+      JSON.parse(newJson);
       setJsonError(null);
       // Optionally auto-apply if valid
     } catch (err) {

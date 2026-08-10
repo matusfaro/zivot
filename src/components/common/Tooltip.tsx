@@ -74,7 +74,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
     refs,
     floatingStyles,
     context,
-    middlewareData,
   } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
@@ -86,6 +85,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         padding: 8,
       }),
       shift({ padding: 8 }),
+      // eslint-disable-next-line react-hooks/refs -- documented floating-ui pattern; the ref is read by the middleware, not during render
       arrow({ element: arrowRef }),
     ],
     whileElementsMounted: autoUpdate,

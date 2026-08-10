@@ -12,22 +12,15 @@ import './HabitCalendar.css';
 
 interface HabitCalendarProps {
   profileId: string;
-  onEventLogged: (event: Omit<HabitEvent, 'eventId' | 'loggedAt'>) => Promise<HabitEvent>;
-  onEventDeleted: (eventId: string) => Promise<void>;
-}
-
-interface HabitCalendarPropsExtended extends HabitCalendarProps {
   selectedDate: Date;
   onDateSelected: (date: Date) => void;
   refreshTrigger?: number;
 }
 
-export const HabitCalendar: React.FC<HabitCalendarPropsExtended> = ({
+export const HabitCalendar: React.FC<HabitCalendarProps> = ({
   profileId,
   selectedDate,
   onDateSelected,
-  onEventLogged,
-  onEventDeleted,
   refreshTrigger
 }) => {
   const [eventsByDay, setEventsByDay] = useState<Map<string, HabitEvent[]>>(new Map());
@@ -77,16 +70,6 @@ export const HabitCalendar: React.FC<HabitCalendarPropsExtended> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleEventLogged = async (event: Omit<HabitEvent, 'eventId' | 'loggedAt'>) => {
-    await onEventLogged(event);
-    await loadEvents(); // Reload to show updated events
-  };
-
-  const handleEventDeleted = async (eventId: string) => {
-    await onEventDeleted(eventId);
-    await loadEvents(); // Reload to show updated events
   };
 
   const formatDayKey = (date: Date): string => {

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { db, HabitEventRecord, HabitTrackingRecord } from '../db';
-import { HabitEvent, EventCategory, EventTypeId } from '../../types/events/habitEvent';
+import { HabitEvent, EventCategory } from '../../types/events/habitEvent';
 
 export class HabitEventRepository {
   /**

@@ -3,7 +3,6 @@ import {
   waitForProfilePersistence,
   waitForRiskCalculation,
   getIndexedDBValue,
-  getNestedValue,
 } from './helpers/test-helpers';
 
 test.describe('Biometrics Section Fields', () => {

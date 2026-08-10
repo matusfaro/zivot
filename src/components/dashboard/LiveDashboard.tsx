@@ -4,7 +4,6 @@ import { UserProfileContext } from '../../contexts/UserProfileContext';
 import { useRiskCalculation } from '../../hooks/useRiskCalculation';
 import { useDebounceProp } from '../../hooks/useDebounceProp';
 import { ChartsSection } from './ChartsSection';
-import { DetailsSection } from './DetailsSection';
 import { CompactProfileEditor } from './CompactProfileEditor';
 import { Header } from '../layout/Header';
 import { RiskReportCard } from '../results/RiskReportCard';
@@ -161,13 +160,6 @@ export const LiveDashboard: React.FC = () => {
             {result?.interpretation?.recommendations && result.interpretation.recommendations.length > 0 && (
               <section className="dashboard-section recommendations-section full-width">
                 <RecommendationsPanel recommendations={result.interpretation.recommendations} />
-              </section>
-            )}
-
-            {/* Details Section: Top Levers + Individual Diseases */}
-            {result && (
-              <section className="dashboard-section details-section-wrapper full-width">
-                <DetailsSection result={result} />
               </section>
             )}
 

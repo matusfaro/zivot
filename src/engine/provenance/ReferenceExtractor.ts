@@ -8,7 +8,6 @@
 import { Reference } from '../../types/risk/provenance';
 import {
   DiseaseModel,
-  DiseaseMetadata,
   BaselineRiskCurve,
   Source,
 } from '../../types/knowledge/disease';

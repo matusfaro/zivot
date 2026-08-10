@@ -3,7 +3,6 @@
  * Explains node types and edge types
  */
 
-import React from 'react';
 
 export function GraphLegend() {
   return (

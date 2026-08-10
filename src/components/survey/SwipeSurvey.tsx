@@ -1,7 +1,7 @@
-// @ts-nocheck
+// @ts-nocheck -- legacy 3,400-line survey component; type-safe rewrite pending
 import React, { useState, useEffect, useRef, useTransition } from 'react';
 import { UserProfile, Screening } from '../../types/user';
-import { createUserDataPoint, addToTimeSeries, TimeSeries, DataPoint } from '../../types/common/datapoint';
+import { createUserDataPoint, TimeSeries, DataPoint } from '../../types/common/datapoint';
 import { DietPattern } from '../../types/user/lifestyle';
 
 // Helper functions to manage conditions as an array
@@ -2936,7 +2936,7 @@ function generateQuestions(): SwipeQuestion[] {
         emoji: '🚫',
         profileUpdate: (p) => ({
           ...p,
-          social: { ...p.social, religiousAttendance: createUserDataPoint(false ? 'weekly' : 'never') }
+          social: { ...p.social, religiousAttendance: createUserDataPoint('never') }
         })
       },
       rightOption: {
@@ -2944,7 +2944,7 @@ function generateQuestions(): SwipeQuestion[] {
         emoji: '🕊️',
         profileUpdate: (p) => ({
           ...p,
-          social: { ...p.social, religiousAttendance: createUserDataPoint(true ? 'weekly' : 'never') }
+          social: { ...p.social, religiousAttendance: createUserDataPoint('weekly') }
         })
       }
     },

@@ -9,7 +9,7 @@
  */
 
 import React, { useState } from 'react';
-import { ProvenanceChain, ProvenanceStep, Reference } from '../../types/risk/provenance';
+import { ProvenanceChain, ProvenanceStep } from '../../types/risk/provenance';
 import { CitationPopover } from './CitationPopover';
 import { Tooltip } from './Tooltip';
 
@@ -33,7 +33,6 @@ interface ProvenanceTooltipProps {
 export const ProvenanceTooltip: React.FC<ProvenanceTooltipProps> = ({
   provenance,
   children,
-  mode = 'inline',
   title,
   disabled = false,
 }) => {

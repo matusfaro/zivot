@@ -1,73 +1,41 @@
-# React + TypeScript + Vite
+# Zivot — Personal Mortality Risk Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A client-only web app that estimates personalized 10-year disease-specific and overall
+mortality risk from evidence-based epidemiological models. All data stays in your
+browser (IndexedDB) — there is no backend and nothing leaves your machine.
 
-Currently, two official plugins are available:
+**Live:** https://matusfaro.github.io/zivot/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What it does
 
-## React Compiler
+- Models 21 diseases (CVD, stroke, 9 cancers, diabetes, COPD, CKD, liver disease,
+  dementia, falls, crashes, overdose, flu/pneumonia, suicide) as JSON knowledge files
+  with cited baseline risk curves and hazard ratios.
+- Multiplies age/sex/ethnicity baseline risk by hazard ratios for your risk factors,
+  aggregates across diseases with the complement rule, and anchors the overall number
+  to CDC life-table mortality via relative-hazard scaling.
+- Applies all-cause mortality modifiers (social connections, volunteering, nature
+  exposure, …) once at the overall level.
+- Shows a lifetime risk projection, per-factor attribution, personalized
+  recommendations, a habit tracker that feeds back into the profile, and a full
+  provenance trail (every number links to its source study).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Methodology details: [`docs/mortality-calculation-methodology.md`](docs/mortality-calculation-methodology.md).
+Contributor guide (architecture, how to add diseases/inputs): [`CLAUDE.md`](CLAUDE.md).
 
-## Expanding the ESLint configuration
+> **Not medical advice.** This is an educational tool built on population-level
+> epidemiology; it cannot diagnose or predict individual outcomes.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Development
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm test           # unit tests (vitest)
+npm run test:e2e   # end-to-end tests (Playwright)
+npm run lint       # eslint
+npm run build      # type-check + production build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Stack: React 19, TypeScript, Vite, Dexie (IndexedDB), Recharts, Cytoscape + dagre.
+Deployed to GitHub Pages by `.github/workflows/deploy.yml` on push to `master`.

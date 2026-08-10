@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { UserProfile, Demographics, Biometrics, LabTests, Lifestyle, MedicalHistory, Social } from '../../types/user';
+import React from 'react';
+import { UserProfile } from '../../types/user';
 import { createUserDataPoint } from '../../types/common/datapoint';
 import { calculateAge } from '../../utils/dataExtraction';
 import { Tooltip } from '../common/Tooltip';

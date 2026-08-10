@@ -2,7 +2,6 @@ import { test, expect } from './fixtures/base';
 import {
   setSelectValue,
   toggleCheckbox,
-  waitForProfilePersistence,
   waitForRiskCalculation,
   getIndexedDBValue,
   getSelectValue,

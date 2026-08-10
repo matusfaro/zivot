@@ -86,7 +86,7 @@ export class EventExtrapolator {
    * For metrics like sleep where multiple entries per day should use the latest (not sum),
    * we group by day and take the most recent entry per day.
    */
-  private calculateAverage(events: HabitEvent[], rollingWindow: number): number {
+  private calculateAverage(events: HabitEvent[], _rollingWindow: number): number {
     if (events.length === 0) return 0;
 
     // Check if this is a "replacement" metric (like sleep) by checking event type

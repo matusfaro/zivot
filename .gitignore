@@ -26,3 +26,9 @@ dist-ssr
 # Test artifacts
 playwright-report/
 test-results/
+
+# Backups & local artifacts
+*.bak*
+coverage/
+.env*
+*.tsbuildinfo

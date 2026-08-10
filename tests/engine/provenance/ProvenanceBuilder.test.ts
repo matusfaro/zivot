@@ -4,7 +4,7 @@ import {
   createInterpolationProvenance,
   createHRMultiplicationProvenance,
 } from '../../../src/engine/provenance/ProvenanceBuilder';
-import { ProvenanceChain, Reference } from '../../../src/types/risk/provenance';
+import { Reference } from '../../../src/types/risk/provenance';
 
 describe('ProvenanceBuilder', () => {
   describe('Basic Builder Construction', () => {

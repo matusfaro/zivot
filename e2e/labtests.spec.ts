@@ -1,7 +1,6 @@
 import { test, expect } from './fixtures/base';
 import {
   setInputValue,
-  waitForProfilePersistence,
   waitForRiskCalculation,
   getIndexedDBValue,
   getInputValue,

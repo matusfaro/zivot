@@ -174,7 +174,7 @@ export class RecommendationEngine {
   /**
    * Convert a modifiable lever to a recommendation
    */
-  private leverToRecommendation(lever: ModifiableLever, profile: UserProfile): Recommendation | null {
+  private leverToRecommendation(lever: ModifiableLever, _profile: UserProfile): Recommendation | null {
     if (lever.currentValue === null || lever.targetValue === null) {
       return null; // Can't make recommendation without current/target
     }

@@ -3,10 +3,8 @@ import {
   setInputValue,
   setSelectValue,
   toggleCheckbox,
-  waitForProfilePersistence,
   waitForRiskCalculation,
   getIndexedDBValue,
-  getInputValue,
   getSelectValue,
   isCheckboxChecked,
 } from './helpers/test-helpers';

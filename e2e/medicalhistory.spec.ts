@@ -3,10 +3,8 @@ import {
   setInputValue,
   setSelectValue,
   toggleCheckbox,
-  waitForProfilePersistence,
   waitForRiskCalculation,
   getIndexedDBValue,
-  isCheckboxChecked,
 } from './helpers/test-helpers';
 
 test.describe('Medical History Section - Conditions', () => {

@@ -20,14 +20,6 @@ export const Header: React.FC<HeaderProps> = ({ onLogoDoubleClick, result, calcu
     return '#ef4444';
   };
 
-  const getRiskLabel = (risk: number) => {
-    const percent = risk * 100;
-    if (percent < 5) return 'Low';
-    if (percent < 15) return 'Moderate';
-    if (percent < 30) return 'High';
-    return 'Very High';
-  };
-
   return (
     <header className="app-header sticky-header">
       <div className="header-content">

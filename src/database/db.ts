@@ -1,7 +1,7 @@
 import Dexie, { Table } from 'dexie';
 import { UserProfile } from '../types/user';
 import { RiskCalculationResult } from '../types/risk/calculation';
-import { HabitEvent, EventCategory, EventTypeId, EventMetadata } from '../types/events/habitEvent';
+import { EventCategory, EventTypeId, EventMetadata } from '../types/events/habitEvent';
 
 /**
  * Main database class
@@ -26,8 +26,7 @@ export class ZivotDB extends Dexie {
       habitEvents: 'eventId, profileId, timestamp, category, eventType, [profileId+timestamp]',
       // Habit tracking metadata: which metrics are actively tracked
       habitTracking: '++id, profileId, metricPath, active'
-    }).upgrade(async (tx) => {
-      console.log('[DB] Upgrading to v2: habit tracking enabled');
+    }).upgrade(async () => {
       // No data migration needed - new tables start empty
     });
 

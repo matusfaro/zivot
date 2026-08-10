@@ -2,7 +2,6 @@
  * Graph controls for filtering, searching, layout selection, and exporting
  */
 
-import React from 'react';
 
 interface GraphControlsProps {
   filterType: 'all' | 'orphaned' | 'connected';

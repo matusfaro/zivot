@@ -93,7 +93,7 @@ export async function waitForProfilePersistence(
           return;
         }
       }
-    } catch (error) {
+    } catch {
       // IndexedDB might not be ready yet, continue waiting
     }
 

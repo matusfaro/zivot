@@ -4,7 +4,7 @@
  * Uses Cytoscape.js for interactive graph visualization
  */
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import cytoscape from 'cytoscape';
 import { RelationshipGraph } from '../../types/registry';
 import { buildGraphLayout, filterGraph } from './graphLayout';
