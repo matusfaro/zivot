@@ -2,9 +2,31 @@ import { Page, expect } from '@playwright/test';
 
 /**
  * Helper to access IndexedDB in the browser context
- * Gets a specific section from the user profile
+ * Gets a specific section from the user profile.
+ *
+ * Polls until the section exists (up to `timeout`) — the specs pair this
+ * with fixed sleeps, and a single raw read races the debounced save.
  */
 export async function getIndexedDBValue(
+  page: Page,
+  sectionName: string,
+  timeout: number = 5000
+): Promise<any> {
+  const startTime = Date.now();
+  for (;;) {
+    const value = await readProfileSection(page, sectionName);
+    if (value !== null && value !== undefined) {
+      return value;
+    }
+    if (Date.now() - startTime >= timeout) {
+      return value;
+    }
+    await page.waitForTimeout(100);
+  }
+}
+
+/** Single raw read of a profile section from IndexedDB */
+async function readProfileSection(
   page: Page,
   sectionName: string
 ): Promise<any> {

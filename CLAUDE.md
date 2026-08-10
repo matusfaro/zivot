@@ -41,11 +41,10 @@ scientific evidence with proper citations.**
 values between diseases without disease-specific evidence, or implement calculations without
 methodological references.
 
-> Reality check (2026-08 audit): ~80 of 162 existing risk factors are missing citations, mostly in
-> the 15 disease files added after the original four (cvd, colorectal, lung, diabetes — plus
-> melanoma and suicide are conformant). New work must meet the standard above; backfilling the
-> non-conformant files is an open task. There is no runtime/build-time schema validation of the
-> JSONs beyond `validateDiseaseModel()` in `src/knowledge/index.ts`.
+> Status (2026-08): 67 legacy risk factors still lack citations — backfilling them is an open
+> task. `tests/knowledge/KBValidation.test.ts` enforces structural invariants (registered ids,
+> curve sources, known mapping strategies, plausible hazard ratios) and ratchets the uncited
+> count downward: the number may only shrink. New factors MUST be cited or the ratchet fails.
 
 ---
 
@@ -53,17 +52,18 @@ methodological references.
 
 ```bash
 npm run dev            # Vite dev server (default http://localhost:5173)
-npm run build          # tsc -b && vite build   (only gate that CI runs)
-npm run lint           # eslint .               (currently reports ~257 errors — see Known Issues)
-npm test               # vitest in WATCH mode — use `npx vitest run` for one-shot
+npm run build          # tsc -b && vite build
+npm run lint           # eslint . — 0 errors expected (legacy `any`s remain as warnings)
+npm test               # vitest run (one-shot); npm run test:watch for watch mode
 npm run test:e2e       # Playwright (starts its own dev server with VITE_E2E_TEST_MODE=true)
 npm run test:e2e:ui    # Playwright UI mode
 npm run test:e2e:debug # Playwright headed/debug
 ```
 
-CI (`.github/workflows/deploy.yml`) runs **build only** — no lint, no tests — then deploys `dist/`
-to GitHub Pages. Base path: `process.env.NODE_ENV === 'production' ? '/zivot/' : '/'` in
-`vite.config.ts`; `App.tsx` pairs it with `<Router basename={import.meta.env.BASE_URL}>`.
+CI: `.github/workflows/deploy.yml` runs lint + unit tests + build on push to `master`, then
+deploys `dist/` to GitHub Pages; `ci.yml` runs the same checks on PRs and non-master pushes.
+Base path: `process.env.NODE_ENV === 'production' ? '/zivot/' : '/'` in `vite.config.ts`;
+`App.tsx` pairs it with `<Router basename={import.meta.env.BASE_URL}>`.
 
 ---
 
@@ -72,27 +72,43 @@ to GitHub Pages. Base path: `process.env.NODE_ENV === 'production' ? '/zivot/' :
 Full write-up: `docs/mortality-calculation-methodology.md`.
 
 1. **Per-disease risk** — hazard-ratio multiplication:
-   `Adjusted Risk = Baseline Risk(age, sex, ethnicity) × ∏ HRᵢ`
+   `Adjusted Risk = min(Baseline Risk(age, sex, ethnicity) × ∏ HRᵢ, 0.999)`
    Baseline comes from the best-scoring `ageRiskMapping` curve (linear interpolation between age
-   points). Each applicable risk factor contributes one HR via a mapping strategy:
+   points). Curves whose sex constraint contradicts the profile are **excluded**; if no
+   sex-compatible curve exists (e.g., breast cancer for a male profile) the disease is skipped
+   (`calculate()` returns null). Each applicable risk factor contributes one HR via a strategy:
    - `linear` / `log_linear`: `HR = exp(β·x)` / `HR = exp(β·ln x)`
-   - `categorical`: lookup table by category value
+   - `categorical`: lookup table by category value (arrays supported)
    - `lookup` / `spline`: interpolation between `{value, hazardRatio}` points
    - `derived`: computed inputs (BMI, pack-years, family history…) special-cased in
-     `FactorAdjuster.extractFactorValue()`
-   Values are clamped to `validRange` before mapping.
-2. **Mortality modifiers** — 6 cross-cutting lifestyle modifiers (dog ownership, volunteering,
-   religious attendance, social connections, nature exposure, creative hobbies) are applied to
-   every disease's baseline in `BaseCalculator.calculate()` before risk factors.
-3. **Overall mortality** — complement rule across diseases:
-   `P(death) = 1 − ∏(1 − riskᵢ)`, capped at 99.9% (`OverallMortalityAggregator`).
-4. **Lifetime projection** — `src/engine/utils/mortalityCurve.ts` scales CDC life-table annual
-   rates by the personal/baseline risk ratio, calibrates through the 10-year point, and
-   accumulates year-by-year for the chart.
-5. **Confidence/uncertainty** — `UncertaintyCalculator` scores data completeness per disease;
-   `OverallMortalityAggregator` combines them into an overall confidence level.
-6. **Provenance** — `ProvenanceBuilder`/`ReferenceExtractor` attach a step-by-step audit trail
-   (baseline selection, each HR, final multiplication) plus citations to every result.
+     `FactorAdjuster.extractFactorValue()`; strategies `has_condition` and `bmi_lookup`
+   Values are clamped to `validRange` before mapping. Unknown strategies are rejected by
+   `tests/knowledge/KBValidation.test.ts` (they would silently evaluate to HR 1.0).
+2. **Overall mortality** — complement rule + life-table anchoring
+   (`OverallMortalityAggregator`): the disease models mix incidence and mortality outcomes, so
+   their raw complement-rule sum overstates all-cause death. The models are used to compute the
+   RELATIVE hazard vs. the population baseline, which is applied to CDC life-table 10-year
+   mortality for the person's age/sex: `H_final = H_lifetable × (H_personal / H_baseline)`,
+   `risk = 1 − exp(−H_final)`, capped at 99.9%. A baseline-only profile reproduces life-table
+   mortality exactly.
+3. **Mortality modifiers** — 6 cross-cutting all-cause modifiers (dog ownership, volunteering,
+   religious attendance, social connections, nature exposure, creative hobbies) are applied
+   ONCE at the overall level on the hazard scale (`risk = 1 − (1 − risk)^HR`), not per disease.
+   Do not also add them as disease risk factors — that double-counts. Caveat (documented in
+   provenance): the six are correlated lifestyle measures; multiplying them treats them as
+   independent and likely overstates their combined effect.
+4. **Factor attribution** — leave-one-out: `contribution = adjusted × (1 − 1/HRᵢ)`, i.e. the
+   absolute risk change vs. the same profile without that factor. Drives top levers and
+   recommendation impact numbers.
+5. **Lifetime projection** — `src/engine/utils/mortalityCurve.ts` scales CDC life-table annual
+   rates by the personal/average hazard ratio, iteratively calibrated so the curve passes through
+   the validated 10-year point exactly (both windows cover ages a..a+9).
+6. **Confidence/uncertainty** — `UncertaintyCalculator` scores data completeness per disease
+   (a factor counts as available when the FactorAdjuster produced an HR for it, which includes
+   derived factors); the aggregator combines them contribution-weighted and normalized.
+7. **Provenance** — `ProvenanceBuilder`/`ReferenceExtractor` attach a step-by-step audit trail
+   (baseline selection, each HR, multiplication, life-table calibration, modifier step) plus
+   citations to every result.
 
 ---
 
@@ -102,28 +118,31 @@ Full write-up: `docs/mortality-calculation-methodology.md`.
 src/
 ├── App.tsx                     # Single route "/" → LiveDashboard (catch-all redirects to /)
 ├── components/
-│   ├── dashboard/              # LiveDashboard (root page), CompactProfileEditor (~2,900 lines,
-│   │                           #   all profile inputs), ChartsSection, DetailsSection, Header via layout/
-│   ├── survey/SwipeSurvey.tsx  # Swipe-card onboarding survey (~3,400 lines)
-│   ├── habits/                 # HabitsDashboard, HabitCalendar, CompactEventLogger
-│   ├── registry/               # RelationshipGraphView (cytoscape + dagre) + controls/legend
-│   ├── results/                # MortalityRiskChart, RiskReportCard, RecommendationsPanel deps
-│   ├── debug/DebugPanel.tsx    # Hidden panel (double-click header logo)
+│   ├── dashboard/              # LiveDashboard (root page, owns the profile + provides context),
+│   │                           #   CompactProfileEditor (~2,900 lines, all inputs), ChartsSection
+│   ├── survey/SwipeSurvey.tsx  # Swipe-card onboarding survey (~3,400 lines, lazy-loaded)
+│   ├── habits/                 # HabitsDashboard (lazy), HabitCalendar, CompactEventLogger
+│   ├── registry/               # RelationshipGraphView (cytoscape + dagre, lazy) + controls/legend
+│   ├── results/                # MortalityRiskChart, RiskReportCard
+│   ├── debug/DebugPanel.tsx    # Hidden panel (double-click header logo, lazy)
+│   ├── layout/Header.tsx
 │   └── common/                 # Tooltip, CitationPopover, ProvenanceTooltip, …
+├── contexts/UserProfileContext.tsx  # Single profile source of truth (provided by LiveDashboard)
 ├── engine/
-│   ├── RiskEngine.ts           # Orchestrator: init calculators, run all diseases, aggregate
-│   ├── calculators/            # BaseCalculator (ALL real logic) + 21 per-disease subclasses
-│   │                           #   (empty shells — none override anything)
+│   ├── RiskEngine.ts           # Orchestrator + getSharedRiskEngine() singleton
+│   ├── calculators/BaseCalculator.ts    # The ONLY calculator — fully data-driven from JSON
 │   ├── adjusters/FactorAdjuster.ts      # HR mapping strategies + profile value extraction
 │   ├── modifiers/ModifierAdjuster.ts    # Mortality-modifier applicability + HR
-│   ├── aggregators/            # OverallMortalityAggregator, UncertaintyCalculator
+│   ├── aggregators/            # OverallMortalityAggregator (life-table anchoring, modifiers),
+│   │                           #   UncertaintyCalculator
 │   ├── provenance/             # ProvenanceBuilder, ReferenceExtractor
 │   ├── recommendations/RecommendationEngine.ts
-│   └── utils/mortalityCurve.ts # Lifetime curve generation (CDC life-table data inside)
+│   └── utils/mortalityCurve.ts # Lifetime curve + CDC life-table rates (also used for anchoring)
 ├── knowledge/
-│   ├── diseases/*.json         # 21 disease models (19 registered — see Known Issues)
-│   ├── modifiers/**/*.json     # 6 mortality modifiers
-│   └── index.ts                # loadDiseaseKB() — EXPLICIT registration list + validation
+│   ├── diseases/*.json         # 21 disease models — AUTO-DISCOVERED via import.meta.glob,
+│   │                           #   registered by metadata.id (duplicates/missing ids throw)
+│   ├── modifiers/**/*.json     # 6 mortality modifiers (same auto-discovery)
+│   └── index.ts                # loadDiseaseKB() / getDiseaseModel() + validateDiseaseModel()
 ├── database/
 │   ├── db.ts                   # Dexie "ZivotDB" v2: profiles, riskCalculations, habitEvents, habitTracking
 │   └── repositories/           # ProfileRepository, HabitEventRepository, RiskResultRepository
@@ -138,27 +157,32 @@ src/
 │   ├── knowledge/              # DiseaseModel, RiskFactorDescriptor, MortalityModifier, …
 │   ├── risk/                   # Calculation results + provenance types
 │   └── common/datapoint.ts     # DataPoint<T> and TimeSeries<T>
-└── utils/dataExtraction.ts     # getValueAtPath, BMI, pack-years, hasCondition, …
+└── utils/dataExtraction.ts     # getValueAtPath, extractPathValue (shared path resolver),
+                                #   BMI, pack-years, hasCondition, …
 
-tests/                          # Vitest unit tests (RiskEngine, ProvenanceBuilder,
-                                #   DiseaseModels, ProfileRepository) — NOT under src/
+tests/                          # Vitest unit tests (engine, aggregator, FactorAdjuster,
+                                #   mortalityCurve, KB validation, repositories) — NOT under src/
 e2e/                            # Playwright specs per profile section + helpers/ + fixtures/
-docs/                           # mortality-calculation-methodology.md (+ legacy AI summaries)
+docs/                           # mortality-calculation-methodology.md
 ```
 
 ### Key design decisions
 
 - **Knowledge-driven**: all epidemiology lives in JSON under `src/knowledge/`; the engine is
-  generic. The per-disease calculator classes exist but contain no logic — `BaseCalculator` +
-  `FactorAdjuster` do everything.
-- **Explicit registration**: a disease JSON does nothing until it is imported and registered in
-  `src/knowledge/index.ts` (`loadDiseaseKB`, `getDiseaseModel`, `getAvailableDiseaseIds`) and
-  instantiated in `RiskEngine.initialize()`. There is no auto-discovery.
+  generic (`BaseCalculator` + `FactorAdjuster` do everything). There are NO per-disease
+  calculator classes.
+- **Auto-discovery**: every `*.json` in `knowledge/diseases/` (and `knowledge/modifiers/`) is
+  registered automatically under its `metadata.id`. Dropping a new model file in is sufficient;
+  a missing or duplicate id throws at load.
+- **One engine, one profile**: use `getSharedRiskEngine()` (never `new RiskEngine()` in UI code)
+  and `useUserProfileContext()` (never a second `useUserProfile()` — per-instance state means a
+  second copy silently diverges).
 - **Local-first persistence**: profile edits flow LiveDashboard → debounce → per-section
-  `updateXxx()` on `useUserProfile` → `ProfileRepository` (read-merge-write of one profile blob).
+  `updateXxx()` on `useUserProfile` → `ProfileRepository` (read-merge-write of one profile blob;
+  sections are saved sequentially on purpose — parallel saves overwrite each other).
 - **Habit events**: logged events are extrapolated to rolling averages (`EventExtrapolator`) and
   merged into the profile (`ProfileMerger`) with `estimated` provenance, mapped via
-  `config/eventRegistry.ts`.
+  `config/eventRegistry.ts`; updates propagate live through the shared profile context.
 
 ### Data structures: TimeSeries vs DataPoint
 
@@ -179,16 +203,20 @@ verify against the actual type in `src/types/user/`.
 
 1. **Create the model** `src/knowledge/diseases/<disease>.json` following the schema in
    `src/types/knowledge/disease.ts` (use `cvd.json` or `type2-diabetes.json` as the reference —
-   they are the most conformant). Citations are mandatory (see CRITICAL section).
-2. **Register it** in `src/knowledge/index.ts`: import the JSON and add it to `loadDiseaseKB()`,
-   `getDiseaseModel()`, and `getAvailableDiseaseIds()`. Skipping this step silently disables the
-   disease (this is exactly what happened to `suicide.json` and `melanoma.json`).
-3. **Create a calculator** `src/engine/calculators/<Disease>Calculator.ts` extending
-   `BaseCalculator` (a 3-line shell is the norm), and register it in `RiskEngine.initialize()`.
-4. **Add the display name** in the disease-name maps used by the dashboard components (grep for
+   they are the most conformant). Citations are mandatory (see CRITICAL section). Rules the
+   validation tests enforce:
+   - `metadata.id` must be unique (registration is automatic from the file).
+   - Baseline curves must carry `source`; provide curves for BOTH sexes unless the disease is
+     sex-specific (sex-mismatched profiles skip the disease entirely).
+   - Do NOT add age or sex as risk factors when the baseline curves already stratify by them
+     (that double-counts), and do NOT duplicate a global mortality modifier as a disease factor.
+   - Only implemented mapping strategies: `linear`, `log_linear`, `lookup`, `spline`,
+     `has_condition`, `bmi_lookup`. Anything else fails KBValidation.
+2. **Add the display name** in the disease-name maps used by the dashboard components (grep for
    `cvd_10year:` to find them).
-5. **Add tests** in `tests/engine/` (unit) and update `tests/knowledge/DiseaseModels.test.ts`
-   (it asserts the exact KB size).
+3. **Update tests**: `tests/knowledge/DiseaseModels.test.ts` asserts the exact KB size (21);
+   add engine assertions in `tests/engine/` as appropriate. `KBValidation.test.ts` runs
+   automatically over the new model.
 
 ## How to add a new user input
 
@@ -222,30 +250,27 @@ verify against the actual type in `src/types/user/`.
 
 ---
 
-## Known issues / gotchas (2026-08 audit — verify before relying on these)
+## Remaining known work (2026-08 — after the remediation pass)
 
-- `npm test` currently fails: vitest's default include also collects `e2e/*.spec.ts` (Playwright)
-  because `vite.config.ts` sets no `test.include`/e2e exclude; plus one real failure in
-  `tests/engine/RiskEngine.test.ts` (confidence scoring: `UncertaintyCalculator.hasFactorData`
-  doesn't understand derived factors, so complete profiles still score `very_low`).
-- `suicide_10year` and `melanoma_10year` have complete JSONs and calculators but are **not
-  registered** in `src/knowledge/index.ts` — silently excluded from overall mortality.
-- Baseline-curve selection does not reject sex-mismatched curves (`BaseCalculator`
-  `findApplicableCurveWithScoring`) — males currently receive breast-cancer risk and females
-  prostate-cancer risk.
-- `adjustedRisk` is not capped at 1.0; extreme profiles can produce risks > 100% and negative
-  survival products in `OverallMortalityAggregator`.
-- Disease models mix **incidence** (diabetes, CVD events, prostate) and **mortality** outcomes but
-  are aggregated as if all were mortality — overall numbers run ~3–5× above life-table values.
-- Several modifiers (dog ownership, volunteering, religious attendance…) also exist as CVD risk
-  factors → double-counted protection.
-- Two `RiskEngine` instances exist (LiveDashboard + useRiskCalculation, re-created per profile
-  change) and `useHabitEvents` holds an independent `useUserProfile()` copy, so habit-driven
-  profile updates don't propagate live.
-- ~17 component files are orphaned (ProfileWizard + its 5 forms, RiskDashboard,
-  MortalityRiskChart_Stacked, ProfileSectionComponents, registry/nodes/* …); `reactflow` is a
-  dead dependency (live graph is cytoscape + dagre). `SwipeSurvey.tsx.bak1–4` are committed.
-- Lint is far from clean (~257 errors incl. real `rules-of-hooks` violations); CI gates nothing
-  but the build.
-- Root-level `*_SUMMARY.md` / `PHASE_*.md` files are untracked AI-session artifacts, not
-  documentation of record.
+- **Citation backfill**: 67 legacy risk factors still lack citations
+  (`KBValidation.test.ts` ratchets the count so it can only shrink); 13 disease files also lack
+  confidence intervals on most hazard ratios.
+- **Sex coverage**: drug-overdose, influenza-pneumonia, and liver-cancer have a single
+  unstratified baseline curve despite strong known sex gradients; most `defaultCurve`s are male.
+- **Incidence vs. mortality**: life-table anchoring corrects the overall number, but
+  disease-level cards still display model outcomes that mix incidence (diabetes, prostate) and
+  mortality (COPD, melanoma). An explicit `outcome` metadata field + case-fatality data would
+  let the UI label them honestly.
+- **Correlated modifiers**: the six all-cause modifiers multiply as if independent (documented
+  in provenance); a shared-variance discount needs a methodological source.
+- **Legacy mega-components**: `SwipeSurvey.tsx` (~3,400 lines, `@ts-nocheck`) and
+  `CompactProfileEditor.tsx` (~2,900 lines) need splitting; they hold nearly all remaining
+  lint warnings (`no-explicit-any`, `set-state-in-effect`).
+- **E2E style**: specs still use fixed `waitForTimeout(1000)` before assertions
+  (`getIndexedDBValue` now polls, which removes the main flake class); migrating to
+  `waitForProfilePersistence` remains preferable. `expandSection` helper is unused.
+- **Accessibility**: no `aria-` attributes anywhere; `window.confirm` used for profile reset.
+- **TopLevers metadata**: `currentValue`/`targetValue`/`effort`/`timeframe` on levers are
+  hardcoded placeholders (`RiskEngine.identifyTopLevers`).
+- Unused-but-typed profile fields (ApoB, sleep quality, vigorous exercise minutes, marital
+  status, lives-alone…) are candidates for new evidence-backed risk factors.

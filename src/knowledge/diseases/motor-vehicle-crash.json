@@ -140,60 +140,6 @@
   },
   "riskFactors": [
     {
-      "factorId": "age_category",
-      "name": "Age Category",
-      "modifiable": false,
-      "evidenceLevel": "high",
-      "requiredFields": [
-        {
-          "path": "demographics.dateOfBirth.value",
-          "alternatives": []
-        }
-      ],
-      "mapping": {
-        "type": "categorical",
-        "strategy": "derived_from_age",
-        "categories": [
-          {
-            "ageRange": [
-              16,
-              19
-            ],
-            "hazardRatio": 3.0
-          },
-          {
-            "ageRange": [
-              20,
-              24
-            ],
-            "hazardRatio": 2.5
-          },
-          {
-            "ageRange": [
-              25,
-              64
-            ],
-            "hazardRatio": 1.0
-          },
-          {
-            "ageRange": [
-              65,
-              74
-            ],
-            "hazardRatio": 1.1
-          },
-          {
-            "ageRange": [
-              75,
-              100
-            ],
-            "hazardRatio": 1.5
-          }
-        ],
-        "referenceCategory": "25-64"
-      }
-    },
-    {
       "factorId": "miles_per_year",
       "name": "Annual Miles Driven",
       "modifiable": true,
