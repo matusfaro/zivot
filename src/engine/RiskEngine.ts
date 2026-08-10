@@ -12,27 +12,6 @@ import { DiseaseModel } from '../types/knowledge/disease';
 import { MortalityModifier } from '../types/knowledge/mortalityModifier';
 import { loadDiseaseKB } from '../knowledge';
 import { loadModifierKB } from '../knowledge/modifiers';
-import { CVDCalculator } from './calculators/CVDCalculator';
-import { ColorectalCancerCalculator } from './calculators/ColorectalCancerCalculator';
-import { LungCancerCalculator } from './calculators/LungCancerCalculator';
-import { DiabetesCalculator } from './calculators/DiabetesCalculator';
-import { StrokeCalculator } from './calculators/StrokeCalculator';
-import { BreastCancerCalculator } from './calculators/BreastCancerCalculator';
-import { ProstateCancerCalculator } from './calculators/ProstateCancerCalculator';
-import { COPDCalculator } from './calculators/COPDCalculator';
-import { ChronicKidneyDiseaseCalculator } from './calculators/ChronicKidneyDiseaseCalculator';
-import { PancreaticCancerCalculator } from './calculators/PancreaticCancerCalculator';
-import { LiverDiseaseCalculator } from './calculators/LiverDiseaseCalculator';
-import { AlzheimerCalculator } from './calculators/AlzheimerCalculator';
-import { MotorVehicleCrashCalculator } from './calculators/MotorVehicleCrashCalculator';
-import { FallsCalculator } from './calculators/FallsCalculator';
-import { InfluenzaPneumoniaCalculator } from './calculators/InfluenzaPneumoniaCalculator';
-import { DrugOverdoseCalculator } from './calculators/DrugOverdoseCalculator';
-import { EsophagealCancerCalculator } from './calculators/EsophagealCancerCalculator';
-import { LiverCancerCalculator } from './calculators/LiverCancerCalculator';
-import { BladderCancerCalculator } from './calculators/BladderCancerCalculator';
-import { SuicideCalculator } from './calculators/SuicideCalculator';
-import { MelanomaCalculator } from './calculators/MelanomaCalculator';
 import { BaseCalculator } from './calculators/BaseCalculator';
 import { OverallMortalityAggregator } from './aggregators/OverallMortalityAggregator';
 import { RecommendationEngine } from './recommendations/RecommendationEngine';
@@ -58,105 +37,12 @@ export class RiskEngine {
     // Load mortality modifiers knowledge base
     this.modifierKB = await loadModifierKB();
     const modifiers = Array.from(this.modifierKB.values());
-    console.log(`[RiskEngine] Loaded ${modifiers.length} mortality modifiers`);
 
-    // Initialize calculators for Phase 1 diseases
-    const cvdModel = this.diseaseKB.get('cvd_10year');
-    const crcModel = this.diseaseKB.get('colorectal_cancer_10year');
-    const lungModel = this.diseaseKB.get('lung_cancer_10year');
-    const diabetesModel = this.diseaseKB.get('type2_diabetes_10year');
-
-    if (cvdModel) {
-      this.calculators.set('cvd_10year', new CVDCalculator(cvdModel, modifiers));
-    }
-    if (crcModel) {
-      this.calculators.set('colorectal_cancer_10year', new ColorectalCancerCalculator(crcModel, modifiers));
-    }
-    if (lungModel) {
-      this.calculators.set('lung_cancer_10year', new LungCancerCalculator(lungModel, modifiers));
-    }
-    if (diabetesModel) {
-      this.calculators.set('type2_diabetes_10year', new DiabetesCalculator(diabetesModel, modifiers));
-    }
-
-    // Initialize calculators for Phase 2 diseases
-    const strokeModel = this.diseaseKB.get('stroke_10year');
-    const breastCancerModel = this.diseaseKB.get('breast_cancer_10year');
-    const prostateCancerModel = this.diseaseKB.get('prostate_cancer_10year');
-
-    if (strokeModel) {
-      this.calculators.set('stroke_10year', new StrokeCalculator(strokeModel, modifiers));
-    }
-    if (breastCancerModel) {
-      this.calculators.set('breast_cancer_10year', new BreastCancerCalculator(breastCancerModel, modifiers));
-    }
-    if (prostateCancerModel) {
-      this.calculators.set('prostate_cancer_10year', new ProstateCancerCalculator(prostateCancerModel, modifiers));
-    }
-
-    // Initialize calculators for Phase 3 diseases
-    const copdModel = this.diseaseKB.get('copd_mortality_10year');
-    const ckdModel = this.diseaseKB.get('ckd_progression_10year');
-    const pancreaticCancerModel = this.diseaseKB.get('pancreatic_cancer_10year');
-
-    if (copdModel) {
-      this.calculators.set('copd_mortality_10year', new COPDCalculator(copdModel, modifiers));
-    }
-    if (ckdModel) {
-      this.calculators.set('ckd_progression_10year', new ChronicKidneyDiseaseCalculator(ckdModel, modifiers));
-    }
-    if (pancreaticCancerModel) {
-      this.calculators.set('pancreatic_cancer_10year', new PancreaticCancerCalculator(pancreaticCancerModel, modifiers));
-    }
-
-    // Initialize calculators for Phase 4 diseases
-    const liverDiseaseModel = this.diseaseKB.get('nafld_cirrhosis_10year');
-    const alzheimersModel = this.diseaseKB.get('alzheimers_dementia_10year');
-
-    if (liverDiseaseModel) {
-      this.calculators.set('nafld_cirrhosis_10year', new LiverDiseaseCalculator(liverDiseaseModel, modifiers));
-    }
-    if (alzheimersModel) {
-      this.calculators.set('alzheimers_dementia_10year', new AlzheimerCalculator(alzheimersModel, modifiers));
-    }
-
-    // Initialize calculators for Phase 5 diseases (External causes & additional cancers)
-    const motorVehicleModel = this.diseaseKB.get('motor_vehicle_crash_10year');
-    const fallsModel = this.diseaseKB.get('falls_10year');
-    const influenzaPneumoniaModel = this.diseaseKB.get('influenza_pneumonia_10year');
-    const drugOverdoseModel = this.diseaseKB.get('drug_overdose_10year');
-    const esophagealCancerModel = this.diseaseKB.get('esophageal_cancer_10year');
-    const liverCancerModel = this.diseaseKB.get('liver_cancer_10year');
-    const bladderCancerModel = this.diseaseKB.get('bladder_cancer_10year');
-    const suicideModel = this.diseaseKB.get('suicide_10year');
-    const melanomaModel = this.diseaseKB.get('melanoma_10year');
-
-    if (motorVehicleModel) {
-      this.calculators.set('motor_vehicle_crash_10year', new MotorVehicleCrashCalculator(motorVehicleModel, modifiers));
-    }
-    if (fallsModel) {
-      this.calculators.set('falls_10year', new FallsCalculator(fallsModel, modifiers));
-    }
-    if (influenzaPneumoniaModel) {
-      this.calculators.set('influenza_pneumonia_10year', new InfluenzaPneumoniaCalculator(influenzaPneumoniaModel, modifiers));
-    }
-    if (drugOverdoseModel) {
-      this.calculators.set('drug_overdose_10year', new DrugOverdoseCalculator(drugOverdoseModel, modifiers));
-    }
-    if (esophagealCancerModel) {
-      this.calculators.set('esophageal_cancer_10year', new EsophagealCancerCalculator(esophagealCancerModel, modifiers));
-    }
-    if (liverCancerModel) {
-      this.calculators.set('liver_cancer_10year', new LiverCancerCalculator(liverCancerModel, modifiers));
-    }
-    if (bladderCancerModel) {
-      this.calculators.set('bladder_cancer_10year', new BladderCancerCalculator(bladderCancerModel, modifiers));
-    }
-    if (suicideModel) {
-      this.calculators.set('suicide_10year', new SuicideCalculator(suicideModel, modifiers));
-    }
-    if (melanomaModel) {
-      this.calculators.set('melanoma_10year', new MelanomaCalculator(melanomaModel, modifiers));
+    // One generic calculator per registered disease model. All behaviour is
+    // data-driven from the model JSON — there are no per-disease subclasses,
+    // and every model in the knowledge base is automatically included.
+    for (const [diseaseId, model] of this.diseaseKB) {
+      this.calculators.set(diseaseId, new BaseCalculator(model, modifiers));
     }
 
     this.initialized = true;

@@ -5,11 +5,15 @@ describe('Disease Knowledge Base', () => {
   it('should load all disease models', async () => {
     const kb = await loadDiseaseKB();
 
-    expect(kb.size).toBe(19); // Updated: now includes all disease models
+    // One entry per JSON file in src/knowledge/diseases/ — auto-discovered
+    expect(kb.size).toBe(21);
     expect(kb.has('cvd_10year')).toBe(true);
     expect(kb.has('colorectal_cancer_10year')).toBe(true);
     expect(kb.has('lung_cancer_10year')).toBe(true);
     expect(kb.has('type2_diabetes_10year')).toBe(true);
+    // Previously authored but never registered — must not regress
+    expect(kb.has('suicide_10year')).toBe(true);
+    expect(kb.has('melanoma_10year')).toBe(true);
   });
 
   it('should get individual disease models', () => {

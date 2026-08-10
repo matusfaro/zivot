@@ -1,90 +1,56 @@
 import { MortalityModifier } from '../../types/knowledge/mortalityModifier';
 
-// Import all modifier JSON files
-import dogOwnershipData from './social/dog_ownership.json';
-import religiousAttendanceData from './social/religious_attendance.json';
-import socialConnectionsData from './social/social_connections.json';
-import volunteeringData from './social/volunteering.json';
-import natureExposureData from './environmental/nature_exposure.json';
-import creativeHobbiesData from './cultural/creative_hobbies.json';
+/**
+ * Mortality-modifier knowledge base.
+ *
+ * Modifiers are all-cause mortality factors that act independently of
+ * specific disease pathways (e.g., social connections, time in nature).
+ * Every JSON file under this directory is auto-discovered and registered
+ * under its metadata.id.
+ */
+const modifierModules = import.meta.glob('./*/*.json', { eager: true }) as Record<
+  string,
+  { default: unknown }
+>;
+
+const modifierKB = new Map<string, MortalityModifier>();
+
+for (const [path, module] of Object.entries(modifierModules)) {
+  const modifier = module.default as MortalityModifier;
+  if (!modifier?.metadata?.id) {
+    throw new Error(`Mortality modifier ${path} is missing metadata.id`);
+  }
+  if (modifierKB.has(modifier.metadata.id)) {
+    throw new Error(`Duplicate modifier id "${modifier.metadata.id}" in ${path}`);
+  }
+  modifierKB.set(modifier.metadata.id, modifier);
+}
 
 /**
- * Load all mortality modifiers into a Map
- *
- * Modifiers are factors that affect overall mortality risk independently
- * of specific disease pathways (e.g., social connections, time in nature).
- *
- * @returns Promise resolving to Map of modifierId → MortalityModifier
+ * Load all mortality modifiers into a Map keyed by modifier ID.
+ * (Async for historical API compatibility; modifiers are bundled statically.)
  */
 export async function loadModifierKB(): Promise<Map<string, MortalityModifier>> {
-  const kb = new Map<string, MortalityModifier>();
-
-  // Social modifiers
-  kb.set('dog_ownership', dogOwnershipData as unknown as MortalityModifier);
-  kb.set('religious_attendance', religiousAttendanceData as unknown as MortalityModifier);
-  kb.set('social_connections', socialConnectionsData as unknown as MortalityModifier);
-  kb.set('volunteering', volunteeringData as unknown as MortalityModifier);
-
-  // Environmental modifiers
-  kb.set('nature_exposure', natureExposureData as unknown as MortalityModifier);
-
-  // Cultural modifiers
-  kb.set('creative_hobbies', creativeHobbiesData as unknown as MortalityModifier);
-
-  console.log(`[Modifier KB] Loaded ${kb.size} mortality modifiers`);
-  return kb;
+  return new Map(modifierKB);
 }
 
 /**
  * Get a single modifier by ID
- *
- * @param modifierId ID of the modifier to retrieve
- * @returns MortalityModifier or null if not found
  */
 export function getModifier(modifierId: string): MortalityModifier | null {
-  switch (modifierId) {
-    case 'dog_ownership':
-      return dogOwnershipData as unknown as MortalityModifier;
-    case 'religious_attendance':
-      return religiousAttendanceData as unknown as MortalityModifier;
-    case 'social_connections':
-      return socialConnectionsData as unknown as MortalityModifier;
-    case 'volunteering':
-      return volunteeringData as unknown as MortalityModifier;
-    case 'nature_exposure':
-      return natureExposureData as unknown as MortalityModifier;
-    case 'creative_hobbies':
-      return creativeHobbiesData as unknown as MortalityModifier;
-    default:
-      return null;
-  }
+  return modifierKB.get(modifierId) ?? null;
 }
 
 /**
  * Get all available modifier IDs
- *
- * @returns Array of modifier IDs
  */
 export function getAvailableModifierIds(): string[] {
-  return [
-    'dog_ownership',
-    'religious_attendance',
-    'social_connections',
-    'volunteering',
-    'nature_exposure',
-    'creative_hobbies',
-  ];
+  return Array.from(modifierKB.keys());
 }
 
 /**
  * Get modifiers by category
- *
- * @param category Modifier category to filter by
- * @returns Array of modifiers in that category
  */
 export async function getModifiersByCategory(category: string): Promise<MortalityModifier[]> {
-  const allModifiers = await loadModifierKB();
-  return Array.from(allModifiers.values()).filter(
-    (modifier) => modifier.metadata.category === category
-  );
+  return Array.from(modifierKB.values()).filter(m => m.metadata.category === category);
 }

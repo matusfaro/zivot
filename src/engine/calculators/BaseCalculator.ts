@@ -6,8 +6,8 @@ import { FactorAdjuster } from '../adjusters/FactorAdjuster';
 import { ModifierAdjuster } from '../modifiers/ModifierAdjuster';
 import { UncertaintyCalculator } from '../aggregators/UncertaintyCalculator';
 import { calculateAge } from '../../utils/dataExtraction';
-import { ProvenanceBuilder, createInterpolationProvenance } from '../provenance/ProvenanceBuilder';
-import { ProvenanceChain, ProvenanceValue, Reference } from '../../types/risk/provenance';
+import { ProvenanceBuilder } from '../provenance/ProvenanceBuilder';
+import { ProvenanceChain } from '../../types/risk/provenance';
 import { ReferenceExtractor } from '../provenance/ReferenceExtractor';
 
 export class BaseCalculator {
@@ -114,123 +114,6 @@ export class BaseCalculator {
   }
 
   /**
-   * Calculate baseline risk from age/sex/ethnicity
-   */
-  protected calculateBaselineRisk(profile: UserProfile): number {
-    // Extract age and sex
-    const age = calculateAge(profile);
-    const sex = profile.demographics?.biologicalSex?.value;
-
-    if (!age) {
-      throw new Error(`${this.model.metadata.name}: Age is required for risk calculation`);
-    }
-
-    // Find applicable baseline curve
-    const curve = this.findApplicableCurve(profile, sex, age);
-
-    // Interpolate risk at given age
-    return this.interpolateRisk(curve.ageRiskMapping, age);
-  }
-
-  /**
-   * Apply risk factor adjustments using multiplicative hazard ratios
-   */
-  protected applyFactorAdjustments(
-    profile: UserProfile,
-    baselineRisk: number
-  ): { adjustedRisk: number; contributions: FactorContribution[] } {
-    const contributions: FactorContribution[] = [];
-    let cumulativeHR = 1.0;
-
-    for (const factorDesc of this.model.riskFactors) {
-      const hr = this.factorAdjuster.calculateHazardRatio(profile, factorDesc);
-
-      if (hr !== null) {
-        cumulativeHR *= hr;
-
-        contributions.push({
-          factorId: factorDesc.factorId,
-          factorName: factorDesc.name,
-          hazardRatio: hr,
-          contribution: baselineRisk * (hr - 1), // Absolute risk increase from this factor
-          modifiable: factorDesc.modifiable,
-          category: factorDesc.category || 'Other',
-        });
-      }
-    }
-
-    const adjustedRisk = baselineRisk * cumulativeHR;
-
-    // Sort contributions by absolute magnitude (biggest impact first)
-    contributions.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
-
-    return { adjustedRisk, contributions };
-  }
-
-  /**
-   * Find the most applicable baseline risk curve
-   */
-  private findApplicableCurve(profile: UserProfile, sex?: string, age?: number): BaselineRiskCurve {
-    const ethnicity = profile.demographics?.ethnicity?.value;
-    const region = profile.demographics?.country?.value || profile.demographics?.region?.value;
-
-    // Score each curve by how well it matches
-    const scoredCurves = this.model.baselineRisk.curves.map(curve => {
-      let score = 0;
-
-      // Sex match (high priority)
-      if (curve.applicability.sex === sex) {
-        score += 100;
-      } else if (!curve.applicability.sex) {
-        score += 50; // Generic curve
-      }
-
-      // Ethnicity match
-      if (ethnicity && curve.applicability.ethnicity?.includes(ethnicity)) {
-        score += 30;
-      } else if (!curve.applicability.ethnicity) {
-        score += 15; // Generic
-      }
-
-      // Region match
-      if (region && curve.applicability.region?.includes(region)) {
-        score += 20;
-      } else if (!curve.applicability.region) {
-        score += 10; // Generic
-      }
-
-      // Age range match
-      if (age && curve.applicability.ageRange) {
-        const [minAge, maxAge] = curve.applicability.ageRange;
-        if (age >= minAge && age <= maxAge) {
-          score += 10;
-        }
-      }
-
-      return { curve, score };
-    });
-
-    // Sort by score (highest first)
-    scoredCurves.sort((a, b) => b.score - a.score);
-
-    // Return best match
-    if (scoredCurves.length > 0 && scoredCurves[0].score > 0) {
-      return scoredCurves[0].curve;
-    }
-
-    // Fallback to default curve
-    const defaultId = this.model.baselineRisk.defaultCurve;
-    const defaultCurve = this.model.baselineRisk.curves.find(c => c.id === defaultId);
-
-    if (defaultCurve) {
-      return defaultCurve;
-    }
-
-    // Last resort: use first curve
-    return this.model.baselineRisk.curves[0];
-  }
-
-  /**
    * Interpolate risk at a specific age from age-risk mapping
    */
   private interpolateRisk(points: Array<{ age: number; risk: number }>, age: number): number {
@@ -252,13 +135,11 @@ export class BaseCalculator {
       }
     }
 
-    // Extrapolate if outside range (with warning)
+    // Clamp if outside the curve's validated age range
     if (age < sorted[0].age) {
-      console.warn(`Age ${age} below minimum age ${sorted[0].age}, using minimum risk`);
       return sorted[0].risk;
     }
     if (age > sorted[sorted.length - 1].age) {
-      console.warn(`Age ${age} above maximum age ${sorted[sorted.length - 1].age}, using maximum risk`);
       return sorted[sorted.length - 1].risk;
     }
 

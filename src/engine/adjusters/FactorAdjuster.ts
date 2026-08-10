@@ -7,8 +7,6 @@ import {
 } from '../../types/knowledge/riskFactor';
 import {
   getValueAtPath,
-  getDataPointValue,
-  getTimeSeriesValue,
   calculateBMI,
   hasCondition,
   hasFamilyHistory,
@@ -111,7 +109,7 @@ export class FactorAdjuster {
   }
 
   /**
-   * Calculate hazard ratio for a given risk factor (legacy method for backward compatibility)
+   * Calculate hazard ratio for a given risk factor (without provenance detail)
    * Returns null if data is not available
    */
   calculateHazardRatio(profile: UserProfile, factor: RiskFactorDescriptor): number | null {
@@ -174,35 +172,6 @@ export class FactorAdjuster {
       return contMapping.coefficients?.unit;
     }
     return undefined;
-  }
-
-  /**
-   * Calculate hazard ratio with provenance (legacy method for backward compatibility)
-   */
-  private calculateHazardRatioOld(profile: UserProfile, factor: RiskFactorDescriptor): number | null {
-    // Extract value from user profile
-    const value = this.extractFactorValue(profile, factor);
-
-    if (value === null || value === undefined) {
-      return null; // Factor not available
-    }
-
-    // Map value to hazard ratio based on factor type
-    switch (factor.mapping.type) {
-      case 'continuous':
-        if (typeof value !== 'number') return null;
-        return this.calculateContinuousHR(value, factor.mapping as ContinuousRiskMapping);
-      case 'categorical':
-        if (typeof value !== 'string') return null;
-        return this.calculateCategoricalHR(value, factor.mapping as CategoricalRiskMapping);
-      case 'boolean':
-        if (typeof value !== 'boolean') return null;
-        return this.calculateBooleanHR(value, factor.mapping as BooleanRiskMapping);
-      case 'derived':
-        return this.calculateDerivedHR(profile, factor);
-      default:
-        return null;
-    }
   }
 
   /**
@@ -318,16 +287,6 @@ export class FactorAdjuster {
     const primary = factor.requiredFields[0];
     let value = this.getValueFromPath(profile, primary.path);
 
-    // Debug logging for alcohol
-    if (factor.factorId.includes('alcohol')) {
-      console.log('[RISK CALC] Alcohol factor extraction:', {
-        factorId: factor.factorId,
-        path: primary.path,
-        extractedValue: value,
-        profileAlcohol: profile.lifestyle?.alcohol
-      });
-    }
-
     // Try alternatives if primary fails
     if (value === null && primary.alternatives) {
       for (const altPath of primary.alternatives) {
@@ -393,129 +352,6 @@ export class FactorAdjuster {
     return null;
   }
 
-  /**
-   * Calculate HR for continuous factors
-   */
-  private calculateContinuousHR(value: number, mapping: ContinuousRiskMapping): number {
-    // Validate range
-    if (mapping.validRange) {
-      const [min, max] = mapping.validRange;
-      if (value < min || value > max) {
-        console.warn(`Value ${value} outside valid range [${min}, ${max}], clamping`);
-        value = Math.max(min, Math.min(max, value));
-      }
-    }
-
-    switch (mapping.strategy) {
-      case 'linear':
-        return this.linearHR(value, mapping.coefficients!);
-      case 'log_linear':
-        return this.logLinearHR(value, mapping.coefficients!);
-      case 'lookup':
-      case 'spline':
-        return this.lookupHR(value, mapping.points!);
-      default:
-        return 1.0;
-    }
-  }
-
-  /**
-   * Linear hazard ratio: HR = exp(slope * value)
-   */
-  private linearHR(value: number, coef: { slope: number; intercept?: number }): number {
-    const logHR = coef.slope * value + (coef.intercept || 0);
-    return Math.exp(logHR);
-  }
-
-  /**
-   * Log-linear hazard ratio: HR = exp(slope * log(value))
-   */
-  private logLinearHR(value: number, coef: { slope: number }): number {
-    if (value <= 0) return 1.0;
-    const logHR = coef.slope * Math.log(value);
-    return Math.exp(logHR);
-  }
-
-  /**
-   * Lookup/interpolate HR from points
-   */
-  private lookupHR(value: number, points: Array<{ value: number; hazardRatio: number }>): number {
-    const sorted = [...points].sort((a, b) => a.value - b.value);
-
-    // Exact match
-    const exact = sorted.find(p => p.value === value);
-    if (exact) return exact.hazardRatio;
-
-    // Find bounding points
-    let lower = sorted[0];
-    let upper = sorted[sorted.length - 1];
-
-    for (let i = 0; i < sorted.length - 1; i++) {
-      if (sorted[i].value <= value && sorted[i + 1].value >= value) {
-        lower = sorted[i];
-        upper = sorted[i + 1];
-        break;
-      }
-    }
-
-    // Extrapolate if outside range
-    if (value < sorted[0].value) {
-      return sorted[0].hazardRatio;
-    }
-    if (value > sorted[sorted.length - 1].value) {
-      return sorted[sorted.length - 1].hazardRatio;
-    }
-
-    // Linear interpolation
-    const t = (value - lower.value) / (upper.value - lower.value);
-    return lower.hazardRatio + t * (upper.hazardRatio - lower.hazardRatio);
-  }
-
-  /**
-   * Calculate HR for categorical factors
-   */
-  private calculateCategoricalHR(value: string, mapping: CategoricalRiskMapping): number {
-    const category = mapping.categories.find(cat => {
-      if (Array.isArray(cat.value)) {
-        return cat.value.includes(value);
-      }
-      return cat.value === value;
-    });
-
-    return category?.hazardRatio || 1.0;
-  }
-
-  /**
-   * Calculate HR for boolean factors
-   */
-  private calculateBooleanHR(value: boolean, mapping: BooleanRiskMapping): number {
-    return value ? mapping.trueHazardRatio : mapping.falseHazardRatio;
-  }
-
-  /**
-   * Calculate HR for derived factors
-   */
-  private calculateDerivedHR(profile: UserProfile, factor: RiskFactorDescriptor): number {
-    const mapping = factor.mapping as any; // DerivedRiskMapping with strategy
-
-    switch (mapping.strategy) {
-      case 'has_condition': {
-        const hasIt = hasCondition(profile, mapping.conditionId);
-        return hasIt ? mapping.presentHR : mapping.absentHR;
-      }
-      case 'bmi_lookup': {
-        const bmi = calculateBMI(profile);
-        if (bmi === null) return 1.0;
-        return this.lookupHR(bmi, mapping.points);
-      }
-      case 'formula':
-        // Placeholder for Phase 2
-        return 1.0;
-      default:
-        return 1.0;
-    }
-  }
-
   // ========================================
   // Provenance-emitting methods
   // ========================================
@@ -535,7 +371,6 @@ export class FactorAdjuster {
     if (mapping.validRange) {
       const [min, max] = mapping.validRange;
       if (value < min || value > max) {
-        console.warn(`Value ${value} outside valid range [${min}, ${max}], clamping`);
         clampedValue = Math.max(min, Math.min(max, value));
       }
     }
@@ -694,7 +529,6 @@ export class FactorAdjuster {
     // Find bounding points for interpolation
     let lower = sorted[0];
     let upper = sorted[sorted.length - 1];
-    let interpolated = true;
 
     for (let i = 0; i < sorted.length - 1; i++) {
       if (sorted[i].value <= value && sorted[i + 1].value >= value) {
