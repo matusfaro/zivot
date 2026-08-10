@@ -13,7 +13,8 @@ import { MortalityModifier } from '../types/knowledge/mortalityModifier';
 import { loadDiseaseKB } from '../knowledge';
 import { loadModifierKB } from '../knowledge/modifiers';
 import { BaseCalculator } from './calculators/BaseCalculator';
-import { OverallMortalityAggregator } from './aggregators/OverallMortalityAggregator';
+import { ModifierAdjuster } from './modifiers/ModifierAdjuster';
+import { OverallMortalityAggregator, AppliedModifier } from './aggregators/OverallMortalityAggregator';
 import { RecommendationEngine } from './recommendations/RecommendationEngine';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -36,13 +37,12 @@ export class RiskEngine {
 
     // Load mortality modifiers knowledge base
     this.modifierKB = await loadModifierKB();
-    const modifiers = Array.from(this.modifierKB.values());
 
     // One generic calculator per registered disease model. All behaviour is
     // data-driven from the model JSON — there are no per-disease subclasses,
     // and every model in the knowledge base is automatically included.
     for (const [diseaseId, model] of this.diseaseKB) {
-      this.calculators.set(diseaseId, new BaseCalculator(model, modifiers));
+      this.calculators.set(diseaseId, new BaseCalculator(model));
     }
 
     this.initialized = true;
@@ -64,7 +64,11 @@ export class RiskEngine {
     for (const [diseaseId, calculator] of this.calculators) {
       try {
         const risk = await calculator.calculate(profile);
-        diseaseRisks.push(risk);
+        // null = the disease model does not apply to this profile
+        // (e.g., no sex-compatible baseline curve)
+        if (risk !== null) {
+          diseaseRisks.push(risk);
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         console.error(`Failed to calculate risk for ${diseaseId}:`, errorMessage);
@@ -77,15 +81,24 @@ export class RiskEngine {
       throw new Error(`No disease risks could be calculated. Errors: ${errors.join('; ')}`);
     }
 
-    // Aggregate into overall mortality
-    const aggregator = new OverallMortalityAggregator();
-    const overallMortality = aggregator.aggregate(diseaseRisks, profile);
+    // Compute all-cause mortality modifiers once for this profile. They are
+    // applied at the overall-mortality level (not per disease) so a single
+    // lifestyle factor is never compounded across 20 disease models.
+    const appliedModifiers = this.computeAppliedModifiers(profile);
 
-    // Aggregate modifier contributions across all diseases
-    const modifierSummary = this.aggregateModifierContributions(diseaseRisks);
+    // Aggregate into overall mortality (life-table anchored, modifier-adjusted)
+    const aggregator = new OverallMortalityAggregator();
+    const overallMortality = aggregator.aggregate(diseaseRisks, profile, appliedModifiers);
+
+    // Summarize modifier effects for display
+    const modifierSummary = this.buildModifierSummary(
+      appliedModifiers,
+      overallMortality.estimatedRisk,
+      diseaseRisks.length
+    );
 
     // Identify modifiable levers
-    const topLevers = this.identifyTopLevers(diseaseRisks, profile);
+    const topLevers = this.identifyTopLevers(diseaseRisks);
 
     // Generate interpretation (Phase 1: basic, Phase 4+: with recommendations)
     const interpretation = this.generateInterpretation(diseaseRisks, overallMortality, profile, topLevers);
@@ -103,53 +116,51 @@ export class RiskEngine {
   }
 
   /**
-   * Aggregate modifier contributions across all diseases
+   * Compute the hazard ratio of every applicable mortality modifier for this
+   * profile (null results — inapplicable or missing data — are skipped).
    */
-  private aggregateModifierContributions(diseaseRisks: DiseaseRisk[]): ModifierSummary | undefined {
-    const modifierMap = new Map<string, {
-      totalContribution: number;
-      diseaseCount: number;
-      sumHR: number;
-      category: string;
-      name: string;
-    }>();
+  private computeAppliedModifiers(profile: UserProfile): AppliedModifier[] {
+    if (!this.modifierKB) return [];
+    const adjuster = new ModifierAdjuster();
+    const applied: AppliedModifier[] = [];
 
-    // Collect all modifier contributions from all diseases
-    for (const disease of diseaseRisks) {
-      if (!disease.modifierContributions) continue;
-
-      for (const modifier of disease.modifierContributions) {
-        const existing = modifierMap.get(modifier.modifierId);
-        if (existing) {
-          existing.totalContribution += modifier.contribution;
-          existing.diseaseCount++;
-          existing.sumHR += modifier.hazardRatio;
-        } else {
-          modifierMap.set(modifier.modifierId, {
-            totalContribution: modifier.contribution,
-            diseaseCount: 1,
-            sumHR: modifier.hazardRatio,
-            category: modifier.category,
-            name: modifier.modifierName,
-          });
-        }
+    for (const modifier of this.modifierKB.values()) {
+      const hr = adjuster.calculateHazardRatio(profile, modifier);
+      if (hr !== null) {
+        applied.push({ modifier, hazardRatio: hr });
       }
     }
+    return applied;
+  }
 
-    // If no modifiers were applied, return undefined
-    if (modifierMap.size === 0) {
+  /**
+   * Summarize modifier effects on the overall mortality estimate.
+   * Contribution is leave-one-out on the hazard scale: how much would the
+   * final risk change if this modifier were removed?
+   */
+  private buildModifierSummary(
+    appliedModifiers: AppliedModifier[],
+    estimatedRisk: number,
+    diseaseCount: number
+  ): ModifierSummary | undefined {
+    if (appliedModifiers.length === 0) {
       return undefined;
     }
 
-    // Build summary
-    const modifiers = Array.from(modifierMap.entries()).map(([id, data]) => ({
-      modifierId: id,
-      modifierName: data.name,
-      averageHazardRatio: data.sumHR / data.diseaseCount,
-      totalContribution: data.totalContribution,
-      affectedDiseases: data.diseaseCount,
-      category: data.category,
-    }));
+    const modifiers = appliedModifiers.map(({ modifier, hazardRatio }) => {
+      // Risk without this modifier: undo its hazard-scale effect
+      const riskWithout = 1 - Math.pow(1 - estimatedRisk, 1 / hazardRatio);
+      const totalContribution = estimatedRisk - riskWithout;
+
+      return {
+        modifierId: modifier.metadata.id,
+        modifierName: modifier.metadata.name,
+        averageHazardRatio: hazardRatio,
+        totalContribution,
+        affectedDiseases: diseaseCount, // applied once at the overall level
+        category: modifier.metadata.category,
+      };
+    });
 
     // Sort by total contribution (most protective first)
     modifiers.sort((a, b) => a.totalContribution - b.totalContribution);
@@ -191,7 +202,7 @@ export class RiskEngine {
     // Disease interpretations
     const diseaseInterpretations = diseaseRisks.map(disease => {
       const percent = Math.round(disease.adjustedRisk * 100);
-      let summary = `Your ${disease.timeframe}-year risk of ${disease.diseaseName} is ${percent}%`;
+      const summary = `Your ${disease.timeframe}-year risk of ${disease.diseaseName} is ${percent}%`;
 
       // Identify top drivers
       const keyDrivers = disease.factorContributions
@@ -229,7 +240,7 @@ export class RiskEngine {
   /**
    * Identify top modifiable levers across all diseases
    */
-  private identifyTopLevers(diseaseRisks: DiseaseRisk[], profile: UserProfile): ModifiableLever[] {
+  private identifyTopLevers(diseaseRisks: DiseaseRisk[]): ModifiableLever[] {
     // Collect all modifiable factors with their impact across diseases
     interface LeverData extends ModifiableLever {
       totalImpact: number;
@@ -263,12 +274,19 @@ export class RiskEngine {
     }
 
     // Sort by total impact and return top 5
-    const levers = Array.from(leverMap.values())
+    return Array.from(leverMap.values())
       .sort((a, b) => b.totalImpact - a.totalImpact)
       .slice(0, 5)
-      .map(({ totalImpact, ...lever }) => lever);
-
-    return levers;
+      .map(lever => ({
+        factorId: lever.factorId,
+        factorName: lever.factorName,
+        currentValue: lever.currentValue,
+        targetValue: lever.targetValue,
+        potentialRiskReduction: lever.potentialRiskReduction,
+        effort: lever.effort,
+        timeframe: lever.timeframe,
+        diseases: lever.diseases,
+      }));
   }
 
   /**
@@ -281,7 +299,7 @@ export class RiskEngine {
   /**
    * Calculate risk for a single disease
    */
-  async calculateForDisease(profile: UserProfile, diseaseId: string): Promise<DiseaseRisk> {
+  async calculateForDisease(profile: UserProfile, diseaseId: string): Promise<DiseaseRisk | null> {
     if (!this.initialized) {
       await this.initialize();
     }
@@ -293,4 +311,18 @@ export class RiskEngine {
 
     return calculator.calculate(profile);
   }
+}
+
+/**
+ * Shared application-wide engine instance. Initialization is idempotent and
+ * the knowledge base is static, so every consumer (dashboard, hooks, survey
+ * previews) should use this instead of constructing its own engine.
+ */
+let sharedEngine: RiskEngine | null = null;
+
+export function getSharedRiskEngine(): RiskEngine {
+  if (!sharedEngine) {
+    sharedEngine = new RiskEngine();
+  }
+  return sharedEngine;
 }

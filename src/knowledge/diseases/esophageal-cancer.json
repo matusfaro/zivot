@@ -32,63 +32,81 @@
         "id": "male_us",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Esophageal Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/esoph.html",
         "notes": "Esophageal cancer incidence; adenocarcinoma rising in Western populations",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.00010 },
-          { "age": 50, "risk": 0.00025 },
-          { "age": 60, "risk": 0.00050 },
-          { "age": 70, "risk": 0.00080 },
-          { "age": 80, "risk": 0.00090 }
+          {
+            "age": 40,
+            "risk": 0.0001
+          },
+          {
+            "age": 50,
+            "risk": 0.00025
+          },
+          {
+            "age": 60,
+            "risk": 0.0005
+          },
+          {
+            "age": 70,
+            "risk": 0.0008
+          },
+          {
+            "age": 80,
+            "risk": 0.0009
+          }
         ]
       },
       {
         "id": "female_us",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Esophageal Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/esoph.html",
         "notes": "Esophageal cancer incidence; adenocarcinoma rising in Western populations",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.00003 },
-          { "age": 50, "risk": 0.00008 },
-          { "age": 60, "risk": 0.00015 },
-          { "age": 70, "risk": 0.00025 },
-          { "age": 80, "risk": 0.00030 }
+          {
+            "age": 40,
+            "risk": 3e-05
+          },
+          {
+            "age": 50,
+            "risk": 8e-05
+          },
+          {
+            "age": 60,
+            "risk": 0.00015
+          },
+          {
+            "age": 70,
+            "risk": 0.00025
+          },
+          {
+            "age": 80,
+            "risk": 0.0003
+          }
         ]
       }
     ]
   },
   "riskFactors": [
-    {
-      "factorId": "sex",
-      "name": "Biological Sex",
-      "modifiable": false,
-      "evidenceLevel": "high",
-      "requiredFields": [
-        {
-          "path": "demographics.biologicalSex.value",
-          "alternatives": []
-        }
-      ],
-      "mapping": {
-        "type": "categorical",
-        "strategy": "lookup",
-        "categories": [
-          { "value": "male", "hazardRatio": 3.0 },
-          { "value": "female", "hazardRatio": 1.0 }
-        ],
-        "referenceCategory": "female",
-        "notes": "Males have 3-4x higher risk"
-      }
-    },
     {
       "factorId": "gerd",
       "name": "GERD (Gastroesophageal Reflux Disease)",
@@ -111,10 +129,9 @@
       "factorId": "barretts_esophagus",
       "name": "Barrett's Esophagus",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "citation": "Barrett's Esophagus Cancer Risk",
       "doi": "10.1056/NEJMoa1306209",
-      "evidenceLevel": "cohort",
       "notes": "Barrett's esophagus HR~10-40 for esophageal adenocarcinoma; surveillance recommended",
       "requiredFields": [
         {
@@ -143,9 +160,18 @@
         "type": "categorical",
         "strategy": "lookup",
         "categories": [
-          { "value": "never", "hazardRatio": 1.0 },
-          { "value": "former", "hazardRatio": 1.8 },
-          { "value": "current", "hazardRatio": 3.0 }
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "former",
+            "hazardRatio": 1.8
+          },
+          {
+            "value": "current",
+            "hazardRatio": 3.0
+          }
         ],
         "referenceCategory": "never"
       }
@@ -167,7 +193,10 @@
         "coefficients": {
           "slope": 0.04
         },
-        "validRange": [0, 50],
+        "validRange": [
+          0,
+          50
+        ],
         "notes": "Heavy drinking increases squamous cell carcinoma risk"
       }
     },
@@ -190,12 +219,27 @@
         "type": "derived",
         "strategy": "bmi_lookup",
         "points": [
-          { "value": 20, "hazardRatio": 1.0 },
-          { "value": 25, "hazardRatio": 1.2 },
-          { "value": 30, "hazardRatio": 1.5 },
-          { "value": 35, "hazardRatio": 1.8 }
+          {
+            "value": 20,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 25,
+            "hazardRatio": 1.2
+          },
+          {
+            "value": 30,
+            "hazardRatio": 1.5
+          },
+          {
+            "value": 35,
+            "hazardRatio": 1.8
+          }
         ],
-        "validRange": [18, 50],
+        "validRange": [
+          18,
+          50
+        ],
         "notes": "Obesity increases adenocarcinoma risk"
       }
     }

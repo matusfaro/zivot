@@ -38,6 +38,72 @@ export function getValueAtPath(profile: UserProfile, path: string): unknown {
 }
 
 /**
+ * Extract a primitive value from a profile path, handling both TimeSeries
+ * ("...mostRecent.value", falling back to the last dataPoint when mostRecent
+ * is unset) and DataPoint unwrapping. This is the single path resolver shared
+ * by FactorAdjuster and ModifierAdjuster so both interpret model paths
+ * identically.
+ */
+export function extractPathValue(
+  profile: UserProfile,
+  path: string
+): number | string | boolean | null {
+  // Paths containing "mostRecent" address a TimeSeries
+  if (path.includes('mostRecent')) {
+    const [basePath, remainingPath] = path.split('.mostRecent');
+
+    const timeSeries = getValueAtPath(profile, basePath) as
+      | { mostRecent?: unknown; dataPoints?: unknown[] }
+      | null;
+    if (!timeSeries) return null;
+
+    const mostRecent =
+      timeSeries.mostRecent ??
+      (timeSeries.dataPoints && timeSeries.dataPoints[timeSeries.dataPoints.length - 1]);
+    if (!mostRecent) return null;
+
+    if (remainingPath) {
+      // Continue down the path (e.g., ".value.systolic")
+      const nestedValue = getValueAtPath(mostRecent as UserProfile, remainingPath.substring(1));
+      if (
+        typeof nestedValue === 'number' ||
+        typeof nestedValue === 'string' ||
+        typeof nestedValue === 'boolean'
+      ) {
+        return nestedValue;
+      }
+      return null;
+    }
+
+    if (typeof mostRecent === 'object' && mostRecent !== null && 'value' in mostRecent) {
+      const value = (mostRecent as { value: unknown }).value;
+      if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean') {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  // Regular path extraction
+  const value = getValueAtPath(profile, path);
+
+  // Unwrap DataPoint if needed
+  if (value && typeof value === 'object' && 'value' in value && 'provenance' in value) {
+    const unwrapped = (value as { value: unknown }).value;
+    if (typeof unwrapped === 'number' || typeof unwrapped === 'string' || typeof unwrapped === 'boolean') {
+      return unwrapped;
+    }
+    return null;
+  }
+
+  if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean') {
+    return value;
+  }
+
+  return null;
+}
+
+/**
  * Extract a DataPoint value (automatically unwraps .value)
  */
 export function getDataPointValue<T>(profile: UserProfile, path: string): T | null {

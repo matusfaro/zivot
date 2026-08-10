@@ -26,54 +26,109 @@
       {
         "id": "white_us",
         "applicability": {
-          "sex": "both",
-          "ethnicity": ["white", "caucasian"],
-          "region": ["US"],
-          "ageRange": [30, 85]
+          "ethnicity": [
+            "white",
+            "caucasian"
+          ],
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            30,
+            85
+          ]
         },
         "source": "SEER 21 2017-2021; 10-yr relative survival 93% localized → 0.7% incidence to mortality conversion",
         "url": "https://seer.cancer.gov/statfacts/html/melan.html",
         "notes": "Whites 25x higher incidence than other groups",
         "ageRiskMapping": [
-          {"age": 30, "risk": 0.0002},
-          {"age": 40, "risk": 0.0004},
-          {"age": 50, "risk": 0.0007},
-          {"age": 60, "risk": 0.0010},
-          {"age": 70, "risk": 0.0013},
-          {"age": 80, "risk": 0.0015}
+          {
+            "age": 30,
+            "risk": 0.0002
+          },
+          {
+            "age": 40,
+            "risk": 0.0004
+          },
+          {
+            "age": 50,
+            "risk": 0.0007
+          },
+          {
+            "age": 60,
+            "risk": 0.001
+          },
+          {
+            "age": 70,
+            "risk": 0.0013
+          },
+          {
+            "age": 80,
+            "risk": 0.0015
+          }
         ]
       },
       {
         "id": "hispanic_us",
         "applicability": {
-          "sex": "both",
-          "ethnicity": ["hispanic"],
-          "region": ["US"],
-          "ageRange": [30, 85]
+          "ethnicity": [
+            "hispanic"
+          ],
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            30,
+            85
+          ]
         },
         "source": "SEER Hispanic rates",
         "url": "https://seer.cancer.gov/statfacts/html/melan.html",
         "ageRiskMapping": [
-          {"age": 30, "risk": 0.00005},
-          {"age": 50, "risk": 0.0001},
-          {"age": 70, "risk": 0.00015}
+          {
+            "age": 30,
+            "risk": 5e-05
+          },
+          {
+            "age": 50,
+            "risk": 0.0001
+          },
+          {
+            "age": 70,
+            "risk": 0.00015
+          }
         ]
       },
       {
         "id": "asian_us",
         "applicability": {
-          "sex": "both",
-          "ethnicity": ["asian"],
-          "region": ["US"],
-          "ageRange": [30, 85]
+          "ethnicity": [
+            "asian"
+          ],
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            30,
+            85
+          ]
         },
         "source": "SEER Asian/Pacific Islander",
         "url": "https://seer.cancer.gov/statfacts/html/melan.html",
         "notes": "Acral lentiginous subtype more common",
         "ageRiskMapping": [
-          {"age": 30, "risk": 0.00002},
-          {"age": 50, "risk": 0.00004},
-          {"age": 70, "risk": 0.00006}
+          {
+            "age": 30,
+            "risk": 2e-05
+          },
+          {
+            "age": 50,
+            "risk": 4e-05
+          },
+          {
+            "age": 70,
+            "risk": 6e-05
+          }
         ]
       }
     ]
@@ -90,12 +145,20 @@
       "doi": "10.1016/j.ejca.2005.03.034",
       "evidenceLevel": "meta_analysis",
       "notes": "9 studies, n=12k cases; adjusted for sun exposure/phenotype. Mechanism: CDKN2A germline mutations.",
-      "requiredFields": [{"path": "medicalHistory.familyHistory", "required": false}],
+      "requiredFields": [
+        {
+          "path": "medicalHistory.familyHistory",
+          "required": false
+        }
+      ],
       "mapping": {
         "type": "boolean",
         "trueHazardRatio": 2.0,
         "falseHazardRatio": 1.0,
-        "confidence": [1.6, 2.5]
+        "confidence": [
+          1.6,
+          2.5
+        ]
       }
     },
     {
@@ -109,17 +172,37 @@
       "doi": "10.1016/j.annepidem.2008.04.006",
       "evidenceLevel": "meta_analysis",
       "notes": "Each sunburn HR 1.6-2.0; childhood sunburns strongest effect.",
-      "requiredFields": [{"path": "medicalHistory.sunExposure.sunburns.value", "required": false}],
+      "requiredFields": [
+        {
+          "path": "medicalHistory.sunExposure.sunburns.value",
+          "required": false
+        }
+      ],
       "mapping": {
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          {"value": 0, "hazardRatio": 1.0},
-          {"value": 2, "hazardRatio": 1.5},
-          {"value": 5, "hazardRatio": 2.0},
-          {"value": 10, "hazardRatio": 2.5}
+          {
+            "value": 0,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 2,
+            "hazardRatio": 1.5
+          },
+          {
+            "value": 5,
+            "hazardRatio": 2.0
+          },
+          {
+            "value": 10,
+            "hazardRatio": 2.5
+          }
         ],
-        "validRange": [0, 50]
+        "validRange": [
+          0,
+          50
+        ]
       }
     }
   ]

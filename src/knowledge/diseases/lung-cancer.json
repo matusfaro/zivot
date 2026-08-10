@@ -32,42 +32,164 @@
         "id": "never_smoker_male",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [40, 79]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            79
+          ]
         },
         "source": "SEER Cancer Statistics Review - Lung and Bronchus Cancer, NCI",
         "url": "https://seer.cancer.gov/statfacts/html/lungb.html",
         "notes": "Never-smoker baseline rates extrapolated from population data accounting for smoking prevalence",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.00015, "confidence": [0.00010, 0.00020] },
-          { "age": 45, "risk": 0.00025, "confidence": [0.00018, 0.00032] },
-          { "age": 50, "risk": 0.00040, "confidence": [0.00032, 0.00048] },
-          { "age": 55, "risk": 0.00065, "confidence": [0.00055, 0.00075] },
-          { "age": 60, "risk": 0.00100, "confidence": [0.00088, 0.00112] },
-          { "age": 65, "risk": 0.00145, "confidence": [0.00130, 0.00160] },
-          { "age": 70, "risk": 0.00200, "confidence": [0.00182, 0.00218] },
-          { "age": 75, "risk": 0.00265, "confidence": [0.00245, 0.00285] }
+          {
+            "age": 40,
+            "risk": 0.00015,
+            "confidence": [
+              0.0001,
+              0.0002
+            ]
+          },
+          {
+            "age": 45,
+            "risk": 0.00025,
+            "confidence": [
+              0.00018,
+              0.00032
+            ]
+          },
+          {
+            "age": 50,
+            "risk": 0.0004,
+            "confidence": [
+              0.00032,
+              0.00048
+            ]
+          },
+          {
+            "age": 55,
+            "risk": 0.00065,
+            "confidence": [
+              0.00055,
+              0.00075
+            ]
+          },
+          {
+            "age": 60,
+            "risk": 0.001,
+            "confidence": [
+              0.00088,
+              0.00112
+            ]
+          },
+          {
+            "age": 65,
+            "risk": 0.00145,
+            "confidence": [
+              0.0013,
+              0.0016
+            ]
+          },
+          {
+            "age": 70,
+            "risk": 0.002,
+            "confidence": [
+              0.00182,
+              0.00218
+            ]
+          },
+          {
+            "age": 75,
+            "risk": 0.00265,
+            "confidence": [
+              0.00245,
+              0.00285
+            ]
+          }
         ]
       },
       {
         "id": "never_smoker_female",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [40, 79]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            79
+          ]
         },
         "source": "SEER Cancer Statistics Review - Lung and Bronchus Cancer, NCI",
         "url": "https://seer.cancer.gov/statfacts/html/lungb.html",
         "notes": "Never-smoker baseline rates extrapolated from population data accounting for smoking prevalence",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.00020, "confidence": [0.00014, 0.00026] },
-          { "age": 45, "risk": 0.00032, "confidence": [0.00025, 0.00039] },
-          { "age": 50, "risk": 0.00052, "confidence": [0.00044, 0.00060] },
-          { "age": 55, "risk": 0.00080, "confidence": [0.00070, 0.00090] },
-          { "age": 60, "risk": 0.00120, "confidence": [0.00108, 0.00132] },
-          { "age": 65, "risk": 0.00170, "confidence": [0.00155, 0.00185] },
-          { "age": 70, "risk": 0.00230, "confidence": [0.00212, 0.00248] },
-          { "age": 75, "risk": 0.00300, "confidence": [0.00278, 0.00322] }
+          {
+            "age": 40,
+            "risk": 0.0002,
+            "confidence": [
+              0.00014,
+              0.00026
+            ]
+          },
+          {
+            "age": 45,
+            "risk": 0.00032,
+            "confidence": [
+              0.00025,
+              0.00039
+            ]
+          },
+          {
+            "age": 50,
+            "risk": 0.00052,
+            "confidence": [
+              0.00044,
+              0.0006
+            ]
+          },
+          {
+            "age": 55,
+            "risk": 0.0008,
+            "confidence": [
+              0.0007,
+              0.0009
+            ]
+          },
+          {
+            "age": 60,
+            "risk": 0.0012,
+            "confidence": [
+              0.00108,
+              0.00132
+            ]
+          },
+          {
+            "age": 65,
+            "risk": 0.0017,
+            "confidence": [
+              0.00155,
+              0.00185
+            ]
+          },
+          {
+            "age": 70,
+            "risk": 0.0023,
+            "confidence": [
+              0.00212,
+              0.00248
+            ]
+          },
+          {
+            "age": 75,
+            "risk": 0.003,
+            "confidence": [
+              0.00278,
+              0.00322
+            ]
+          }
         ]
       }
     ]
@@ -94,15 +216,67 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": 10, "hazardRatio": 5.0, "confidence": [4.50, 5.50] },
-          { "value": 20, "hazardRatio": 12.0, "confidence": [11.0, 13.0] },
-          { "value": 30, "hazardRatio": 20.0, "confidence": [18.5, 21.5] },
-          { "value": 40, "hazardRatio": 28.0, "confidence": [26.0, 30.0] },
-          { "value": 50, "hazardRatio": 35.0, "confidence": [32.5, 37.5] },
-          { "value": 60, "hazardRatio": 40.0, "confidence": [37.0, 43.0] }
+          {
+            "value": 0,
+            "hazardRatio": 1.0,
+            "confidence": [
+              0.95,
+              1.05
+            ]
+          },
+          {
+            "value": 10,
+            "hazardRatio": 5.0,
+            "confidence": [
+              4.5,
+              5.5
+            ]
+          },
+          {
+            "value": 20,
+            "hazardRatio": 12.0,
+            "confidence": [
+              11.0,
+              13.0
+            ]
+          },
+          {
+            "value": 30,
+            "hazardRatio": 20.0,
+            "confidence": [
+              18.5,
+              21.5
+            ]
+          },
+          {
+            "value": 40,
+            "hazardRatio": 28.0,
+            "confidence": [
+              26.0,
+              30.0
+            ]
+          },
+          {
+            "value": 50,
+            "hazardRatio": 35.0,
+            "confidence": [
+              32.5,
+              37.5
+            ]
+          },
+          {
+            "value": 60,
+            "hazardRatio": 40.0,
+            "confidence": [
+              37.0,
+              43.0
+            ]
+          }
         ],
-        "validRange": [0, 100]
+        "validRange": [
+          0,
+          100
+        ]
       }
     },
     {
@@ -133,12 +307,18 @@
           {
             "value": "former",
             "hazardRatio": 8.5,
-            "confidence": [7.80, 9.20]
+            "confidence": [
+              7.8,
+              9.2
+            ]
           },
           {
             "value": "current",
             "hazardRatio": 18.0,
-            "confidence": [16.5, 19.5]
+            "confidence": [
+              16.5,
+              19.5
+            ]
           }
         ]
       }
@@ -164,14 +344,59 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": 5, "hazardRatio": 0.75, "confidence": [0.68, 0.82] },
-          { "value": 10, "hazardRatio": 0.55, "confidence": [0.48, 0.62] },
-          { "value": 15, "hazardRatio": 0.40, "confidence": [0.34, 0.46] },
-          { "value": 20, "hazardRatio": 0.30, "confidence": [0.25, 0.35] },
-          { "value": 25, "hazardRatio": 0.25, "confidence": [0.20, 0.30] }
+          {
+            "value": 0,
+            "hazardRatio": 1.0,
+            "confidence": [
+              0.95,
+              1.05
+            ]
+          },
+          {
+            "value": 5,
+            "hazardRatio": 0.75,
+            "confidence": [
+              0.68,
+              0.82
+            ]
+          },
+          {
+            "value": 10,
+            "hazardRatio": 0.55,
+            "confidence": [
+              0.48,
+              0.62
+            ]
+          },
+          {
+            "value": 15,
+            "hazardRatio": 0.4,
+            "confidence": [
+              0.34,
+              0.46
+            ]
+          },
+          {
+            "value": 20,
+            "hazardRatio": 0.3,
+            "confidence": [
+              0.25,
+              0.35
+            ]
+          },
+          {
+            "value": 25,
+            "hazardRatio": 0.25,
+            "confidence": [
+              0.2,
+              0.3
+            ]
+          }
         ],
-        "validRange": [0, 50]
+        "validRange": [
+          0,
+          50
+        ]
       }
     },
     {
@@ -195,7 +420,10 @@
         "type": "boolean",
         "trueHazardRatio": 1.8,
         "falseHazardRatio": 1.0,
-        "confidence": [1.60, 2.00]
+        "confidence": [
+          1.6,
+          2.0
+        ]
       }
     },
     {
@@ -219,7 +447,10 @@
         "type": "boolean",
         "trueHazardRatio": 2.5,
         "falseHazardRatio": 1.0,
-        "confidence": [2.25, 2.75]
+        "confidence": [
+          2.25,
+          2.75
+        ]
       }
     },
     {
@@ -243,32 +474,9 @@
         "type": "boolean",
         "trueHazardRatio": 1.5,
         "falseHazardRatio": 1.0,
-        "confidence": [1.35, 1.65]
-      }
-    },
-    {
-      "factorId": "air_pollution_pm25_lung",
-      "name": "Air Pollution (PM2.5 Exposure)",
-      "type": "categorical",
-      "evidenceStrength": "strong",
-      "category": "Environmental",
-      "modifiable": false,
-      "citation": "Hamra et al. Outdoor particulate matter exposure and lung cancer: a systematic review and meta-analysis. Environ Health Perspect. 2014;122(9):906-11",
-      "doi": "10.1289/ehp.1408092",
-      "evidenceLevel": "meta_analysis",
-      "notes": "PM2.5 exposure increases lung cancer risk by ~9% per 10 µg/m³ increase. Mechanisms: DNA damage, oxidative stress, chronic inflammation",
-      "requiredFields": [
-        {
-          "path": "lifestyle.airQualityExposure.value",
-          "required": false
-        }
-      ],
-      "mapping": {
-        "type": "categorical",
-        "categories": [
-          { "value": "good", "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": "moderate", "hazardRatio": 1.04, "confidence": [1.01, 1.07] },
-          { "value": "poor", "hazardRatio": 1.09, "confidence": [1.04, 1.14] }
+        "confidence": [
+          1.35,
+          1.65
         ]
       }
     }

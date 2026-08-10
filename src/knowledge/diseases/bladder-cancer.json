@@ -32,71 +32,88 @@
         "id": "male_us",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Bladder Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/urinb.html",
         "notes": "Bladder cancer incidence; males 3-4x higher than females; strongly linked to smoking",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.00030 },
-          { "age": 50, "risk": 0.00070 },
-          { "age": 60, "risk": 0.00150 },
-          { "age": 70, "risk": 0.00280 },
-          { "age": 80, "risk": 0.00380 }
+          {
+            "age": 40,
+            "risk": 0.0003
+          },
+          {
+            "age": 50,
+            "risk": 0.0007
+          },
+          {
+            "age": 60,
+            "risk": 0.0015
+          },
+          {
+            "age": 70,
+            "risk": 0.0028
+          },
+          {
+            "age": 80,
+            "risk": 0.0038
+          }
         ]
       },
       {
         "id": "female_us",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Bladder Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/urinb.html",
         "notes": "Bladder cancer incidence; males 3-4x higher than females; strongly linked to smoking",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.00010 },
-          { "age": 50, "risk": 0.00025 },
-          { "age": 60, "risk": 0.00050 },
-          { "age": 70, "risk": 0.00095 },
-          { "age": 80, "risk": 0.00130 }
+          {
+            "age": 40,
+            "risk": 0.0001
+          },
+          {
+            "age": 50,
+            "risk": 0.00025
+          },
+          {
+            "age": 60,
+            "risk": 0.0005
+          },
+          {
+            "age": 70,
+            "risk": 0.00095
+          },
+          {
+            "age": 80,
+            "risk": 0.0013
+          }
         ]
       }
     ]
   },
   "riskFactors": [
     {
-      "factorId": "sex",
-      "name": "Biological Sex",
-      "modifiable": false,
-      "evidenceLevel": "high",
-      "requiredFields": [
-        {
-          "path": "demographics.biologicalSex.value",
-          "alternatives": []
-        }
-      ],
-      "mapping": {
-        "type": "categorical",
-        "strategy": "lookup",
-        "categories": [
-          { "value": "male", "hazardRatio": 3.5 },
-          { "value": "female", "hazardRatio": 1.0 }
-        ],
-        "referenceCategory": "female",
-        "notes": "Males have 3-4x higher risk"
-      }
-    },
-    {
       "factorId": "smoking_status",
       "name": "Smoking Status",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "citation": "Smoking and Bladder Cancer Meta-analysis",
       "doi": "10.1016/S1470-2045(14)70468-1",
-      "evidenceLevel": "meta_analysis",
       "notes": "Smoking HR~3-4 for bladder cancer; primary modifiable risk factor",
       "requiredFields": [
         {
@@ -108,9 +125,18 @@
         "type": "categorical",
         "strategy": "lookup",
         "categories": [
-          { "value": "never", "hazardRatio": 1.0 },
-          { "value": "former", "hazardRatio": 2.0 },
-          { "value": "current", "hazardRatio": 3.5 }
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "former",
+            "hazardRatio": 2.0
+          },
+          {
+            "value": "current",
+            "hazardRatio": 3.5
+          }
         ],
         "referenceCategory": "never"
       }
@@ -132,7 +158,10 @@
         "coefficients": {
           "slope": 0.02
         },
-        "validRange": [0, 100],
+        "validRange": [
+          0,
+          100
+        ],
         "notes": "Risk increases with cumulative smoking exposure"
       }
     },

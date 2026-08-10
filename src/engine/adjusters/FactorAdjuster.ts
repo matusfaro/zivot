@@ -6,7 +6,7 @@ import {
   BooleanRiskMapping,
 } from '../../types/knowledge/riskFactor';
 import {
-  getValueAtPath,
+  extractPathValue,
   calculateBMI,
   hasCondition,
   hasFamilyHistory,
@@ -302,54 +302,7 @@ export class FactorAdjuster {
    * Get value from a path, handling DataPoints and TimeSeries
    */
   private getValueFromPath(profile: UserProfile, path: string): number | string | boolean | null {
-    // Check if path contains "mostRecent" - indicates TimeSeries
-    if (path.includes('mostRecent')) {
-      const basePathParts = path.split('.mostRecent');
-      const basePath = basePathParts[0];
-      const remainingPath = basePathParts[1];
-
-      const timeSeries = getValueAtPath(profile, basePath) as any;
-      if (!timeSeries) return null;
-
-      const mostRecent = timeSeries.mostRecent || (timeSeries.dataPoints && timeSeries.dataPoints[timeSeries.dataPoints.length - 1]);
-      if (!mostRecent) return null;
-
-      if (remainingPath) {
-        // Continue down the path (e.g., .value.systolic)
-        const nestedValue = getValueAtPath(mostRecent as UserProfile, remainingPath.substring(1));
-        if (typeof nestedValue === 'number' || typeof nestedValue === 'string' || typeof nestedValue === 'boolean') {
-          return nestedValue;
-        }
-        return null;
-      }
-
-      if (typeof mostRecent === 'object' && mostRecent !== null && 'value' in mostRecent) {
-        const value = (mostRecent as { value: unknown }).value;
-        if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean') {
-          return value;
-        }
-      }
-      return null;
-    }
-
-    // Regular path extraction
-    const value = getValueAtPath(profile, path);
-
-    // Unwrap DataPoint if needed
-    if (value && typeof value === 'object' && 'value' in value && 'provenance' in value) {
-      const unwrapped = (value as { value: unknown }).value;
-      if (typeof unwrapped === 'number' || typeof unwrapped === 'string' || typeof unwrapped === 'boolean') {
-        return unwrapped;
-      }
-      return null;
-    }
-
-    // Return if it's a primitive type
-    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean') {
-      return value;
-    }
-
-    return null;
+    return extractPathValue(profile, path);
   }
 
   // ========================================

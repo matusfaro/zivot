@@ -32,44 +32,108 @@
         "id": "male_us",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [16, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            16,
+            100
+          ]
         },
         "source": "NHTSA FARS Database",
         "url": "https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars",
         "notes": "National crash fatality rates by age/sex; young males 3x baseline risk",
         "ageRiskMapping": [
-          { "age": 16, "risk": 0.0015 },
-          { "age": 20, "risk": 0.00133 },
-          { "age": 25, "risk": 0.00100 },
-          { "age": 35, "risk": 0.00080 },
-          { "age": 45, "risk": 0.00070 },
-          { "age": 55, "risk": 0.00060 },
-          { "age": 65, "risk": 0.00055 },
-          { "age": 75, "risk": 0.00070 },
-          { "age": 85, "risk": 0.00090 }
+          {
+            "age": 16,
+            "risk": 0.0015
+          },
+          {
+            "age": 20,
+            "risk": 0.00133
+          },
+          {
+            "age": 25,
+            "risk": 0.001
+          },
+          {
+            "age": 35,
+            "risk": 0.0008
+          },
+          {
+            "age": 45,
+            "risk": 0.0007
+          },
+          {
+            "age": 55,
+            "risk": 0.0006
+          },
+          {
+            "age": 65,
+            "risk": 0.00055
+          },
+          {
+            "age": 75,
+            "risk": 0.0007
+          },
+          {
+            "age": 85,
+            "risk": 0.0009
+          }
         ]
       },
       {
         "id": "female_us",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [16, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            16,
+            100
+          ]
         },
         "source": "NHTSA FARS Database",
         "url": "https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars",
         "notes": "National crash fatality rates by age/sex; young males 3x baseline risk",
         "ageRiskMapping": [
-          { "age": 16, "risk": 0.00070 },
-          { "age": 20, "risk": 0.00049 },
-          { "age": 25, "risk": 0.00040 },
-          { "age": 35, "risk": 0.00035 },
-          { "age": 45, "risk": 0.00030 },
-          { "age": 55, "risk": 0.00028 },
-          { "age": 65, "risk": 0.00030 },
-          { "age": 75, "risk": 0.00040 },
-          { "age": 85, "risk": 0.00050 }
+          {
+            "age": 16,
+            "risk": 0.0007
+          },
+          {
+            "age": 20,
+            "risk": 0.00049
+          },
+          {
+            "age": 25,
+            "risk": 0.0004
+          },
+          {
+            "age": 35,
+            "risk": 0.00035
+          },
+          {
+            "age": 45,
+            "risk": 0.0003
+          },
+          {
+            "age": 55,
+            "risk": 0.00028
+          },
+          {
+            "age": 65,
+            "risk": 0.0003
+          },
+          {
+            "age": 75,
+            "risk": 0.0004
+          },
+          {
+            "age": 85,
+            "risk": 0.0005
+          }
         ]
       }
     ]
@@ -90,11 +154,41 @@
         "type": "categorical",
         "strategy": "derived_from_age",
         "categories": [
-          { "ageRange": [16, 19], "hazardRatio": 3.0 },
-          { "ageRange": [20, 24], "hazardRatio": 2.5 },
-          { "ageRange": [25, 64], "hazardRatio": 1.0 },
-          { "ageRange": [65, 74], "hazardRatio": 1.1 },
-          { "ageRange": [75, 100], "hazardRatio": 1.5 }
+          {
+            "ageRange": [
+              16,
+              19
+            ],
+            "hazardRatio": 3.0
+          },
+          {
+            "ageRange": [
+              20,
+              24
+            ],
+            "hazardRatio": 2.5
+          },
+          {
+            "ageRange": [
+              25,
+              64
+            ],
+            "hazardRatio": 1.0
+          },
+          {
+            "ageRange": [
+              65,
+              74
+            ],
+            "hazardRatio": 1.1
+          },
+          {
+            "ageRange": [
+              75,
+              100
+            ],
+            "hazardRatio": 1.5
+          }
         ],
         "referenceCategory": "25-64"
       }
@@ -112,12 +206,15 @@
       ],
       "mapping": {
         "type": "continuous",
-        "strategy": "log_linear",
+        "strategy": "linear",
         "coefficients": {
-          "slope": 0.00003
+          "slope": 3e-05
         },
-        "validRange": [0, 50000],
-        "notes": "HR increases logarithmically with exposure (miles driven)"
+        "validRange": [
+          0,
+          50000
+        ],
+        "notes": "HR = exp(3e-05 × miles/year); exposure-proportional risk"
       }
     },
     {
@@ -138,10 +235,22 @@
         "type": "categorical",
         "strategy": "lookup",
         "categories": [
-          { "value": "always", "hazardRatio": 1.0 },
-          { "value": "usually", "hazardRatio": 1.5 },
-          { "value": "sometimes", "hazardRatio": 2.5 },
-          { "value": "never", "hazardRatio": 4.0 }
+          {
+            "value": "always",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "usually",
+            "hazardRatio": 1.5
+          },
+          {
+            "value": "sometimes",
+            "hazardRatio": 2.5
+          },
+          {
+            "value": "never",
+            "hazardRatio": 4.0
+          }
         ],
         "referenceCategory": "always"
       }
@@ -163,7 +272,10 @@
         "coefficients": {
           "slope": 0.05
         },
-        "validRange": [0, 50],
+        "validRange": [
+          0,
+          50
+        ],
         "notes": "HR increases with drinking due to impaired driving risk"
       }
     },
@@ -182,9 +294,12 @@
         "type": "continuous",
         "strategy": "linear",
         "coefficients": {
-          "slope": 0.20
+          "slope": 0.2
         },
-        "validRange": [0, 10],
+        "validRange": [
+          0,
+          10
+        ],
         "notes": "Each violation increases risk by ~20%"
       }
     },
@@ -203,10 +318,22 @@
         "type": "categorical",
         "strategy": "lookup",
         "categories": [
-          { "value": "never", "hazardRatio": 1.0 },
-          { "value": "rare", "hazardRatio": 1.2 },
-          { "value": "occasional", "hazardRatio": 1.5 },
-          { "value": "frequent", "hazardRatio": 2.0 }
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "rare",
+            "hazardRatio": 1.2
+          },
+          {
+            "value": "occasional",
+            "hazardRatio": 1.5
+          },
+          {
+            "value": "frequent",
+            "hazardRatio": 2.0
+          }
         ],
         "referenceCategory": "never"
       }
@@ -226,10 +353,22 @@
         "type": "categorical",
         "strategy": "lookup",
         "categories": [
-          { "value": "urban", "hazardRatio": 0.8 },
-          { "value": "suburban", "hazardRatio": 1.0 },
-          { "value": "rural", "hazardRatio": 1.3 },
-          { "value": "mixed", "hazardRatio": 1.0 }
+          {
+            "value": "urban",
+            "hazardRatio": 0.8
+          },
+          {
+            "value": "suburban",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "rural",
+            "hazardRatio": 1.3
+          },
+          {
+            "value": "mixed",
+            "hazardRatio": 1.0
+          }
         ],
         "referenceCategory": "suburban"
       }

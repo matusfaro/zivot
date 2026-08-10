@@ -32,46 +32,196 @@
         "id": "average_male_us",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [30, 79]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            30,
+            79
+          ]
         },
         "source": "Framingham Offspring Study Diabetes Risk Score",
         "doi": "10.2337/dc07-0954",
         "notes": "Based on 8-year follow-up data from Framingham Offspring Study; extrapolated to 10-year risk",
         "ageRiskMapping": [
-          { "age": 30, "risk": 0.035, "confidence": [0.028, 0.042] },
-          { "age": 35, "risk": 0.045, "confidence": [0.038, 0.052] },
-          { "age": 40, "risk": 0.060, "confidence": [0.052, 0.068] },
-          { "age": 45, "risk": 0.080, "confidence": [0.072, 0.088] },
-          { "age": 50, "risk": 0.105, "confidence": [0.095, 0.115] },
-          { "age": 55, "risk": 0.135, "confidence": [0.122, 0.148] },
-          { "age": 60, "risk": 0.165, "confidence": [0.150, 0.180] },
-          { "age": 65, "risk": 0.195, "confidence": [0.178, 0.212] },
-          { "age": 70, "risk": 0.220, "confidence": [0.202, 0.238] },
-          { "age": 75, "risk": 0.240, "confidence": [0.220, 0.260] }
+          {
+            "age": 30,
+            "risk": 0.035,
+            "confidence": [
+              0.028,
+              0.042
+            ]
+          },
+          {
+            "age": 35,
+            "risk": 0.045,
+            "confidence": [
+              0.038,
+              0.052
+            ]
+          },
+          {
+            "age": 40,
+            "risk": 0.06,
+            "confidence": [
+              0.052,
+              0.068
+            ]
+          },
+          {
+            "age": 45,
+            "risk": 0.08,
+            "confidence": [
+              0.072,
+              0.088
+            ]
+          },
+          {
+            "age": 50,
+            "risk": 0.105,
+            "confidence": [
+              0.095,
+              0.115
+            ]
+          },
+          {
+            "age": 55,
+            "risk": 0.135,
+            "confidence": [
+              0.122,
+              0.148
+            ]
+          },
+          {
+            "age": 60,
+            "risk": 0.165,
+            "confidence": [
+              0.15,
+              0.18
+            ]
+          },
+          {
+            "age": 65,
+            "risk": 0.195,
+            "confidence": [
+              0.178,
+              0.212
+            ]
+          },
+          {
+            "age": 70,
+            "risk": 0.22,
+            "confidence": [
+              0.202,
+              0.238
+            ]
+          },
+          {
+            "age": 75,
+            "risk": 0.24,
+            "confidence": [
+              0.22,
+              0.26
+            ]
+          }
         ]
       },
       {
         "id": "average_female_us",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [30, 79]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            30,
+            79
+          ]
         },
         "source": "Framingham Offspring Study Diabetes Risk Score",
         "doi": "10.2337/dc07-0954",
         "notes": "Based on 8-year follow-up data from Framingham Offspring Study; extrapolated to 10-year risk",
         "ageRiskMapping": [
-          { "age": 30, "risk": 0.040, "confidence": [0.033, 0.047] },
-          { "age": 35, "risk": 0.052, "confidence": [0.045, 0.059] },
-          { "age": 40, "risk": 0.070, "confidence": [0.062, 0.078] },
-          { "age": 45, "risk": 0.092, "confidence": [0.083, 0.101] },
-          { "age": 50, "risk": 0.120, "confidence": [0.108, 0.132] },
-          { "age": 55, "risk": 0.152, "confidence": [0.138, 0.166] },
-          { "age": 60, "risk": 0.185, "confidence": [0.168, 0.202] },
-          { "age": 65, "risk": 0.215, "confidence": [0.195, 0.235] },
-          { "age": 70, "risk": 0.240, "confidence": [0.218, 0.262] },
-          { "age": 75, "risk": 0.260, "confidence": [0.238, 0.282] }
+          {
+            "age": 30,
+            "risk": 0.04,
+            "confidence": [
+              0.033,
+              0.047
+            ]
+          },
+          {
+            "age": 35,
+            "risk": 0.052,
+            "confidence": [
+              0.045,
+              0.059
+            ]
+          },
+          {
+            "age": 40,
+            "risk": 0.07,
+            "confidence": [
+              0.062,
+              0.078
+            ]
+          },
+          {
+            "age": 45,
+            "risk": 0.092,
+            "confidence": [
+              0.083,
+              0.101
+            ]
+          },
+          {
+            "age": 50,
+            "risk": 0.12,
+            "confidence": [
+              0.108,
+              0.132
+            ]
+          },
+          {
+            "age": 55,
+            "risk": 0.152,
+            "confidence": [
+              0.138,
+              0.166
+            ]
+          },
+          {
+            "age": 60,
+            "risk": 0.185,
+            "confidence": [
+              0.168,
+              0.202
+            ]
+          },
+          {
+            "age": 65,
+            "risk": 0.215,
+            "confidence": [
+              0.195,
+              0.235
+            ]
+          },
+          {
+            "age": 70,
+            "risk": 0.24,
+            "confidence": [
+              0.218,
+              0.262
+            ]
+          },
+          {
+            "age": 75,
+            "risk": 0.26,
+            "confidence": [
+              0.238,
+              0.282
+            ]
+          }
         ]
       }
     ]
@@ -90,7 +240,7 @@
       "notes": "Strongest modifiable risk factor; BMI 30-35 increases risk ~8x, BMI >40 increases risk ~20x compared to BMI <23",
       "requiredFields": [
         {
-          "path": "biometrics.weight.mostRecent.value",
+          "path": "biometrics.weight.mostRecent.value.value",
           "required": false
         }
       ],
@@ -98,15 +248,67 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 20, "hazardRatio": 0.50, "confidence": [0.42, 0.58] },
-          { "value": 23, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": 27, "hazardRatio": 2.5, "confidence": [2.30, 2.70] },
-          { "value": 30, "hazardRatio": 4.0, "confidence": [3.70, 4.30] },
-          { "value": 35, "hazardRatio": 8.0, "confidence": [7.40, 8.60] },
-          { "value": 40, "hazardRatio": 14.0, "confidence": [13.0, 15.0] },
-          { "value": 45, "hazardRatio": 20.0, "confidence": [18.5, 21.5] }
+          {
+            "value": 20,
+            "hazardRatio": 0.5,
+            "confidence": [
+              0.42,
+              0.58
+            ]
+          },
+          {
+            "value": 23,
+            "hazardRatio": 1.0,
+            "confidence": [
+              0.95,
+              1.05
+            ]
+          },
+          {
+            "value": 27,
+            "hazardRatio": 2.5,
+            "confidence": [
+              2.3,
+              2.7
+            ]
+          },
+          {
+            "value": 30,
+            "hazardRatio": 4.0,
+            "confidence": [
+              3.7,
+              4.3
+            ]
+          },
+          {
+            "value": 35,
+            "hazardRatio": 8.0,
+            "confidence": [
+              7.4,
+              8.6
+            ]
+          },
+          {
+            "value": 40,
+            "hazardRatio": 14.0,
+            "confidence": [
+              13.0,
+              15.0
+            ]
+          },
+          {
+            "value": 45,
+            "hazardRatio": 20.0,
+            "confidence": [
+              18.5,
+              21.5
+            ]
+          }
         ],
-        "validRange": [15, 50]
+        "validRange": [
+          15,
+          50
+        ]
       }
     },
     {
@@ -130,13 +332,51 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 80, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": 90, "hazardRatio": 1.5, "confidence": [1.38, 1.62] },
-          { "value": 100, "hazardRatio": 2.5, "confidence": [2.30, 2.70] },
-          { "value": 110, "hazardRatio": 4.0, "confidence": [3.70, 4.30] },
-          { "value": 120, "hazardRatio": 6.0, "confidence": [5.50, 6.50] }
+          {
+            "value": 80,
+            "hazardRatio": 1.0,
+            "confidence": [
+              0.95,
+              1.05
+            ]
+          },
+          {
+            "value": 90,
+            "hazardRatio": 1.5,
+            "confidence": [
+              1.38,
+              1.62
+            ]
+          },
+          {
+            "value": 100,
+            "hazardRatio": 2.5,
+            "confidence": [
+              2.3,
+              2.7
+            ]
+          },
+          {
+            "value": 110,
+            "hazardRatio": 4.0,
+            "confidence": [
+              3.7,
+              4.3
+            ]
+          },
+          {
+            "value": 120,
+            "hazardRatio": 6.0,
+            "confidence": [
+              5.5,
+              6.5
+            ]
+          }
         ],
-        "validRange": [60, 150]
+        "validRange": [
+          60,
+          150
+        ]
       }
     },
     {
@@ -167,17 +407,26 @@
           {
             "value": "one_parent",
             "hazardRatio": 2.3,
-            "confidence": [2.10, 2.50]
+            "confidence": [
+              2.1,
+              2.5
+            ]
           },
           {
             "value": "both_parents",
             "hazardRatio": 5.0,
-            "confidence": [4.50, 5.50]
+            "confidence": [
+              4.5,
+              5.5
+            ]
           },
           {
             "value": "sibling",
             "hazardRatio": 2.5,
-            "confidence": [2.30, 2.70]
+            "confidence": [
+              2.3,
+              2.7
+            ]
           }
         ]
       }
@@ -203,14 +452,59 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.8, "confidence": [1.65, 1.95] },
-          { "value": 30, "hazardRatio": 1.4, "confidence": [1.30, 1.50] },
-          { "value": 75, "hazardRatio": 1.15, "confidence": [1.08, 1.22] },
-          { "value": 150, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": 300, "hazardRatio": 0.75, "confidence": [0.68, 0.82] },
-          { "value": 450, "hazardRatio": 0.60, "confidence": [0.52, 0.68] }
+          {
+            "value": 0,
+            "hazardRatio": 1.8,
+            "confidence": [
+              1.65,
+              1.95
+            ]
+          },
+          {
+            "value": 30,
+            "hazardRatio": 1.4,
+            "confidence": [
+              1.3,
+              1.5
+            ]
+          },
+          {
+            "value": 75,
+            "hazardRatio": 1.15,
+            "confidence": [
+              1.08,
+              1.22
+            ]
+          },
+          {
+            "value": 150,
+            "hazardRatio": 1.0,
+            "confidence": [
+              0.95,
+              1.05
+            ]
+          },
+          {
+            "value": 300,
+            "hazardRatio": 0.75,
+            "confidence": [
+              0.68,
+              0.82
+            ]
+          },
+          {
+            "value": 450,
+            "hazardRatio": 0.6,
+            "confidence": [
+              0.52,
+              0.68
+            ]
+          }
         ],
-        "validRange": [0, 600]
+        "validRange": [
+          0,
+          600
+        ]
       }
     },
     {
@@ -234,7 +528,10 @@
         "type": "boolean",
         "trueHazardRatio": 5.5,
         "falseHazardRatio": 1.0,
-        "confidence": [5.00, 6.00]
+        "confidence": [
+          5.0,
+          6.0
+        ]
       }
     },
     {
@@ -258,7 +555,10 @@
         "type": "boolean",
         "trueHazardRatio": 2.5,
         "falseHazardRatio": 1.0,
-        "confidence": [2.30, 2.70]
+        "confidence": [
+          2.3,
+          2.7
+        ]
       }
     },
     {
@@ -282,7 +582,10 @@
         "type": "boolean",
         "trueHazardRatio": 7.5,
         "falseHazardRatio": 1.0,
-        "confidence": [6.80, 8.20]
+        "confidence": [
+          6.8,
+          8.2
+        ]
       }
     },
     {
@@ -306,7 +609,10 @@
         "type": "boolean",
         "trueHazardRatio": 2.5,
         "falseHazardRatio": 1.0,
-        "confidence": [2.25, 2.75]
+        "confidence": [
+          2.25,
+          2.75
+        ]
       }
     },
     {
@@ -330,13 +636,51 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.4, "confidence": [1.30, 1.50] },
-          { "value": 1, "hazardRatio": 1.2, "confidence": [1.12, 1.28] },
-          { "value": 3, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": 5, "hazardRatio": 0.85, "confidence": [0.78, 0.92] },
-          { "value": 7, "hazardRatio": 0.72, "confidence": [0.65, 0.79] }
+          {
+            "value": 0,
+            "hazardRatio": 1.4,
+            "confidence": [
+              1.3,
+              1.5
+            ]
+          },
+          {
+            "value": 1,
+            "hazardRatio": 1.2,
+            "confidence": [
+              1.12,
+              1.28
+            ]
+          },
+          {
+            "value": 3,
+            "hazardRatio": 1.0,
+            "confidence": [
+              0.95,
+              1.05
+            ]
+          },
+          {
+            "value": 5,
+            "hazardRatio": 0.85,
+            "confidence": [
+              0.78,
+              0.92
+            ]
+          },
+          {
+            "value": 7,
+            "hazardRatio": 0.72,
+            "confidence": [
+              0.65,
+              0.79
+            ]
+          }
         ],
-        "validRange": [0, 10]
+        "validRange": [
+          0,
+          10
+        ]
       }
     },
     {
@@ -350,17 +694,41 @@
       "doi": "10.2337/dc14-2073",
       "evidenceLevel": "meta_analysis",
       "notes": "U-shaped curve: <6h or >8h increases risk. 7h optimal.",
-      "requiredFields": [{"path": "lifestyle.sleep.averageHoursPerNight.mostRecent.value", "required": false}],
+      "requiredFields": [
+        {
+          "path": "lifestyle.sleep.averageHoursPerNight.mostRecent.value",
+          "required": false
+        }
+      ],
       "mapping": {
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          {"value": 7, "hazardRatio": 1.0},
-          {"value": 5, "hazardRatio": 1.5, "confidence": [1.3, 1.7]},
-          {"value": 4, "hazardRatio": 2.1},
-          {"value": 9, "hazardRatio": 1.4}
+          {
+            "value": 7,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 5,
+            "hazardRatio": 1.5,
+            "confidence": [
+              1.3,
+              1.7
+            ]
+          },
+          {
+            "value": 4,
+            "hazardRatio": 2.1
+          },
+          {
+            "value": 9,
+            "hazardRatio": 1.4
+          }
         ],
-        "validRange": [3, 12]
+        "validRange": [
+          3,
+          12
+        ]
       }
     }
   ]

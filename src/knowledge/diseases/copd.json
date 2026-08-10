@@ -26,34 +26,68 @@
         "id": "male_us",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "CDC WONDER Mortality Database - COPD",
         "url": "https://wonder.cdc.gov/",
         "notes": "COPD mortality rates by age/sex from national vital statistics",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.005 },
-          { "age": 55, "risk": 0.015 },
-          { "age": 65, "risk": 0.045 },
-          { "age": 75, "risk": 0.095 }
+          {
+            "age": 40,
+            "risk": 0.005
+          },
+          {
+            "age": 55,
+            "risk": 0.015
+          },
+          {
+            "age": 65,
+            "risk": 0.045
+          },
+          {
+            "age": 75,
+            "risk": 0.095
+          }
         ]
       },
       {
         "id": "female_us",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "CDC WONDER Mortality Database - COPD",
         "url": "https://wonder.cdc.gov/",
         "notes": "COPD mortality rates by age/sex from national vital statistics",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.003 },
-          { "age": 55, "risk": 0.010 },
-          { "age": 65, "risk": 0.032 },
-          { "age": 75, "risk": 0.075 }
+          {
+            "age": 40,
+            "risk": 0.003
+          },
+          {
+            "age": 55,
+            "risk": 0.01
+          },
+          {
+            "age": 65,
+            "risk": 0.032
+          },
+          {
+            "age": 75,
+            "risk": 0.075
+          }
         ]
       }
     ]
@@ -93,9 +127,18 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": "never", "hazardRatio": 1.0 },
-          { "value": "former", "hazardRatio": 1.3 },
-          { "value": "current", "hazardRatio": 2.1 }
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "former",
+            "hazardRatio": 1.3
+          },
+          {
+            "value": "current",
+            "hazardRatio": 2.1
+          }
         ]
       }
     },
@@ -114,14 +157,35 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.0 },
-          { "value": 10, "hazardRatio": 1.3 },
-          { "value": 20, "hazardRatio": 1.6 },
-          { "value": 30, "hazardRatio": 1.9 },
-          { "value": 40, "hazardRatio": 2.2 },
-          { "value": 50, "hazardRatio": 2.5 }
+          {
+            "value": 0,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 10,
+            "hazardRatio": 1.3
+          },
+          {
+            "value": 20,
+            "hazardRatio": 1.6
+          },
+          {
+            "value": 30,
+            "hazardRatio": 1.9
+          },
+          {
+            "value": 40,
+            "hazardRatio": 2.2
+          },
+          {
+            "value": 50,
+            "hazardRatio": 2.5
+          }
         ],
-        "validRange": [0, 100]
+        "validRange": [
+          0,
+          100
+        ]
       }
     },
     {
@@ -139,14 +203,35 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 16, "hazardRatio": 2.2 },
-          { "value": 18.5, "hazardRatio": 1.6 },
-          { "value": 21, "hazardRatio": 1.2 },
-          { "value": 25, "hazardRatio": 1.0 },
-          { "value": 30, "hazardRatio": 0.9 },
-          { "value": 35, "hazardRatio": 0.85 }
+          {
+            "value": 16,
+            "hazardRatio": 2.2
+          },
+          {
+            "value": 18.5,
+            "hazardRatio": 1.6
+          },
+          {
+            "value": 21,
+            "hazardRatio": 1.2
+          },
+          {
+            "value": 25,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 30,
+            "hazardRatio": 0.9
+          },
+          {
+            "value": 35,
+            "hazardRatio": 0.85
+          }
         ],
-        "validRange": [12, 50]
+        "validRange": [
+          12,
+          50
+        ]
       }
     },
     {
@@ -164,15 +249,39 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 20, "hazardRatio": 4.5 },
-          { "value": 30, "hazardRatio": 3.2 },
-          { "value": 40, "hazardRatio": 2.3 },
-          { "value": 50, "hazardRatio": 1.7 },
-          { "value": 60, "hazardRatio": 1.3 },
-          { "value": 70, "hazardRatio": 1.1 },
-          { "value": 80, "hazardRatio": 1.0 }
+          {
+            "value": 20,
+            "hazardRatio": 4.5
+          },
+          {
+            "value": 30,
+            "hazardRatio": 3.2
+          },
+          {
+            "value": 40,
+            "hazardRatio": 2.3
+          },
+          {
+            "value": 50,
+            "hazardRatio": 1.7
+          },
+          {
+            "value": 60,
+            "hazardRatio": 1.3
+          },
+          {
+            "value": 70,
+            "hazardRatio": 1.1
+          },
+          {
+            "value": 80,
+            "hazardRatio": 1.0
+          }
         ],
-        "validRange": [10, 100]
+        "validRange": [
+          10,
+          100
+        ]
       }
     },
     {
@@ -189,11 +298,41 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": ["none", "0"], "hazardRatio": 1.0 },
-          { "value": ["mild", "1"], "hazardRatio": 1.4 },
-          { "value": ["moderate", "2"], "hazardRatio": 2.0 },
-          { "value": ["severe", "3"], "hazardRatio": 3.2 },
-          { "value": ["very_severe", "4"], "hazardRatio": 4.8 }
+          {
+            "value": [
+              "none",
+              "0"
+            ],
+            "hazardRatio": 1.0
+          },
+          {
+            "value": [
+              "mild",
+              "1"
+            ],
+            "hazardRatio": 1.4
+          },
+          {
+            "value": [
+              "moderate",
+              "2"
+            ],
+            "hazardRatio": 2.0
+          },
+          {
+            "value": [
+              "severe",
+              "3"
+            ],
+            "hazardRatio": 3.2
+          },
+          {
+            "value": [
+              "very_severe",
+              "4"
+            ],
+            "hazardRatio": 4.8
+          }
         ]
       }
     },
@@ -211,36 +350,33 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": ["0", "none"], "hazardRatio": 1.0 },
-          { "value": ["1"], "hazardRatio": 1.4 },
-          { "value": ["2"], "hazardRatio": 1.9 },
-          { "value": ["3", "3+", "multiple"], "hazardRatio": 2.6 }
-        ]
-      }
-    },
-    {
-      "factorId": "air_pollution_pm25_copd",
-      "name": "Air Pollution (PM2.5 Exposure)",
-      "type": "categorical",
-      "evidenceStrength": "strong",
-      "category": "Environmental",
-      "modifiable": false,
-      "citation": "Liu et al. Ambient air pollution and COPD mortality: a systematic review and meta-analysis. Chronic Obstr Pulm Dis. 2021;8(3):433-442",
-      "doi": "10.15326/jcopdf.2021.0207",
-      "evidenceLevel": "meta_analysis",
-      "notes": "Long-term PM2.5 exposure increases COPD mortality risk by 8-12% per 10 µg/m³. Mechanisms: airway inflammation, oxidative stress, accelerated lung function decline",
-      "requiredFields": [
-        {
-          "path": "lifestyle.airQualityExposure.value",
-          "required": false
-        }
-      ],
-      "mapping": {
-        "type": "categorical",
-        "categories": [
-          { "value": "good", "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": "moderate", "hazardRatio": 1.05, "confidence": [1.02, 1.08] },
-          { "value": "poor", "hazardRatio": 1.10, "confidence": [1.05, 1.15] }
+          {
+            "value": [
+              "0",
+              "none"
+            ],
+            "hazardRatio": 1.0
+          },
+          {
+            "value": [
+              "1"
+            ],
+            "hazardRatio": 1.4
+          },
+          {
+            "value": [
+              "2"
+            ],
+            "hazardRatio": 1.9
+          },
+          {
+            "value": [
+              "3",
+              "3+",
+              "multiple"
+            ],
+            "hazardRatio": 2.6
+          }
         ]
       }
     }

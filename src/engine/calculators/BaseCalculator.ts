@@ -1,34 +1,38 @@
 import { UserProfile } from '../../types/user';
-import { DiseaseRisk, FactorContribution, ModifierContribution } from '../../types/risk/calculation';
+import { DiseaseRisk, FactorContribution } from '../../types/risk/calculation';
 import { DiseaseModel, BaselineRiskCurve } from '../../types/knowledge/disease';
-import { MortalityModifier } from '../../types/knowledge/mortalityModifier';
 import { FactorAdjuster } from '../adjusters/FactorAdjuster';
-import { ModifierAdjuster } from '../modifiers/ModifierAdjuster';
 import { UncertaintyCalculator } from '../aggregators/UncertaintyCalculator';
 import { calculateAge } from '../../utils/dataExtraction';
 import { ProvenanceBuilder } from '../provenance/ProvenanceBuilder';
 import { ProvenanceChain } from '../../types/risk/provenance';
 import { ReferenceExtractor } from '../provenance/ReferenceExtractor';
 
+/**
+ * A 10-year disease-specific risk can never legitimately reach 100%.
+ * Multiplied hazard ratios are capped here so a stacked-risk-factor profile
+ * cannot produce a probability > 1 (which would corrupt the complement-rule
+ * aggregation with negative survival probabilities).
+ */
+const MAX_DISEASE_RISK = 0.999;
+
 export class BaseCalculator {
   protected model: DiseaseModel;
-  protected modifiers: MortalityModifier[];
   protected factorAdjuster: FactorAdjuster;
-  protected modifierAdjuster: ModifierAdjuster;
   protected uncertaintyCalculator: UncertaintyCalculator;
 
-  constructor(model: DiseaseModel, modifiers?: MortalityModifier[]) {
+  constructor(model: DiseaseModel) {
     this.model = model;
-    this.modifiers = modifiers || [];
     this.factorAdjuster = new FactorAdjuster();
-    this.modifierAdjuster = new ModifierAdjuster();
     this.uncertaintyCalculator = new UncertaintyCalculator();
   }
 
   /**
-   * Main calculation method - orchestrates the risk calculation pipeline
+   * Main calculation method - orchestrates the risk calculation pipeline.
+   * Returns null when the disease model does not apply to this profile
+   * (e.g., breast cancer for a male profile: no sex-compatible baseline curve).
    */
-  async calculate(profile: UserProfile): Promise<DiseaseRisk> {
+  async calculate(profile: UserProfile): Promise<DiseaseRisk | null> {
     const calculationId = `${this.model.metadata.id}-${Date.now()}`;
     const provenanceBuilder = new ProvenanceBuilder(calculationId);
 
@@ -38,49 +42,26 @@ export class BaseCalculator {
 
     // Step 1: Calculate baseline risk with provenance
     const baselineResult = this.calculateBaselineRiskWithProvenance(profile, calculationId);
-    let baselineRisk = baselineResult.risk;
-    const originalBaseline = baselineRisk; // Track for contributions
-
-    // Step 2: Apply mortality modifiers to baseline (NEW)
-    let cumulativeModifierHR = 1.0;
-    const modifierContributions: ModifierContribution[] = [];
-
-    if (this.modifiers.length > 0) {
-      for (const modifier of this.modifiers) {
-        const hr = this.modifierAdjuster.calculateHazardRatio(profile, modifier);
-        if (hr !== null) {
-          cumulativeModifierHR *= hr;
-          modifierContributions.push({
-            modifierId: modifier.metadata.id,
-            modifierName: modifier.metadata.name,
-            hazardRatio: hr,
-            contribution: baselineRisk * (hr - 1),
-            category: modifier.metadata.category,
-          });
-        }
-      }
-
-      // Apply cumulative modifier effect to baseline
-      baselineRisk = originalBaseline * cumulativeModifierHR;
-
-      if (modifierContributions.length > 0) {
-        console.log(
-          `[${this.model.metadata.id}] Applied ${modifierContributions.length} modifiers: baseline ${originalBaseline.toFixed(4)} → ${baselineRisk.toFixed(4)}`
-        );
-      }
+    if (baselineResult === null) {
+      return null; // No applicable baseline curve for this profile
     }
+    const baselineRisk = baselineResult.risk;
 
-    // Step 3: Apply disease-specific risk factor adjustments with provenance
+    // Step 2: Apply disease-specific risk factor adjustments with provenance.
+    // (Mortality modifiers are applied once at the overall-mortality level by
+    // OverallMortalityAggregator, not per disease — see RiskEngine.)
     const { adjustedRisk, contributions, hrProvenance } = this.applyFactorAdjustmentsWithProvenance(
       profile,
-      baselineRisk,
-      calculationId
+      baselineRisk
     );
 
-    // Step 4: Calculate confidence and uncertainty
+    // Step 3: Calculate confidence and uncertainty. A factor counts as
+    // "available" when the adjuster actually produced a hazard ratio for it,
+    // which correctly includes derived factors (BMI, family history, ...).
+    const availableFactorIds = new Set(contributions.map(c => c.factorId));
     const confidence = this.uncertaintyCalculator.calculateConfidence(
-      profile,
-      this.model.riskFactors
+      this.model.riskFactors,
+      availableFactorIds
     );
 
     const range = this.uncertaintyCalculator.calculateRange(
@@ -101,15 +82,13 @@ export class BaseCalculator {
       diseaseId: this.model.metadata.id,
       diseaseName: this.model.metadata.name,
       timeframe: this.model.metadata.timeframe,
-      baselineRisk: originalBaseline, // Original, unmodified baseline
-      modifiedBaselineRisk: baselineRisk, // After applying modifiers
+      baselineRisk,
       adjustedRisk,
-      absoluteRiskIncrease: adjustedRisk - originalBaseline,
+      absoluteRiskIncrease: adjustedRisk - baselineRisk,
       confidence,
       range,
-      modifierContributions: modifierContributions.length > 0 ? modifierContributions : undefined,
       factorContributions: contributions,
-      provenance, // NEW: Complete calculation provenance
+      provenance,
     };
   }
 
@@ -158,7 +137,7 @@ export class BaseCalculator {
   private calculateBaselineRiskWithProvenance(
     profile: UserProfile,
     calculationId: string
-  ): { risk: number; provenance: ProvenanceChain; curve: BaselineRiskCurve } {
+  ): { risk: number; provenance: ProvenanceChain; curve: BaselineRiskCurve } | null {
     // Extract age and sex
     const age = calculateAge(profile);
     const sex = profile.demographics?.biologicalSex?.value;
@@ -168,7 +147,12 @@ export class BaseCalculator {
     }
 
     // Find applicable baseline curve with scoring
-    const { curve, scoredCurves } = this.findApplicableCurveWithScoring(profile, sex, age);
+    const curveSelection = this.findApplicableCurveWithScoring(profile, sex, age);
+    if (curveSelection === null) {
+      // No sex-compatible curve exists — this disease does not apply
+      return null;
+    }
+    const { curve, scoredCurves } = curveSelection;
 
     // Get reference for the curve
     const curveReference = ReferenceExtractor.getBaselineReference(curve);
@@ -283,18 +267,35 @@ export class BaseCalculator {
   }
 
   /**
-   * Find applicable curve with scoring information
+   * Find applicable curve with scoring information.
+   *
+   * Curves whose sex constraint contradicts the profile's sex are EXCLUDED
+   * (not just down-scored): a male profile must never be scored on a
+   * female-only curve (e.g., breast cancer) and vice versa. When no curve is
+   * compatible, returns null and the disease is skipped for this profile.
    */
   private findApplicableCurveWithScoring(
     profile: UserProfile,
     sex?: string,
     age?: number
-  ): { curve: BaselineRiskCurve; scoredCurves: Array<{ curve: BaselineRiskCurve; score: number }> } {
+  ): {
+    curve: BaselineRiskCurve;
+    scoredCurves: Array<{ curve: BaselineRiskCurve; score: number }>;
+  } | null {
     const ethnicity = profile.demographics?.ethnicity?.value;
     const region = profile.demographics?.country?.value || profile.demographics?.region?.value;
 
-    // Score each curve by how well it matches
-    const scoredCurves = this.model.baselineRisk.curves.map(curve => {
+    // Hard filter: reject curves whose sex constraint contradicts the profile
+    const compatibleCurves = this.model.baselineRisk.curves.filter(
+      curve => !curve.applicability.sex || !sex || curve.applicability.sex === sex
+    );
+
+    if (compatibleCurves.length === 0) {
+      return null;
+    }
+
+    // Score each compatible curve by how well it matches
+    const scoredCurves = compatibleCurves.map(curve => {
       let score = 0;
 
       // Sex match (high priority)
@@ -332,21 +333,19 @@ export class BaseCalculator {
     // Sort by score (highest first)
     scoredCurves.sort((a, b) => b.score - a.score);
 
-    // Return best match
-    if (scoredCurves.length > 0 && scoredCurves[0].score > 0) {
+    if (scoredCurves[0].score > 0) {
       return { curve: scoredCurves[0].curve, scoredCurves };
     }
 
-    // Fallback to default curve
+    // Fallback to default curve — only if it is sex-compatible
     const defaultId = this.model.baselineRisk.defaultCurve;
-    const defaultCurve = this.model.baselineRisk.curves.find(c => c.id === defaultId);
-
+    const defaultCurve = compatibleCurves.find(c => c.id === defaultId);
     if (defaultCurve) {
       return { curve: defaultCurve, scoredCurves };
     }
 
-    // Last resort: use first curve
-    return { curve: this.model.baselineRisk.curves[0], scoredCurves };
+    // Last resort: best-scoring compatible curve
+    return { curve: scoredCurves[0].curve, scoredCurves };
   }
 
   /**
@@ -354,8 +353,7 @@ export class BaseCalculator {
    */
   private applyFactorAdjustmentsWithProvenance(
     profile: UserProfile,
-    baselineRisk: number,
-    calculationId: string
+    baselineRisk: number
   ): {
     adjustedRisk: number;
     contributions: FactorContribution[];
@@ -375,7 +373,7 @@ export class BaseCalculator {
           factorId: factorDesc.factorId,
           factorName: factorDesc.name,
           hazardRatio: result.hr,
-          contribution: baselineRisk * (result.hr - 1), // Absolute risk increase from this factor
+          contribution: 0, // Filled in below once adjustedRisk is known
           modifiable: factorDesc.modifiable,
           category: factorDesc.category || 'Other',
           inputValue: result.inputValue,
@@ -389,7 +387,17 @@ export class BaseCalculator {
       }
     }
 
-    const adjustedRisk = baselineRisk * cumulativeHR;
+    // Cap: a probability cannot exceed 1 no matter how many HRs stack
+    const adjustedRisk = Math.min(baselineRisk * cumulativeHR, MAX_DISEASE_RISK);
+
+    // Leave-one-out attribution: contribution of factor i is the absolute
+    // risk change vs. the same profile without that factor,
+    //   adjusted − adjusted/HRᵢ = adjusted × (1 − 1/HRᵢ).
+    // Unlike baseline × (HR − 1), these attributions are consistent with the
+    // multiplicative model (they don't overstate stacked factors).
+    for (const contribution of contributions) {
+      contribution.contribution = adjustedRisk * (1 - 1 / contribution.hazardRatio);
+    }
 
     // Sort contributions by absolute magnitude (biggest impact first)
     contributions.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
@@ -415,12 +423,14 @@ export class BaseCalculator {
 
     // Add final multiplication step if there are risk factors
     if (hrProvenance.length > 0) {
-      const hrValues = hrProvenance.map((hp, idx) => ({
+      const hrValues = hrProvenance.map(hp => ({
         factorId: hp.factorId,
         hr: hp.provenance.finalResult.value as number,
       }));
 
       const cumulativeHR = hrValues.reduce((acc, hv) => acc * hv.hr, 1.0);
+      const uncappedRisk = baselineResult.risk * cumulativeHR;
+      const wasCapped = finalRisk < uncappedRisk - 1e-12;
 
       builder
         .addStep()
@@ -438,7 +448,7 @@ export class BaseCalculator {
         )
         .setOutput(ProvenanceBuilder.calculated(finalRisk, hrProvenance.length + 1, 'Adjusted Risk', '%'))
         .setFormula(
-          `Adjusted = ${(baselineResult.risk * 100).toFixed(2)}% × ${hrValues.map(hv => hv.hr.toFixed(2)).join(' × ')} = ${(finalRisk * 100).toFixed(2)}%`
+          `Adjusted = ${(baselineResult.risk * 100).toFixed(2)}% × ${hrValues.map(hv => hv.hr.toFixed(2)).join(' × ')} = ${(finalRisk * 100).toFixed(2)}%${wasCapped ? ' (capped at 99.9%)' : ''}`
         )
         .setExplanation(`Multiply baseline risk by all hazard ratios`)
         .addIntermediate('Cumulative HR', cumulativeHR, hrValues.map(hv => hv.hr.toFixed(2)).join(' × '))

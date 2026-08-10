@@ -118,23 +118,26 @@ export function generateMortalityCurve(
     ? tenYearRisk / averageTenYearRisk
     : 1.0;
 
-  // STEP 2b: Calibrate the multiplier
-  // Calculate what the 10-year cumulative risk WOULD be using age-adjusted rates
-  let testCumulative = 0;
-  for (let year = 0; year < 10; year++) {
-    const testAge = currentAge + year;
-    const baselineRate = getBaselineAnnualMortality(testAge, sex);
-    const testRate = Math.min(baselineRate * initialMultiplier, 1.0);
-    testCumulative += testRate * (1 - testCumulative);
+  // STEP 2b: Calibrate the multiplier iteratively.
+  // The cumulative-risk compounding is nonlinear in the multiplier, so a
+  // single proportional adjustment is only approximate — iterate the
+  // proportional step until the 10-year point converges on tenYearRisk.
+  let riskMultiplier = initialMultiplier;
+  for (let iteration = 0; iteration < 50; iteration++) {
+    let testCumulative = 0;
+    for (let year = 0; year < 10; year++) {
+      const baselineRate = getBaselineAnnualMortality(currentAge + year, sex);
+      const testRate = Math.min(baselineRate * riskMultiplier, 1.0);
+      testCumulative += testRate * (1 - testCumulative);
+    }
+    if (testCumulative <= 0) break;
+    const calibrationFactor = tenYearRisk / testCumulative;
+    riskMultiplier *= calibrationFactor;
+    if (Math.abs(calibrationFactor - 1) < 1e-9) break;
   }
 
-  // Adjust multiplier so the curve passes through the exact 10-year risk point
-  // If testCumulative is too high/low, scale the multiplier proportionally
-  const calibrationFactor = testCumulative > 0 ? tenYearRisk / testCumulative : 1.0;
-  const riskMultiplier = initialMultiplier * calibrationFactor;
-
   // Now riskMultiplier is calibrated so that applying it to age-specific rates
-  // will yield exactly tenYearRisk at year 10
+  // yields tenYearRisk at year 10 (same year-window as the rendering loop below)
 
   let cumulativeRisk = 0;
   let cumulativeAverage = 0;
@@ -169,8 +172,11 @@ export function generateMortalityCurve(
       continue; // Don't calculate rates for current age (no time has passed)
     }
 
-    // Calculate rates for this age FIRST
-    const avgRate = getBaselineAnnualMortality(age, sex);
+    // Accumulate the year that ENDS at this age: the point at age
+    // currentAge + n reflects mortality over ages currentAge .. currentAge+n−1,
+    // matching the calibration window above (so the curve passes through
+    // tenYearRisk exactly at yearOffset 10).
+    const avgRate = getBaselineAnnualMortality(age - 1, sex);
     cumulativeAverage += avgRate * (1 - cumulativeAverage);
     const personalRate = Math.min(avgRate * riskMultiplier, 1.0);
     cumulativeRisk += personalRate * (1 - cumulativeRisk);

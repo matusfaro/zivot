@@ -5,7 +5,7 @@ import {
   CategoricalModifierMapping,
   ContinuousModifierMapping,
 } from '../../types/knowledge/mortalityModifier';
-import { getValueAtPath, calculateAge } from '../../utils/dataExtraction';
+import { extractPathValue, calculateAge } from '../../utils/dataExtraction';
 
 /**
  * ModifierAdjuster - Calculates hazard ratios for mortality modifiers
@@ -62,22 +62,16 @@ export class ModifierAdjuster {
     const age = calculateAge(profile);
     const sex = profile.demographics?.biologicalSex?.value;
 
-    // Age range check
-    if (modifier.applicability.ageRange && age) {
+    // Age range check (age 0 is a valid age; only skip the check when unknown)
+    if (modifier.applicability.ageRange && age !== null) {
       const [minAge, maxAge] = modifier.applicability.ageRange;
       if (age < minAge || age > maxAge) {
-        console.log(
-          `[Modifier] ${modifier.metadata.id} not applicable: age ${age} outside range [${minAge}, ${maxAge}]`
-        );
         return false;
       }
     }
 
     // Sex check
     if (modifier.applicability.sex && sex && sex !== modifier.applicability.sex) {
-      console.log(
-        `[Modifier] ${modifier.metadata.id} not applicable: sex ${sex} != required ${modifier.applicability.sex}`
-      );
       return false;
     }
 
@@ -116,42 +110,12 @@ export class ModifierAdjuster {
   }
 
   /**
-   * Get value from a path, handling DataPoints and TimeSeries
+   * Get value from a path, handling DataPoints and TimeSeries.
+   * Shares the same resolver as FactorAdjuster so modifier paths using
+   * "mostRecent" (TimeSeries) resolve identically.
    */
   private getValueFromPath(profile: UserProfile, path: string): number | string | boolean | null {
-    const rawValue = getValueAtPath(profile, path);
-    if (rawValue === null || rawValue === undefined) {
-      return null;
-    }
-
-    // Unwrap DataPoint if needed (has .value and .provenance properties)
-    if (
-      typeof rawValue === 'object' &&
-      rawValue !== null &&
-      'value' in rawValue &&
-      'provenance' in rawValue
-    ) {
-      const unwrapped = (rawValue as { value: unknown }).value;
-      if (
-        typeof unwrapped === 'number' ||
-        typeof unwrapped === 'string' ||
-        typeof unwrapped === 'boolean'
-      ) {
-        return unwrapped;
-      }
-      return null;
-    }
-
-    // Return if it's a primitive type
-    if (
-      typeof rawValue === 'number' ||
-      typeof rawValue === 'string' ||
-      typeof rawValue === 'boolean'
-    ) {
-      return rawValue;
-    }
-
-    return null;
+    return extractPathValue(profile, path);
   }
 
   /**
