@@ -15,14 +15,15 @@ import { habitEventRepository } from '../database/repositories/HabitEventReposit
 import { EventExtrapolator } from '../services/events/EventExtrapolator';
 import { ProfileMerger } from '../services/events/ProfileMerger';
 import { EVENT_TYPE_REGISTRY } from '../config/eventRegistry';
-import { useUserProfile } from './useUserProfile';
+import { useUserProfileContext } from '../contexts/UserProfileContext';
 
 export function useHabitEvents(profileId: string | undefined) {
   const [recentEvents, setRecentEvents] = useState<HabitEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { profile, updateLifestyle, updateBiometrics, updateSocial } = useUserProfile();
+  // Shared profile instance — habit-driven updates propagate to the dashboard
+  const { profile, updateLifestyle, updateBiometrics, updateSocial } = useUserProfileContext();
   const extrapolator = useMemo(() => new EventExtrapolator(), []);
   const merger = useMemo(() => new ProfileMerger(), []);
 

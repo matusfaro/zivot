@@ -1,84 +1,108 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useCallback, useEffect } from 'react';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { UserProfileContext } from '../../contexts/UserProfileContext';
 import { useRiskCalculation } from '../../hooks/useRiskCalculation';
 import { useDebounceProp } from '../../hooks/useDebounceProp';
 import { ChartsSection } from './ChartsSection';
 import { DetailsSection } from './DetailsSection';
 import { CompactProfileEditor } from './CompactProfileEditor';
-import { SwipeSurvey } from '../survey/SwipeSurvey';
-import { HabitsDashboard } from '../habits/HabitsDashboard';
 import { Header } from '../layout/Header';
-import { DebugPanel } from '../debug/DebugPanel';
 import { RiskReportCard } from '../results/RiskReportCard';
 import { RecommendationsPanel } from './RecommendationsPanel';
-import { RelationshipGraphView } from '../registry/RelationshipGraphView';
 import { UserProfile } from '../../types/user';
-import { RiskEngine } from '../../engine/RiskEngine';
+import { RiskEngine, getSharedRiskEngine } from '../../engine/RiskEngine';
 import { RelationshipGraph } from '../../types/registry';
 import { getRelationshipGraph } from '../../registry/RelationshipGraphBuilder';
+
+// Heavy, below-the-fold sections are code-split out of the initial bundle
+const SwipeSurvey = lazy(() =>
+  import('../survey/SwipeSurvey').then(m => ({ default: m.SwipeSurvey }))
+);
+const HabitsDashboard = lazy(() =>
+  import('../habits/HabitsDashboard').then(m => ({ default: m.HabitsDashboard }))
+);
+const RelationshipGraphView = lazy(() =>
+  import('../registry/RelationshipGraphView').then(m => ({ default: m.RelationshipGraphView }))
+);
+const DebugPanel = lazy(() =>
+  import('../debug/DebugPanel').then(m => ({ default: m.DebugPanel }))
+);
+
+const SectionSpinner: React.FC = () => (
+  <div className="graph-loading">
+    <div className="spinner"></div>
+  </div>
+);
+
+// Default profile shown before any data exists. Created once at module load
+// (creating it during render trips the react-hooks purity rules via Date.now).
+const DEFAULT_PROFILE: UserProfile = {
+  profileId: 'default',
+  version: '1.0.0',
+  lastUpdated: Date.now(),
+  demographics: {
+    dateOfBirth: {
+      value: `${new Date().getFullYear() - 40}-01-01`,
+      provenance: { source: 'default' as never, timestamp: Date.now() },
+    },
+  },
+};
 
 export const LiveDashboard: React.FC = () => {
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [riskEngine, setRiskEngine] = useState<RiskEngine | null>(null);
   const [relationshipGraph, setRelationshipGraph] = useState<RelationshipGraph | null>(null);
-  const { profile, loading, updateDemographics, updateBiometrics, updateLabTests, updateLifestyle, updateMedicalHistory, updateSocial, clearProfile } = useUserProfile();
+  const profileApi = useUserProfile();
+  const {
+    profile,
+    loading,
+    updateDemographics,
+    updateBiometrics,
+    updateLabTests,
+    updateLifestyle,
+    updateMedicalHistory,
+    updateSocial,
+    clearProfile,
+  } = profileApi;
 
-  // Initialize RiskEngine for survey impact calculations
+  // Shared RiskEngine (also used by useRiskCalculation) for survey previews
   useEffect(() => {
-    const initEngine = async () => {
-      const engine = new RiskEngine();
-      await engine.initialize();
-      setRiskEngine(engine);
-    };
-    initEngine();
+    const engine = getSharedRiskEngine();
+    engine.initialize().then(() => setRiskEngine(engine));
   }, []);
 
   // Build relationship graph on mount
   useEffect(() => {
-    const buildGraph = async () => {
-      try {
-        console.log('[LiveDashboard] Building relationship graph...');
-        const graph = await getRelationshipGraph();
-        setRelationshipGraph(graph);
-        console.log('[LiveDashboard] Relationship graph loaded successfully');
-      } catch (error) {
-        console.error('[LiveDashboard] Failed to build relationship graph:', error);
-      }
-    };
-    buildGraph();
+    getRelationshipGraph()
+      .then(setRelationshipGraph)
+      .catch(error => console.error('[LiveDashboard] Failed to build relationship graph:', error));
   }, []);
 
   // Debounced save function for profile updates
   const saveProfile = useCallback(async (updatedProfile: UserProfile) => {
-    console.log('[PERSISTENCE] Saving profile to IndexedDB (debounced)');
-
-    // Save each section sequentially to avoid race conditions
-    // Each updateXYZ method fetches the current profile, merges its section, and saves
-    // If run in parallel, they overwrite each other's changes!
+    // Save each section sequentially to avoid race conditions:
+    // each updateXYZ fetches the current profile, merges its section, and
+    // saves — run in parallel they would overwrite each other's changes.
     try {
       if (updatedProfile.demographics) {
-        console.log('[PERSISTENCE] Saving demographics');
         await updateDemographics(updatedProfile.demographics);
       }
       if (updatedProfile.biometrics) {
-        console.log('[PERSISTENCE] Saving biometrics');
         await updateBiometrics(updatedProfile.biometrics);
       }
       if (updatedProfile.labTests) {
         await updateLabTests(updatedProfile.labTests);
       }
       if (updatedProfile.lifestyle) {
-        console.log('[PERSISTENCE] Saving lifestyle');
         await updateLifestyle(updatedProfile.lifestyle);
       }
       if (updatedProfile.medicalHistory) {
         await updateMedicalHistory(updatedProfile.medicalHistory);
       }
       if (updatedProfile.social) {
-        console.log('[PERSISTENCE] Saving social');
         await updateSocial(updatedProfile.social);
       }
-      console.log('[PERSISTENCE] All sections saved successfully');
+      console.log('[PERSISTENCE] Profile saved');
     } catch (error) {
       console.error('[PERSISTENCE] Error saving profile:', error);
     }
@@ -86,19 +110,8 @@ export const LiveDashboard: React.FC = () => {
 
   // Use useDebounceProp for automatic external sync + debounced saves
   const [localProfile, setLocalProfile] = useDebounceProp(
-    profile || {
-      profileId: 'default',
-      version: '1.0.0',
-      lastUpdated: Date.now(),
-      demographics: {
-        dateOfBirth: {
-          value: `${new Date().getFullYear() - 40}-01-01`,
-          provenance: { source: 'default' as any, timestamp: Date.now() },
-        },
-      },
-    },
-    saveProfile,
-    () => console.log('[PROFILE] User started editing')
+    profile || DEFAULT_PROFILE,
+    saveProfile
   );
 
   // Risk calculation based on local profile (always up-to-date)
@@ -109,11 +122,9 @@ export const LiveDashboard: React.FC = () => {
     if (window.confirm('Are you sure you want to reset your entire health profile? This cannot be undone.')) {
       try {
         await clearProfile();
-        console.log('[PROFILE] Profile reset completed');
         // Local profile will automatically sync with cleared profile from IndexedDB
       } catch (err) {
         console.error('Failed to reset profile:', err);
-        alert('Failed to reset profile. Please try again.');
       }
     }
   };
@@ -128,7 +139,7 @@ export const LiveDashboard: React.FC = () => {
   }
 
   return (
-    <>
+    <UserProfileContext.Provider value={profileApi}>
       <Header
         onLogoDoubleClick={() => setShowDebugPanel(true)}
         result={result}
@@ -163,17 +174,21 @@ export const LiveDashboard: React.FC = () => {
             {/* Swipe Survey Section */}
             <section className="dashboard-section swipe-section full-width">
               <h2>🎯 QUICK INPUT</h2>
-              <SwipeSurvey
-                profile={localProfile}
-                onProfileChange={setLocalProfile}
-                riskEngine={riskEngine}
-                currentRisk={result?.overallMortality.estimatedRisk ? result.overallMortality.estimatedRisk * 100 : undefined}
-              />
+              <Suspense fallback={<SectionSpinner />}>
+                <SwipeSurvey
+                  profile={localProfile}
+                  onProfileChange={setLocalProfile}
+                  riskEngine={riskEngine}
+                  currentRisk={result?.overallMortality.estimatedRisk ? result.overallMortality.estimatedRisk * 100 : undefined}
+                />
+              </Suspense>
             </section>
 
             {/* Habits Tracking Section */}
             <section className="dashboard-section habits-section full-width">
-              <HabitsDashboard />
+              <Suspense fallback={<SectionSpinner />}>
+                <HabitsDashboard />
+              </Suspense>
             </section>
 
             {/* Profile Input Section */}
@@ -199,7 +214,9 @@ export const LiveDashboard: React.FC = () => {
               </p>
               {relationshipGraph ? (
                 <div className="graph-wrapper">
-                  <RelationshipGraphView graph={relationshipGraph} />
+                  <Suspense fallback={<SectionSpinner />}>
+                    <RelationshipGraphView graph={relationshipGraph} />
+                  </Suspense>
                 </div>
               ) : (
                 <div className="graph-loading">
@@ -214,13 +231,15 @@ export const LiveDashboard: React.FC = () => {
 
       {/* Debug Panel */}
       {showDebugPanel && (
-        <DebugPanel
-          profile={localProfile}
-          result={result}
-          onClose={() => setShowDebugPanel(false)}
-          onProfileUpdate={setLocalProfile}
-        />
+        <Suspense fallback={null}>
+          <DebugPanel
+            profile={localProfile}
+            result={result}
+            onClose={() => setShowDebugPanel(false)}
+            onProfileUpdate={setLocalProfile}
+          />
+        </Suspense>
       )}
-    </>
+    </UserProfileContext.Provider>
   );
 };

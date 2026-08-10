@@ -2,7 +2,6 @@ import React from 'react';
 import { RiskCalculationResult } from '../../types/risk/calculation';
 import { UserProfile } from '../../types/user';
 import { MortalityRiskChart } from '../results/MortalityRiskChart';
-import { DiseaseBreakdownBar } from '../results/DiseaseBreakdownBar';
 import './ChartsSection.css';
 
 interface ChartsSectionProps {

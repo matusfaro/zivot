@@ -88,12 +88,24 @@ const CustomMortalityTooltip: React.FC<CustomTooltipProps> = ({
 export const MortalityRiskChart: React.FC<MortalityRiskChartProps> = React.memo(({ result, profile }) => {
   const currentAge = calculateAge(profile);
 
+  // Use pre-computed mortality curve from calculation result
+  const chartData = result.overallMortality.mortalityCurve;
+
+  // Generate decade ticks: current age, then every 10 years up to 110.
+  // (Hooks must run unconditionally — keep this above the early returns.)
+  const decadeTicks = useMemo(() => {
+    const baseAge = currentAge ?? 0;
+    const ticks = [baseAge];
+    const startDecade = Math.ceil(baseAge / 10) * 10;
+    for (let age = startDecade; age <= 110; age += 10) {
+      ticks.push(age);
+    }
+    return ticks;
+  }, [currentAge]);
+
   if (!currentAge) {
     return null;
   }
-
-  // Use pre-computed mortality curve from calculation result
-  const chartData = result.overallMortality.mortalityCurve;
 
   if (!chartData || chartData.length === 0) {
     return <div>Unable to generate mortality curve (missing age data)</div>;
@@ -103,16 +115,6 @@ export const MortalityRiskChart: React.FC<MortalityRiskChartProps> = React.memo(
   const tenYearRisk = result.overallMortality.estimatedRisk * 100;
   const tenYearDataPoint = chartData.find(d => d.age === currentAge + 10);
   const tenYearAverage = tenYearDataPoint?.averageRisk || tenYearRisk;
-
-  // Generate decade ticks: current age, then every 10 years up to 110
-  const decadeTicks = useMemo(() => {
-    const ticks = [currentAge];
-    const startDecade = Math.ceil(currentAge / 10) * 10;
-    for (let age = startDecade; age <= 110; age += 10) {
-      ticks.push(age);
-    }
-    return ticks;
-  }, [currentAge]);
 
   return (
     <div className="mortality-risk-chart">

@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useUserProfile } from '../../hooks/useUserProfile';
+import { useUserProfileContext } from '../../contexts/UserProfileContext';
 import { useHabitEvents } from '../../hooks/useHabitEvents';
 import { HabitCalendar } from './HabitCalendar';
 import { habitEventRepository } from '../../database/repositories/HabitEventRepository';
@@ -18,7 +18,7 @@ import { EVENT_GROUPS } from '../../config/eventRegistry';
 import './HabitsDashboard.css';
 
 export const HabitsDashboard: React.FC = () => {
-  const { profile } = useUserProfile();
+  const { profile } = useUserProfileContext();
   const { logEvent } = useHabitEvents(profile?.profileId);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [todayStats, setTodayStats] = useState<Map<string, number>>(new Map());
