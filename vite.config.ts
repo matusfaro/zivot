@@ -10,6 +10,8 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./tests/setup.ts'],
-    exclude: [...configDefaults.exclude],
+    // Only collect Vitest tests from tests/ — e2e/ holds Playwright specs
+    include: ['tests/**/*.{test,spec}.ts'],
+    exclude: [...configDefaults.exclude, 'e2e/**'],
   },
 })
