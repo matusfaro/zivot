@@ -23,7 +23,15 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year risk of fatal or non-fatal cardiovascular events including myocardial infarction, stroke, heart failure, and cardiovascular death"
+    "description": "10-year risk of fatal or non-fatal cardiovascular events including myocardial infarction, stroke, heart failure, and cardiovascular death",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.5,
+      "basis": "Derived: 1-year post-MI all-cause mortality 24.2% (Danish nationwide cohort 2004-08) plus ~2x-population long-term excess mortality among 1-year survivors (England 2004-2010) compounded over the remaining 9 years",
+      "citation": "Schmidt M et al. BMJ 2012;344:e356 (doi:10.1136/bmj.e356); Smolina K et al. Circ Cardiovasc Qual Outcomes 2012 (doi:10.1161/CIRCOUTCOMES.111.964700)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/22279115/",
+      "notes": "Includes background mortality of survivors; documented modeling derivation, not a single published 10-year figure"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "white_male_us",
@@ -1229,6 +1237,35 @@
         "confidence": [
           1.4,
           2.3
+        ]
+      }
+    },
+    {
+      "factorId": "insomnia",
+      "name": "Insomnia",
+      "type": "derived",
+      "evidenceStrength": "moderate",
+      "category": "Lifestyle",
+      "modifiable": true,
+      "citation": "Sofi F, Cesari F, Casini A, Macchi C, Abbate R, Gensini GF. Insomnia and risk of cardiovascular disease: a meta-analysis. Eur J Prev Cardiol. 2014;21(1):57-64",
+      "doi": "10.1177/2047487312460020",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Insomnia -> incident CVD RR 1.45 (95% CI 1.29-1.62), 122,501 subjects. Wired to CVD only: the all-cause mortality association is much weaker (RR 1.14, 1.01-1.29).",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.conditions",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "derived",
+        "strategy": "has_condition",
+        "conditionId": "insomnia",
+        "presentHR": 1.45,
+        "absentHR": 1.0,
+        "confidence": [
+          1.29,
+          1.62
         ]
       }
     }

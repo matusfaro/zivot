@@ -23,11 +23,27 @@ export interface DiseaseRisk {
   diseaseName: string;
   timeframe: number; // years
 
+  /**
+   * What adjustedRisk means: risk of DEVELOPING the disease ('incidence')
+   * or risk of DYING from it ('mortality').
+   */
+  outcome: 'incidence' | 'mortality';
+
   // The risk calculation breakdown
   baselineRisk: number; // Original baseline (before modifiers)
   modifiedBaselineRisk?: number; // Baseline after applying mortality modifiers
   adjustedRisk: number;
   absoluteRiskIncrease: number; // adjustedRisk - baselineRisk
+
+  /**
+   * Mortality-scale risks used for overall aggregation. For mortality models
+   * these equal adjustedRisk/baselineRisk; for incidence models they are
+   * scaled by the model's cited 10-year case fatality.
+   */
+  mortalityRisk: number;
+  baselineMortalityRisk: number;
+  /** Case-fatality fraction applied (1.0 for mortality outcomes) */
+  caseFatality: number;
 
   // Confidence and uncertainty
   confidence: ConfidenceScore;

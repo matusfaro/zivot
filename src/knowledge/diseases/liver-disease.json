@@ -17,7 +17,15 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year risk of NAFLD progression to cirrhosis and liver-related mortality. Progression driven by metabolic syndrome components (obesity, diabetes, dyslipidemia)"
+    "description": "10-year risk of NAFLD progression to cirrhosis and liver-related mortality. Progression driven by metabolic syndrome components (obesity, diabetes, dyslipidemia)",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.31,
+      "basis": "Medicare real-world cohort: 31.1% cumulative mortality over ~8 years with NAFLD compensated cirrhosis",
+      "citation": "Loomba R, Wong R, Fraysse J, et al. The natural history of NAFLD with advanced fibrosis and cirrhosis. Aliment Pharmacol Ther 2020;51(11):1149-1159",
+      "doi": "10.1111/apt.15679",
+      "notes": "8-year horizon (not 10); decompensated cirrhosis 51.4%, HCC 76.2%"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -97,7 +105,7 @@
       "factorId": "fib4_score",
       "name": "FIB-4 Score (Derived from Age, AST, ALT, Platelets)",
       "modifiable": false,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "derived_fib4",
@@ -141,13 +149,16 @@
           0,
           10
         ]
-      }
+      },
+      "citation": "Fibrosis-4 Index as an Independent Predictor of Mortality and Liver-Related Outcomes in NAFLD. Hepatol Commun. 2022;6(4):765-779",
+      "doi": "10.1002/hep4.1841",
+      "notes": "FIB-4 >=2.67: all-cause mortality HR 2.49 (2.20-2.82), cirrhosis HR 2.04, HCC HR 3.66; separate cohort: liver events aHR 16.5 for FIB-4 >2.67 vs <1.30 (10-yr cumulative incidence 15% vs 1%)."
     },
     {
       "factorId": "bmi_nafld",
       "name": "Body Mass Index",
       "modifiable": true,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "biometrics.weight.mostRecent.value.value",
@@ -160,40 +171,47 @@
         "points": [
           {
             "value": 18.5,
-            "hazardRatio": 0.7
+            "hazardRatio": 1.0
           },
           {
             "value": 22,
             "hazardRatio": 1.0
           },
           {
-            "value": 25,
-            "hazardRatio": 1.5
-          },
-          {
             "value": 30,
-            "hazardRatio": 3.0
+            "hazardRatio": 1.2,
+            "confidence": [
+              1.12,
+              1.28
+            ]
           },
           {
             "value": 35,
-            "hazardRatio": 5.5
+            "hazardRatio": 1.7
           },
           {
             "value": 40,
-            "hazardRatio": 8.5
+            "hazardRatio": 2.3,
+            "confidence": [
+              1.7,
+              2.97
+            ]
           }
         ],
         "validRange": [
           15,
           50
         ]
-      }
+      },
+      "citation": "Jarvis H, Craig D, Barker R, et al. Metabolic risk factors and incident advanced liver disease in NAFLD: systematic review and meta-analysis of population-based observational studies. PLoS Med. 2020;17(4):e1003100",
+      "doi": "10.1371/journal.pmed.1003100",
+      "notes": "Obesity: pooled aHR 1.20 (1.12-1.28) for incident advanced liver disease; largest single cohort (UKCTOCS) HR 2.25 (1.70-2.97) anchors the severe-obesity end."
     },
     {
       "factorId": "diabetes_nafld",
       "name": "Type 2 Diabetes",
       "modifiable": true,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -202,15 +220,18 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 2.8,
+        "trueHazardRatio": 2.25,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Jarvis H, Craig D, Barker R, et al. Metabolic risk factors and incident advanced liver disease in NAFLD. PLoS Med. 2020;17(4):e1003100",
+      "doi": "10.1371/journal.pmed.1003100",
+      "notes": "T2DM: adjusted HR 2.25 (1.83-2.76) for incident severe liver disease (12 studies, 22.8M participants)."
     },
     {
       "factorId": "dyslipidemia_nafld",
       "name": "Dyslipidemia (High Triglycerides, Low HDL)",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "labTests.lipidPanel.triglycerides.value",
@@ -227,32 +248,35 @@
           },
           {
             "value": 150,
-            "hazardRatio": 1.3
+            "hazardRatio": 1.15
           },
           {
             "value": 200,
-            "hazardRatio": 1.8
+            "hazardRatio": 1.25
           },
           {
             "value": 300,
-            "hazardRatio": 2.5
+            "hazardRatio": 1.3
           },
           {
             "value": 500,
-            "hazardRatio": 3.5
+            "hazardRatio": 1.4
           }
         ],
         "validRange": [
           50,
           1000
         ]
-      }
+      },
+      "citation": "Jarvis H, Craig D, Barker R, et al. Metabolic risk factors and incident advanced liver disease in NAFLD. PLoS Med. 2020;17(4):e1003100",
+      "doi": "10.1371/journal.pmed.1003100",
+      "notes": "High triglycerides HR 1.30 (0.99-1.72, borderline); combined dyslipidemia HR 1.23 (1.19-1.28); low HDL 1.28 (1.04-1.59). Capped ~1.4 accordingly."
     },
     {
       "factorId": "alcohol_nafld",
       "name": "Alcohol Consumption",
       "modifiable": true,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
@@ -268,37 +292,48 @@
             "hazardRatio": 1.0
           },
           {
-            "value": 7,
-            "hazardRatio": 1.2
-          },
-          {
-            "value": 14,
+            "value": 6,
             "hazardRatio": 1.6
           },
           {
-            "value": 21,
-            "hazardRatio": 2.3
+            "value": 12,
+            "hazardRatio": 2.65,
+            "confidence": [
+              2.22,
+              3.16
+            ]
           },
           {
-            "value": 35,
-            "hazardRatio": 3.8
+            "value": 25,
+            "hazardRatio": 6.83,
+            "confidence": [
+              5.84,
+              7.97
+            ]
           },
           {
             "value": 50,
-            "hazardRatio": 6.0
+            "hazardRatio": 16.38,
+            "confidence": [
+              13.81,
+              19.42
+            ]
           }
         ],
         "validRange": [
           0,
-          100
+          50
         ]
-      }
+      },
+      "citation": "How does alcohol use impact morbidity and mortality of liver cirrhosis? A systematic review and dose-response meta-analysis (44 studies, 5.1M participants). Hepatol Int. 2023;17:1339-1351",
+      "doi": "10.1007/s12072-023-10584-z",
+      "notes": "Cirrhosis mortality dose-response: RR 2.65 at 25 g/day (~12 US drinks/week), 6.83 at 50 g/day (~25/week), 16.38 at 100 g/day (~50/week)."
     },
     {
       "factorId": "nafld_diagnosis",
       "name": "NAFLD or NASH Diagnosis",
       "modifiable": false,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -307,15 +342,18 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 4.0,
+        "trueHazardRatio": 3.2,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Nonalcoholic fatty liver disease and mortality from all causes, cardiovascular disease, and cancer: a meta-analysis. Sci Rep. 2019;9:11124",
+      "doi": "10.1038/s41598-019-47687-3",
+      "notes": "NAFLD with significant fibrosis/cirrhosis: mortality HR 3.22 (2.40-4.33); NAFLD alone HR 1.34 (1.17-1.54). Diagnosis within a liver-progression model weighted toward the fibrosis estimate."
     },
     {
       "factorId": "cirrhosis_diagnosis",
       "name": "Cirrhosis Diagnosis",
       "modifiable": false,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -324,9 +362,12 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 12.0,
+        "trueHazardRatio": 4.7,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Fleming KM, et al. All-cause mortality in people with cirrhosis compared with the general population: a population-based cohort study. Liver Int. 2012;32(1):79-84",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21745279/",
+      "notes": "Compensated cirrhosis HR 4.7 (4.4-5.0) vs general population; decompensated 9.7 (8.9-10.6)."
     }
   ]
 }

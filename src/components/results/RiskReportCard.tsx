@@ -33,7 +33,8 @@ export const RiskReportCard: React.FC<RiskReportCardProps> = ({ result }) => {
   // Prepare all factors (diseases/causes + protective factors)
   const allFactors = useMemo(() => {
     const risks = result.diseaseRisks.map((dr) => ({
-      name: DISEASE_NAMES[dr.diseaseId] || dr.diseaseName,
+      // Label what the number means: chance of developing vs dying from
+      name: `${DISEASE_NAMES[dr.diseaseId] || dr.diseaseName}${dr.outcome === 'mortality' ? ' (death)' : ''}`,
       yourRisk: dr.adjustedRisk * 100,
       avgRisk: dr.baselineRisk * 100,
       status: dr.adjustedRisk > dr.baselineRisk ? 'elevated' : dr.adjustedRisk < dr.baselineRisk ? 'reduced' : 'average',

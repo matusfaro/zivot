@@ -78,13 +78,24 @@ export class BaseCalculator {
       adjustedRisk
     );
 
+    // Convert to the mortality scale for overall aggregation. Mortality
+    // models pass through unchanged; incidence models are scaled by their
+    // cited 10-year case fatality (see metadata.caseFatality10yr).
+    const outcome = this.model.metadata.outcome ?? 'incidence';
+    const caseFatality =
+      outcome === 'mortality' ? 1.0 : this.model.metadata.caseFatality10yr?.value ?? 1.0;
+
     return {
       diseaseId: this.model.metadata.id,
       diseaseName: this.model.metadata.name,
       timeframe: this.model.metadata.timeframe,
+      outcome,
       baselineRisk,
       adjustedRisk,
       absoluteRiskIncrease: adjustedRisk - baselineRisk,
+      mortalityRisk: adjustedRisk * caseFatality,
+      baselineMortalityRisk: baselineRisk * caseFatality,
+      caseFatality,
       confidence,
       range,
       factorContributions: contributions,

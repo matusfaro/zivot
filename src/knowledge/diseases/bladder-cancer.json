@@ -23,7 +23,14 @@
         "evidenceLevel": "meta_analysis"
       }
     ],
-    "description": "10-year risk of bladder cancer (urothelial carcinoma)"
+    "description": "10-year risk of bladder cancer (urothelial carcinoma)",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.209,
+      "basis": "SEER 5-year relative survival 79.1% (all stages, 2016-2022) -> CFR 0.209; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/urinb.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -145,7 +152,7 @@
       "factorId": "pack_years",
       "name": "Smoking Pack-Years",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.smoking.packYears.value",
@@ -156,20 +163,24 @@
         "type": "continuous",
         "strategy": "linear",
         "coefficients": {
-          "slope": 0.02
+          "slope": 0.0169,
+          "unit": "pack-years"
         },
         "validRange": [
           0,
-          100
+          50
         ],
         "notes": "Risk increases with cumulative smoking exposure"
-      }
+      },
+      "citation": "Zhao X, Wang Y, Liang C. Cigarette smoking and risk of bladder cancer: a dose-response meta-analysis. Int Urol Nephrol. 2022;54:1169-1185",
+      "doi": "10.1007/s11255-022-03173-w",
+      "notes": "RR 1.017 (1.016-1.019) per pack-year with a plateau at ~50 pack-years (max HR ~2.3); range capped at 50 accordingly. Current-smoker summary OR 3.14 (2.53-3.75) in the 89-study van Osch meta-analysis."
     },
     {
       "factorId": "occupational_exposures",
       "name": "Occupational Chemical Exposures",
       "modifiable": false,
-      "evidenceLevel": "medium",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.occupationalExposures.value",
@@ -178,10 +189,13 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 1.8,
+        "trueHazardRatio": 1.72,
         "falseHazardRatio": 1.0,
         "notes": "Exposure to aromatic amines, dyes, chemicals"
-      }
+      },
+      "citation": "Cumberbatch MGK, Cox A, Teare D, Catto JWF. Contemporary Occupational Carcinogen Exposure and Bladder Cancer: A Systematic Review and Meta-analysis. JAMA Oncol. 2015;1(9):1282-1290",
+      "doi": "10.1001/jamaoncol.2015.3209",
+      "notes": "Aromatic-amine-exposed occupations pooled RR 1.72 (1.37-2.15); estimates highly heterogeneous by occupation (1.2 to >10 for historical dye workers)."
     }
   ]
 }

@@ -23,26 +23,129 @@
         "evidenceLevel": "meta_analysis"
       }
     ],
-    "description": "10-year risk of hepatocellular carcinoma and other liver cancers"
+    "description": "10-year risk of hepatocellular carcinoma and other liver cancers",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.781,
+      "basis": "SEER 5-year relative survival 21.9% (all stages, 2016-2022) -> CFR 0.781; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/livibd.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "general_us",
     "curves": [
       {
+        "id": "male_us",
+        "applicability": {
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ],
+          "sex": "male"
+        },
+        "source": "Derived from the unstratified curve using age-specific male:female HCC incidence ratios (Liu P, et al. Age-specific sex difference in the incidence of hepatocellular carcinoma in the United States. Oncotarget. 2017;8(40):68131-68137, doi:10.18632/oncotarget.19245: ratio ~1.6 under 30, peak 5.40 at 50-54, ~2.5 at 80-84; SEER liver+IBD age-adjusted male 13.9 vs female 5.7 per 100k)",
+        "url": "https://seer.cancer.gov/statfacts/html/livibd.html",
+        "notes": "male = c*2r/(1+r), female = c*2/(1+r) with age-interpolated ratio r",
+        "ageRiskMapping": [
+          {
+            "age": 40,
+            "risk": 0.000231
+          },
+          {
+            "age": 50,
+            "risk": 0.000668
+          },
+          {
+            "age": 60,
+            "risk": 0.001316
+          },
+          {
+            "age": 70,
+            "risk": 0.001728
+          },
+          {
+            "age": 80,
+            "risk": 0.001458
+          }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ],
+          "sex": "female"
+        },
+        "source": "Derived from the unstratified curve using age-specific male:female HCC incidence ratios (Liu P, et al. Age-specific sex difference in the incidence of hepatocellular carcinoma in the United States. Oncotarget. 2017;8(40):68131-68137, doi:10.18632/oncotarget.19245: ratio ~1.6 under 30, peak 5.40 at 50-54, ~2.5 at 80-84; SEER liver+IBD age-adjusted male 13.9 vs female 5.7 per 100k)",
+        "url": "https://seer.cancer.gov/statfacts/html/livibd.html",
+        "notes": "male = c*2r/(1+r), female = c*2/(1+r) with age-interpolated ratio r",
+        "ageRiskMapping": [
+          {
+            "age": 40,
+            "risk": 6.9e-05
+          },
+          {
+            "age": 50,
+            "risk": 0.000132
+          },
+          {
+            "age": 60,
+            "risk": 0.000284
+          },
+          {
+            "age": 70,
+            "risk": 0.000472
+          },
+          {
+            "age": 80,
+            "risk": 0.000542
+          }
+        ]
+      },
+      {
         "id": "general_us",
         "applicability": {
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Liver Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/livibd.html",
         "notes": "Hepatocellular carcinoma (HCC) incidence; strongly associated with viral hepatitis",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.00015 },
-          { "age": 50, "risk": 0.00040 },
-          { "age": 60, "risk": 0.00080 },
-          { "age": 70, "risk": 0.00110 },
-          { "age": 80, "risk": 0.00100 }
+          {
+            "age": 40,
+            "risk": 0.00015
+          },
+          {
+            "age": 50,
+            "risk": 0.0004
+          },
+          {
+            "age": 60,
+            "risk": 0.0008
+          },
+          {
+            "age": 70,
+            "risk": 0.0011
+          },
+          {
+            "age": 80,
+            "risk": 0.001
+          }
         ]
       }
     ]
@@ -52,10 +155,9 @@
       "factorId": "hepatitis_b",
       "name": "Hepatitis B Infection",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "citation": "Hepatitis B and Liver Cancer Meta-analysis",
       "doi": "10.1016/S1470-2045(13)70500-8",
-      "evidenceLevel": "meta_analysis",
       "notes": "Chronic HBV HR~15-20 for HCC; major global risk factor",
       "requiredFields": [
         {
@@ -73,10 +175,9 @@
       "factorId": "hepatitis_c",
       "name": "Hepatitis C Infection",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "citation": "Hepatitis C and Liver Cancer Meta-analysis",
       "doi": "10.1016/S1470-2045(13)70500-8",
-      "evidenceLevel": "meta_analysis",
       "notes": "Chronic HCV HR~17 for HCC; curable with direct-acting antivirals",
       "requiredFields": [
         {
@@ -92,9 +193,9 @@
     },
     {
       "factorId": "liver_disease",
-      "name": "Chronic Liver Disease / Cirrhosis",
+      "name": "Cirrhosis",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -104,17 +205,20 @@
       "mapping": {
         "type": "derived",
         "strategy": "has_condition",
-        "conditionId": "liver_disease",
-        "presentHR": 8.0,
+        "conditionId": "cirrhosis",
+        "presentHR": 26.0,
         "absentHR": 1.0,
-        "notes": "Cirrhosis dramatically increases HCC risk"
-      }
+        "notes": "Cirrhosis-specific HCC risk"
+      },
+      "citation": "Sorensen HT, et al. Risk of liver and other types of cancer in patients with cirrhosis: a nationwide cohort study in Denmark. Hepatology. 1998;28(4):921-925; Bengtsson B, et al. United European Gastroenterol J. 2022",
+      "doi": "10.1002/hep.510280404",
+      "notes": "Cirrhosis: HCC incidence 26-60x the general population (Swedish nationwide 10-yr cumulative incidence 12.2%; Danish SIR 60 for HCC). Wired to the cirrhosis condition checkbox; non-cirrhotic chronic liver disease (~3-4x) is captured via the NAFLD progression model instead."
     },
     {
       "factorId": "alcohol_consumption",
       "name": "Heavy Alcohol Consumption",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
@@ -125,21 +229,62 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.0 },
-          { "value": 7, "hazardRatio": 1.2 },
-          { "value": 14, "hazardRatio": 1.5 },
-          { "value": 21, "hazardRatio": 2.5 },
-          { "value": 35, "hazardRatio": 4.0 }
+          {
+            "value": 0,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 7,
+            "hazardRatio": 1.08,
+            "confidence": [
+              1.04,
+              1.11
+            ]
+          },
+          {
+            "value": 14,
+            "hazardRatio": 1.2
+          },
+          {
+            "value": 25,
+            "hazardRatio": 1.54,
+            "confidence": [
+              1.36,
+              1.74
+            ]
+          },
+          {
+            "value": 37,
+            "hazardRatio": 2.14,
+            "confidence": [
+              1.74,
+              2.62
+            ]
+          },
+          {
+            "value": 49,
+            "hazardRatio": 3.21,
+            "confidence": [
+              2.34,
+              4.4
+            ]
+          }
         ],
-        "validRange": [0, 70],
+        "validRange": [
+          0,
+          50
+        ],
         "notes": "Heavy drinking causes cirrhosis leading to HCC"
-      }
+      },
+      "citation": "Chuang SC, Lee YC, Wu GJ, Straif K, Hashibe M. Alcohol consumption and liver cancer risk: a meta-analysis. Cancer Causes Control. 2015;26(9):1205-1231",
+      "doi": "10.1007/s10552-015-0615-3",
+      "notes": "Dose-response (converted at 14 g/US drink): 12 g/day -> RR 1.08; 50 g/day -> 1.54; 75 g/day -> 2.14; 100 g/day -> 3.21. Synergistic with hepatitis and diabetes."
     },
     {
       "factorId": "diabetes",
       "name": "Diabetes",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -153,13 +298,16 @@
         "presentHR": 2.0,
         "absentHR": 1.0,
         "notes": "Diabetes increases HCC risk via NAFLD"
-      }
+      },
+      "citation": "Diabetes mellitus and risk of hepatocellular carcinoma: a systematic review and meta-analysis. Diabetes Metab Res Rev. 2012;28(2):109-122",
+      "doi": "10.1002/dmrr.1291",
+      "notes": "Pooled RR 2.31 (1.87-2.84); cohort-only RR 2.23 (1.68-2.96). Current value 2.0 is conservative."
     },
     {
       "factorId": "obesity_bmi",
       "name": "Obesity (BMI)",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "biometrics.weight.mostRecent.value.value",
@@ -174,14 +322,44 @@
         "type": "derived",
         "strategy": "bmi_lookup",
         "points": [
-          { "value": 22, "hazardRatio": 1.0 },
-          { "value": 25, "hazardRatio": 1.1 },
-          { "value": 30, "hazardRatio": 1.5 },
-          { "value": 35, "hazardRatio": 2.0 }
+          {
+            "value": 22,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 25,
+            "hazardRatio": 1.02,
+            "confidence": [
+              1.02,
+              1.03
+            ]
+          },
+          {
+            "value": 30,
+            "hazardRatio": 1.35,
+            "confidence": [
+              1.24,
+              1.47
+            ]
+          },
+          {
+            "value": 35,
+            "hazardRatio": 2.22,
+            "confidence": [
+              1.74,
+              2.83
+            ]
+          }
         ],
-        "validRange": [18, 50],
+        "validRange": [
+          18,
+          50
+        ],
         "notes": "Obesity increases risk via NAFLD/NASH"
-      }
+      },
+      "citation": "Chen Y, Wang X, Wang J, Yan Z, Luo J. Excess Body Mass Index and Risk of Liver Cancer: A Nonlinear Dose-Response Meta-Analysis of Prospective Studies. PLoS One. 2012;7(9):e44522",
+      "doi": "10.1371/journal.pone.0044522",
+      "notes": "Nonlinear dose-response; risk rises faster in men."
     }
   ]
 }

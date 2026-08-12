@@ -23,7 +23,14 @@
         "evidenceLevel": "meta_analysis"
       }
     ],
-    "description": "10-year risk of developing colorectal cancer (colon or rectal)"
+    "description": "10-year risk of developing colorectal cancer (colon or rectal)",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.346,
+      "basis": "SEER 5-year relative survival 65.4% (all stages, 2016-2022) -> CFR 0.346; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/colorect.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "average_male_us",

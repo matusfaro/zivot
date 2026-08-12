@@ -13,7 +13,8 @@
         "evidenceLevel": "expert_opinion"
       }
     ],
-    "description": "10-year risk of death from unintentional falls, primarily affecting older adults"
+    "description": "10-year risk of death from unintentional falls, primarily affecting older adults",
+    "outcome": "mortality"
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -186,7 +187,7 @@
       "factorId": "dizziness_when_standing",
       "name": "Dizziness When Standing (Orthostatic Hypotension)",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.fallHistory.dizzinessWhenStanding.value",
@@ -197,7 +198,10 @@
         "type": "boolean",
         "trueHazardRatio": 1.7,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Mol A, et al. Orthostatic Hypotension and Falls in Older Adults: A Systematic Review and Meta-analysis (50 studies, 49,164 individuals). J Am Med Dir Assoc. 2019;20(5):589-597",
+      "url": "https://www.jamda.com/article/S1525-8610(18)30635-2/abstract",
+      "notes": "Orthostatic hypotension-falls OR 1.73 (1.50-1.99), robust across designs and OH definitions."
     },
     {
       "factorId": "medication_count",
@@ -244,7 +248,7 @@
       "factorId": "blood_pressure_meds",
       "name": "Blood Pressure Medications",
       "modifiable": false,
-      "evidenceLevel": "medium",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.medications.takesBloodPressureMeds.value",
@@ -253,16 +257,19 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 1.3,
+        "trueHazardRatio": 1.1,
         "falseHazardRatio": 1.0,
         "notes": "Can cause orthostatic hypotension"
-      }
+      },
+      "citation": "Kahlaee HR, Latt MD, Schneider CR. Association Between Chronic or Acute Use of Antihypertensive Class of Medications and Falls in Older Adults: A Systematic Review and Meta-Analysis. Drugs Aging. 2018;35(7):625-635",
+      "doi": "10.1007/s40266-018-0561-3",
+      "notes": "Chronic antihypertensive use: pooled OR 0.97 (0.93-1.01, ns); risk concentrated in the 24h after initiation/dose change; highest pooled estimate 1.24 (1.01-1.50). Modeled conservatively at 1.1."
     },
     {
       "factorId": "vitamin_d_level",
       "name": "Vitamin D Level",
       "modifiable": true,
-      "evidenceLevel": "medium",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "labTests.vitaminD.mostRecent.value",
@@ -275,7 +282,11 @@
         "points": [
           {
             "value": 10,
-            "hazardRatio": 1.5
+            "hazardRatio": 1.4,
+            "confidence": [
+              1.01,
+              1.94
+            ]
           },
           {
             "value": 20,
@@ -287,7 +298,7 @@
           },
           {
             "value": 50,
-            "hazardRatio": 0.9
+            "hazardRatio": 1.0
           }
         ],
         "validRange": [
@@ -295,7 +306,10 @@
           100
         ],
         "notes": "Low vitamin D associated with muscle weakness and falls"
-      }
+      },
+      "citation": "Shimizu Y, et al. Serum 25-hydroxyvitamin D level and risk of falls in Japanese community-dwelling elderly women: a 1-year follow-up study. Osteoporos Int. 2015;26:2185-2192",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25910748/",
+      "notes": "25(OH)D <20 ng/mL vs >=25: falls OR 1.40 (1.01-1.94); no additional benefit above ~30 ng/mL."
     }
   ]
 }

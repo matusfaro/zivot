@@ -18,7 +18,8 @@
         "evidenceLevel": "meta_analysis"
       }
     ],
-    "description": "10-year risk of death by suicide stratified by age, sex, and key psychosocial/psychiatric predictors"
+    "description": "10-year risk of death by suicide stratified by age, sex, and key psychosocial/psychiatric predictors",
+    "outcome": "mortality"
   },
   "baselineRisk": {
     "defaultCurve": "white_male_us",

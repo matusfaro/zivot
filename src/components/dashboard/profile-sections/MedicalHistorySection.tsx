@@ -569,6 +569,19 @@ export const MedicalHistorySection: React.FC<ProfileSectionProps> = ({ getFieldV
                 <span>Sleep Apnea Diagnosis</span>
               </label>
 
+              <label className="checkbox-label">
+                <input
+                  data-testid="profile-medicalHistory-conditions-insomnia"
+                  type="checkbox"
+                  checked={getFieldValue('medicalHistory', 'conditions.insomnia') || false}
+                  onChange={(e) => updateField('medicalHistory', 'conditions.insomnia', e.target.checked)}
+                />
+                <span>Insomnia</span>
+                <Tooltip content="Insomnia is associated with a 45% higher risk of cardiovascular disease (RR 1.45, meta-analysis of 122,501 people).">
+                  <span className="field-help">ℹ️</span>
+                </Tooltip>
+              </label>
+
               <label>
                 Hearing Loss Status
                 <Tooltip content="Untreated hearing loss increases dementia risk by 90%. Hearing aids reduce risk by ~75%.">

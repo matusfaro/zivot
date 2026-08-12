@@ -199,10 +199,11 @@ export class RiskEngine {
       overallSummary = 'Your overall mortality risk is high.';
     }
 
-    // Disease interpretations
+    // Disease interpretations — label incidence vs mortality outcomes honestly
     const diseaseInterpretations = diseaseRisks.map(disease => {
       const percent = Math.round(disease.adjustedRisk * 100);
-      const summary = `Your ${disease.timeframe}-year risk of ${disease.diseaseName} is ${percent}%`;
+      const verb = disease.outcome === 'mortality' ? 'dying from' : 'developing';
+      const summary = `Your ${disease.timeframe}-year risk of ${verb} ${disease.diseaseName} is ${percent}%`;
 
       // Identify top drivers
       const keyDrivers = disease.factorContributions

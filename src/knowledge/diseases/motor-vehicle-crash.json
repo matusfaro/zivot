@@ -23,7 +23,8 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year risk of death from motor vehicle traffic crashes"
+    "description": "10-year risk of death from motor vehicle traffic crashes",
+    "outcome": "mortality"
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -143,7 +144,7 @@
       "factorId": "miles_per_year",
       "name": "Annual Miles Driven",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.drivingHabits.milesPerYear.value",
@@ -152,16 +153,38 @@
       ],
       "mapping": {
         "type": "continuous",
-        "strategy": "linear",
-        "coefficients": {
-          "slope": 3e-05
-        },
+        "strategy": "lookup",
         "validRange": [
           0,
           50000
         ],
-        "notes": "HR = exp(3e-05 × miles/year); exposure-proportional risk"
-      }
+        "notes": "HR = exp(3e-05 × miles/year); exposure-proportional risk",
+        "points": [
+          {
+            "value": 2000,
+            "hazardRatio": 0.4
+          },
+          {
+            "value": 5000,
+            "hazardRatio": 0.61
+          },
+          {
+            "value": 13500,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 25000,
+            "hazardRatio": 1.36
+          },
+          {
+            "value": 50000,
+            "hazardRatio": 1.92
+          }
+        ]
+      },
+      "citation": "Elvik R. Driver mileage and accident involvement: A synthesis of evidence. Accid Anal Prev. 2023;179:106899",
+      "doi": "10.1016/j.aap.2022.106899",
+      "notes": "Crash involvement grows ~ with the SQUARE ROOT of annual mileage (high-mileage driving skews to low-risk divided highways). HR = sqrt(miles/13,500 US average), clamped [0.4, ~1.9]. Replaces an exponential form that overstated 50k mi/yr by ~2.3x."
     },
     {
       "factorId": "seat_belt_use",
@@ -205,7 +228,7 @@
       "factorId": "alcohol_consumption",
       "name": "Alcohol Consumption",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "case_control",
       "requiredFields": [
         {
           "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
@@ -216,20 +239,24 @@
         "type": "continuous",
         "strategy": "linear",
         "coefficients": {
-          "slope": 0.05
+          "slope": 0.02,
+          "unit": "drinks/week"
         },
         "validRange": [
           0,
-          50
+          35
         ],
         "notes": "HR increases with drinking due to impaired driving risk"
-      }
+      },
+      "citation": "Yao J, Voas RB, Lacey JH. Drivers with alcohol use disorders and their risks of crash involvement. Drug Alcohol Depend. 2017;183:210-216; Taylor B, et al. Drug Alcohol Depend. 2010 (acute-BAC meta-analysis)",
+      "doi": "10.1016/j.drugalcdep.2017.10.040",
+      "notes": "Crash risk tracks drinking-and-driving occasions (acute BAC), not weekly volume; habitual-volume evidence is weak once BAC-at-the-wheel is controlled. Slope reduced from 0.05 to 0.02 (14/wk -> 1.32, 35/wk -> 2.0) as a proxy for drink-driving exposure."
     },
     {
       "factorId": "traffic_violations",
       "name": "Traffic Violations (Past 3 Years)",
       "modifiable": true,
-      "evidenceLevel": "medium",
+      "evidenceLevel": "case_control",
       "requiredFields": [
         {
           "path": "lifestyle.drivingHabits.trafficViolationsPast3Years.value",
@@ -244,16 +271,19 @@
         },
         "validRange": [
           0,
-          10
+          3
         ],
         "notes": "Each violation increases risk by ~20%"
-      }
+      },
+      "citation": "Informing traffic enforcement leniency and discretion: crash culpability and prior citations. 2023 (PMC12520197); California DMV driver-record studies",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12520197/",
+      "notes": "Prior moving citations -> crash culpability OR 1.64 (1.29-2.08); exp(0.2x) brackets this at 1-3 violations, capped at 3 (HR 1.82) — outcome evidence is crash involvement, not death."
     },
     {
       "factorId": "phone_use_while_driving",
       "name": "Phone Use While Driving",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "lifestyle.drivingHabits.phoneUseWhileDriving.value",
@@ -270,7 +300,7 @@
           },
           {
             "value": "rare",
-            "hazardRatio": 1.2
+            "hazardRatio": 1.16
           },
           {
             "value": "occasional",
@@ -278,17 +308,24 @@
           },
           {
             "value": "frequent",
-            "hazardRatio": 2.0
+            "hazardRatio": 1.83,
+            "confidence": [
+              1.03,
+              3.25
+            ]
           }
         ],
         "referenceCategory": "never"
-      }
+      },
+      "citation": "Owens JM, Dingus TA, Guo F, et al. Crash Risk of Cell Phone Use While Driving: A Case-Crossover Analysis of Naturalistic Driving Data (SHRP2). AAA Foundation for Traffic Safety, 2018",
+      "url": "https://aaafoundation.org/crash-risk-cell-phone-use-driving-case-crossover-analysis-naturalistic-driving-data/",
+      "notes": "Visual-manual phone tasks OR 1.83 (1.03-3.25), texting OR 2.22 (1.07-4.63); hand-held conversation alone 1.16 (ns)."
     },
     {
       "factorId": "driving_setting",
       "name": "Driving Environment",
       "modifiable": false,
-      "evidenceLevel": "medium",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "lifestyle.drivingHabits.drivingSetting.value",
@@ -317,7 +354,10 @@
           }
         ],
         "referenceCategory": "suburban"
-      }
+      },
+      "citation": "Insurance Institute for Highway Safety. Fatality Facts 2024: Urban/rural comparison (FARS analysis); NHTSA Rural/Urban Comparison of Traffic Fatalities, DOT HS 813 599",
+      "url": "https://www.iihs.org/research-areas/fatality-statistics/detail/urban-rural-comparison",
+      "notes": "Fatality rate per 100M VMT: rural 1.56 vs urban 1.01 (vs ~1.20 national) -> urban ~0.84, rural ~1.30, matching the modeled 0.8/1.3."
     }
   ]
 }

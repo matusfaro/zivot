@@ -19,7 +19,15 @@
         "evidenceLevel": "expert_opinion"
       }
     ],
-    "description": "Cerebrovascular accident - blockage or rupture of blood vessels in the brain"
+    "description": "Cerebrovascular accident - blockage or rupture of blood vessels in the brain",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.79,
+      "basis": "Perth Community Stroke Study: 79% (95% CI 74-84%) dead within 10 years of first-ever stroke",
+      "citation": "Hardie K, Hankey GJ, Jamrozik K, Broadhurst RJ, Anderson C. Ten-year risk of first recurrent stroke and disability after first-ever stroke. Stroke. 2003;34(8):1842-1846",
+      "doi": "10.1161/01.STR.0000082382.42061.EE",
+      "notes": "All-cause mortality among the diagnosed (annual death rate of survivors 2.3x matched population); includes background mortality"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -240,7 +248,7 @@
       "factorId": "cvd_history_stroke",
       "name": "History of Cardiovascular Disease",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -251,13 +259,16 @@
         "type": "boolean",
         "trueHazardRatio": 1.6,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Wolf PA, Abbott RD, Kannel WB. Atrial fibrillation as an independent risk factor for stroke: the Framingham Study. Stroke. 1991;22(8):983-988",
+      "doi": "10.1161/01.STR.22.8.983",
+      "notes": "Framingham: age-adjusted stroke incidence roughly doubled with coronary heart disease; 1.6 is a conservative adjusted estimate (CHARLS 2025: HR 1.96, 1.55-2.48)."
     },
     {
       "factorId": "prior_stroke_tia",
       "name": "Prior Stroke or TIA",
       "modifiable": false,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -266,15 +277,18 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 3.2,
+        "trueHazardRatio": 4.37,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Lioutas VA, et al. Incidence of Transient Ischemic Attack and Association With Long-term Risk of Stroke. JAMA. 2021;325(4):373-381",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33496774/",
+      "notes": "Framingham: fully adjusted 10-year stroke HR after TIA 4.37 (3.30-5.71); cumulative post-TIA stroke risk 19.8% at 10 years in 38-study meta-analysis."
     },
     {
       "factorId": "cholesterol_hdl_stroke",
       "name": "HDL Cholesterol (Protective)",
       "modifiable": true,
-      "evidenceLevel": "moderate",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "labTests.lipidPanel.hdlCholesterol.value",
@@ -287,11 +301,11 @@
         "points": [
           {
             "value": 30,
-            "hazardRatio": 1.3
+            "hazardRatio": 1.11
           },
           {
             "value": 40,
-            "hazardRatio": 1.15
+            "hazardRatio": 1.05
           },
           {
             "value": 50,
@@ -299,28 +313,35 @@
           },
           {
             "value": 60,
-            "hazardRatio": 0.9
+            "hazardRatio": 0.95
           },
           {
             "value": 70,
-            "hazardRatio": 0.82
+            "hazardRatio": 0.9
           },
           {
             "value": 80,
-            "hazardRatio": 0.75
+            "hazardRatio": 0.86,
+            "confidence": [
+              0.8,
+              0.92
+            ]
           }
         ],
         "validRange": [
           20,
           100
         ]
-      }
+      },
+      "citation": "Dose-Response Association Between High-Density Lipoprotein Cholesterol and Stroke: A Systematic Review and Meta-Analysis of Prospective Cohort Studies. Prev Chronic Dis. 2021;18:E100",
+      "url": "https://www.cdc.gov/pcd/issues/2021/20_0278.htm",
+      "notes": "Total stroke RR 0.82 (0.76-0.89) per 1 mmol/L (38.7 mg/dL) higher HDL (62 cohorts, 900,501 participants). Caveat: high HDL is associated with INCREASED intracerebral hemorrhage (RR 1.21)."
     },
     {
       "factorId": "bmi_stroke",
       "name": "Body Mass Index",
       "modifiable": true,
-      "evidenceLevel": "moderate",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "biometrics.weight.mostRecent.value.value",
@@ -360,7 +381,10 @@
           15,
           50
         ]
-      }
+      },
+      "citation": "Strazzullo P, et al. Excess body weight and incidence of stroke: meta-analysis of prospective studies with 2 million participants. Stroke. 2010;41(5):e418-e426",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/20299666/",
+      "notes": "Ischemic stroke: overweight RR 1.22 (1.05-1.41), obese RR 1.64 (1.36-1.99); values map the pooled estimates conservatively across the BMI range."
     }
   ]
 }

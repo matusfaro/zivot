@@ -512,3 +512,18 @@ test.describe('Medical History Section - Phase 3 New Fields', () => {
     await waitForRiskCalculation(page);
   });
 });
+
+test.describe('Insomnia (CVD risk factor input)', () => {
+  test('should persist and calculate risk when Insomnia is toggled', async ({ page }) => {
+    await toggleCheckbox(page, 'Insomnia', true);
+    await page.waitForTimeout(500);
+
+    const medicalHistory = await getIndexedDBValue(page, 'medicalHistory');
+    const hasInsomnia = (medicalHistory.conditions || []).some(
+      (c: any) => c.conditionId === 'insomnia' && c.status === 'active'
+    );
+    expect(hasInsomnia).toBe(true);
+
+    await waitForRiskCalculation(page);
+  });
+});

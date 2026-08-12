@@ -23,7 +23,14 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year risk of esophageal cancer, including both adenocarcinoma and squamous cell carcinoma"
+    "description": "10-year risk of esophageal cancer, including both adenocarcinoma and squamous cell carcinoma",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.778,
+      "basis": "SEER 5-year relative survival 22.2% (all stages, 2016-2022) -> CFR 0.778; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/esoph.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -111,7 +118,7 @@
       "factorId": "gerd",
       "name": "GERD (Gastroesophageal Reflux Disease)",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.gastrointestinalHistory.gerdDiagnosis.value",
@@ -123,7 +130,10 @@
         "trueHazardRatio": 2.5,
         "falseHazardRatio": 1.0,
         "notes": "Chronic GERD is major risk factor for adenocarcinoma"
-      }
+      },
+      "citation": "Rubenstein JH, Taylor JB. Meta-analysis: the association of oesophageal adenocarcinoma with symptoms of gastro-oesophageal reflux. Aliment Pharmacol Ther. 2010;32(10):1222-1227",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3481544/",
+      "notes": "Weekly GERD symptoms: OR 4.92 (3.90-6.22) for esophageal ADENOcarcinoma (daily 7.40). The 2.5 here is diluted because the model covers combined EAC+SCC and GERD is not an SCC risk factor."
     },
     {
       "factorId": "barretts_esophagus",
@@ -149,7 +159,7 @@
       "factorId": "smoking",
       "name": "Smoking Status",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.smoking.status.value",
@@ -174,13 +184,16 @@
           }
         ],
         "referenceCategory": "never"
-      }
+      },
+      "citation": "Wang QL, Xie SH, Li WT, Lagergren J. Smoking Cessation and Risk of Esophageal Cancer by Histological Type: systematic review and meta-analysis. J Natl Cancer Inst. 2017;109(12):djx115",
+      "doi": "10.1093/jnci/djx115",
+      "notes": "Adenocarcinoma: current RR 2.32 (1.96-2.75), former 1.62 (1.40-1.87); squamous: current 4.18 (3.42-5.12), former 2.05 (1.71-2.45). Values here sit between the histology-specific estimates for the combined outcome."
     },
     {
       "factorId": "alcohol_consumption",
       "name": "Alcohol Consumption",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
@@ -198,13 +211,16 @@
           50
         ],
         "notes": "Heavy drinking increases squamous cell carcinoma risk"
-      }
+      },
+      "citation": "IARC Monographs on the Identification of Carcinogenic Hazards to Humans, Volume 100E: Personal Habits and Indoor Combustions (alcohol and oesophageal squamous cell carcinoma)",
+      "url": "https://publications.iarc.fr/122",
+      "notes": "Alcohol is an established cause of esophageal SQUAMOUS cell carcinoma with strong dose-response; adenocarcinoma shows no association (Tramacere meta: RR 0.87-0.96). Slope reflects the SCC component of the combined outcome."
     },
     {
       "factorId": "bmi",
       "name": "Body Mass Index (Obesity)",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "biometrics.weight.mostRecent.value.value",
@@ -241,7 +257,10 @@
           50
         ],
         "notes": "Obesity increases adenocarcinoma risk"
-      }
+      },
+      "citation": "Turati F, et al. A meta-analysis of body mass index and esophageal and gastric cardia adenocarcinoma. Ann Oncol. 2013;24(3):609-617",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/22898040/",
+      "notes": "EAC: overweight RR 1.71 (1.50-1.96), obese RR 2.34 (1.95-2.81). Values here are attenuated because BMI is inversely associated with the SCC component of the combined outcome."
     }
   ]
 }

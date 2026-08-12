@@ -23,7 +23,14 @@
         "evidenceLevel": "meta_analysis"
       }
     ],
-    "description": "10-year risk of developing lung cancer (all histological types)"
+    "description": "10-year risk of developing lung cancer (all histological types)",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.705,
+      "basis": "SEER 5-year relative survival 29.5% (all stages, 2016-2022) -> CFR 0.705; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/lungb.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "never_smoker_male",

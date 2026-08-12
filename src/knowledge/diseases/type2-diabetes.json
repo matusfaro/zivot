@@ -23,7 +23,15 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year risk of developing type 2 diabetes mellitus"
+    "description": "10-year risk of developing type 2 diabetes mellitus",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.0,
+      "basis": "Diabetes mortality is intentionally attributed to the CVD, CKD, and stroke models, where diabetes is already a multiplicative risk factor - counting it separately would double-count those deaths",
+      "citation": "Hansen LJ, de Fine Olivarius N, Siersma V. 16-year excess all-cause mortality of newly diagnosed type 2 diabetic patients. BMC Public Health 2009;9:400",
+      "doi": "10.1186/1471-2458-9-400",
+      "notes": "Excess mortality of newly diagnosed T2DM is HR ~1.5-2.5 vs matched non-diabetics, largely cardiovascular/renal - captured via the diabetes HRs in those disease models"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "average_male_us",

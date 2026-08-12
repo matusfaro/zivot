@@ -18,7 +18,14 @@
         "evidenceLevel": "meta_analysis"
       }
     ],
-    "description": "10-year mortality risk from cutaneous malignant melanoma based on incidence, stage-adjusted survival"
+    "description": "10-year mortality risk from cutaneous malignant melanoma based on incidence, stage-adjusted survival",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.053,
+      "basis": "SEER 5-year relative survival 94.7% (all stages, 2016-2022) -> CFR 0.053; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/melan.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "white_us",

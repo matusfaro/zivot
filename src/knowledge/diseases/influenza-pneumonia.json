@@ -13,11 +13,128 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year risk of death from influenza and pneumonia, primarily affecting elderly and immunocompromised individuals"
+    "description": "10-year risk of death from influenza and pneumonia, primarily affecting elderly and immunocompromised individuals",
+    "outcome": "mortality"
   },
   "baselineRisk": {
     "defaultCurve": "general_us",
     "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            18,
+            100
+          ],
+          "sex": "male"
+        },
+        "source": "Derived from the unstratified curve using the male:female influenza/pneumonia mortality ratio ~1.35 (CDC WONDER via American Lung Association Trends in Pneumonia and Influenza Mortality: age-adjusted 2013 male 18.6 vs female 13.9 per 100k; MMWR 2020;69(40) QuickStats confirms higher male rates in every 65+ age group)",
+        "url": "https://www.lung.org/getmedia/98f088b5-3fd7-4c43-a490-ba8f4747bd4d/pi-trend-report.pdf.pdf",
+        "notes": "male = 1.15x combined, female = 0.85x combined (equal population shares)",
+        "ageRiskMapping": [
+          {
+            "age": 18,
+            "risk": 8e-05
+          },
+          {
+            "age": 30,
+            "risk": 8e-05
+          },
+          {
+            "age": 40,
+            "risk": 0.000115
+          },
+          {
+            "age": 50,
+            "risk": 0.00023
+          },
+          {
+            "age": 60,
+            "risk": 0.000575
+          },
+          {
+            "age": 65,
+            "risk": 0.003059
+          },
+          {
+            "age": 70,
+            "risk": 0.00575
+          },
+          {
+            "age": 75,
+            "risk": 0.0115
+          },
+          {
+            "age": 80,
+            "risk": 0.0207
+          },
+          {
+            "age": 85,
+            "risk": 0.0345
+          }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            18,
+            100
+          ],
+          "sex": "female"
+        },
+        "source": "Derived from the unstratified curve using the male:female influenza/pneumonia mortality ratio ~1.35 (CDC WONDER via American Lung Association Trends in Pneumonia and Influenza Mortality: age-adjusted 2013 male 18.6 vs female 13.9 per 100k; MMWR 2020;69(40) QuickStats confirms higher male rates in every 65+ age group)",
+        "url": "https://www.lung.org/getmedia/98f088b5-3fd7-4c43-a490-ba8f4747bd4d/pi-trend-report.pdf.pdf",
+        "notes": "male = 1.15x combined, female = 0.85x combined (equal population shares)",
+        "ageRiskMapping": [
+          {
+            "age": 18,
+            "risk": 5.9e-05
+          },
+          {
+            "age": 30,
+            "risk": 5.9e-05
+          },
+          {
+            "age": 40,
+            "risk": 8.5e-05
+          },
+          {
+            "age": 50,
+            "risk": 0.00017
+          },
+          {
+            "age": 60,
+            "risk": 0.000425
+          },
+          {
+            "age": 65,
+            "risk": 0.002261
+          },
+          {
+            "age": 70,
+            "risk": 0.00425
+          },
+          {
+            "age": 75,
+            "risk": 0.0085
+          },
+          {
+            "age": 80,
+            "risk": 0.0153
+          },
+          {
+            "age": 85,
+            "risk": 0.0255
+          }
+        ]
+      },
       {
         "id": "general_us",
         "applicability": {
@@ -103,7 +220,7 @@
       "factorId": "pneumococcal_vaccine",
       "name": "Pneumococcal Vaccination",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.vaccinations.pneumococcalVaccine.value",
@@ -112,16 +229,19 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 0.6,
+        "trueHazardRatio": 0.58,
         "falseHazardRatio": 1.0,
         "notes": "Pneumococcal vaccine reduces pneumonia mortality"
-      }
+      },
+      "citation": "Kim S, et al. Prior pneumococcal vaccination improves in-hospital mortality among elderly hospitalized with community-acquired pneumonia. BMC Pulm Med. 2024;24:168",
+      "doi": "10.1186/s12890-024-02928-8",
+      "notes": "30-day mortality aHR 0.576 (0.409-0.812) in vaccinated CAP patients >=65. Conditional on hospitalization (case-fatality effect); population-level prevention benefit is smaller."
     },
     {
       "factorId": "immunocompromised",
       "name": "Immunocompromised Status",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.immuneStatus.value",
@@ -138,17 +258,24 @@
           },
           {
             "value": "immunocompromised",
-            "hazardRatio": 3.5
+            "hazardRatio": 3.2,
+            "confidence": [
+              1.93,
+              5.34
+            ]
           }
         ],
         "referenceCategory": "normal"
-      }
+      },
+      "citation": "Wang L, et al. The severity and risk factors for mortality in immunocompromised adult patients hospitalized with influenza-related pneumonia. Ann Clin Microbiol Antimicrob. 2021;20:60",
+      "doi": "10.1186/s12941-021-00462-7",
+      "notes": "30-day mortality OR 3.206 (1.926-5.335) for immunocompromised vs immunocompetent influenza pneumonia."
     },
     {
       "factorId": "chronic_lung_disease",
       "name": "Chronic Lung Disease (COPD)",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -161,13 +288,16 @@
         "conditionId": "copd",
         "presentHR": 2.5,
         "absentHR": 1.0
-      }
+      },
+      "citation": "Barker WH, Mullooly JP. Pneumonia and influenza deaths during epidemics: implications for prevention. Arch Intern Med. 1982;142(1):85-89 (PMID 7053739)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/7053739/",
+      "notes": "Epidemic P&I death rates <10/100k in healthy adults vs >600/100k in chronically ill (870/100k with combined cardiopulmonary disease). Effect driven by higher infection/pneumonia incidence (RR 1.36) more than case fatality (aHR 1.12, ns, Miyashita 2021)."
     },
     {
       "factorId": "diabetes",
       "name": "Diabetes",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -180,13 +310,16 @@
         "conditionId": "type2_diabetes",
         "presentHR": 1.8,
         "absentHR": 1.0
-      }
+      },
+      "citation": "Miyashita K, Nakatani E, Hozumi H, et al. Risk Factors for Pneumonia and Death in Adult Patients With Seasonal Influenza: A Population-Based Study. Open Forum Infect Dis. 2021;8(3):ofab068",
+      "doi": "10.1093/ofid/ofab068",
+      "notes": "Diabetes: 28-day mortality HR 1.69 (1.10-2.60), pneumonia incidence RR 1.56 (1.25-1.94); all-infection mortality HR 1.82 (1.78-1.86) in T2D (Carey 2024)."
     },
     {
       "factorId": "heart_disease",
       "name": "Heart Disease",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -199,7 +332,10 @@
         "conditionId": "cvd",
         "presentHR": 2.0,
         "absentHR": 1.0
-      }
+      },
+      "citation": "Miyashita K, Nakatani E, Hozumi H, et al. Open Forum Infect Dis. 2021;8(3):ofab068",
+      "doi": "10.1093/ofid/ofab068",
+      "notes": "Congestive heart failure: 28-day mortality HR 2.11 (1.49-2.98); evidence is CHF-specific — may overstate stable coronary disease."
     }
   ]
 }

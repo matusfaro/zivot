@@ -18,7 +18,15 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "Breast cancer risk for women based on BCRAT/Gail model"
+    "description": "Breast cancer risk for women based on BCRAT/Gail model",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.16,
+      "basis": "SEER 5-yr relative survival 91.9% (CFR 0.081); 10-yr relative survival ~84% per ACS-derived figures -> CFR 0.16 used for the 10-year horizon",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/breast.html",
+      "notes": "10-year figure verified only in secondary sources quoting ACS"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "white_female_us",
@@ -27,56 +35,120 @@
         "id": "white_female_us",
         "applicability": {
           "sex": "female",
-          "ethnicity": ["white"],
-          "region": ["US"],
-          "ageRange": [35, 100]
+          "ethnicity": [
+            "white"
+          ],
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            35,
+            100
+          ]
         },
         "source": "SEER Cancer Statistics Review (1975-2021)",
         "url": "https://seer.cancer.gov/statfacts/html/breast.html",
         "notes": "Age-specific incidence peaks 60-69; ~128/100k age-adjusted; exponential rise post-30.",
         "ageRiskMapping": [
-          { "age": 35, "risk": 0.005 },
-          { "age": 40, "risk": 0.014 },
-          { "age": 50, "risk": 0.024 },
-          { "age": 60, "risk": 0.034 },
-          { "age": 70, "risk": 0.038 }
+          {
+            "age": 35,
+            "risk": 0.005
+          },
+          {
+            "age": 40,
+            "risk": 0.014
+          },
+          {
+            "age": 50,
+            "risk": 0.024
+          },
+          {
+            "age": 60,
+            "risk": 0.034
+          },
+          {
+            "age": 70,
+            "risk": 0.038
+          }
         ]
       },
       {
         "id": "black_female_us",
         "applicability": {
           "sex": "female",
-          "ethnicity": ["black"],
-          "region": ["US"],
-          "ageRange": [35, 100]
+          "ethnicity": [
+            "black"
+          ],
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            35,
+            100
+          ]
         },
         "source": "SEER Cancer Statistics Review (1975-2021)",
         "url": "https://seer.cancer.gov/statfacts/html/breast.html",
         "notes": "Slightly lower overall incidence than White females but higher mortality; younger age at diagnosis.",
         "ageRiskMapping": [
-          { "age": 35, "risk": 0.004 },
-          { "age": 40, "risk": 0.012 },
-          { "age": 50, "risk": 0.020 },
-          { "age": 60, "risk": 0.027 },
-          { "age": 70, "risk": 0.030 }
+          {
+            "age": 35,
+            "risk": 0.004
+          },
+          {
+            "age": 40,
+            "risk": 0.012
+          },
+          {
+            "age": 50,
+            "risk": 0.02
+          },
+          {
+            "age": 60,
+            "risk": 0.027
+          },
+          {
+            "age": 70,
+            "risk": 0.03
+          }
         ]
       },
       {
         "id": "female_us",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [35, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            35,
+            100
+          ]
         },
         "source": "SEER Cancer Statistics Review (1975-2021)",
         "url": "https://seer.cancer.gov/statfacts/html/breast.html",
         "notes": "Overall US female population incidence; accounts for all ethnicities.",
         "ageRiskMapping": [
-          { "age": 35, "risk": 0.005 },
-          { "age": 40, "risk": 0.013 },
-          { "age": 50, "risk": 0.023 },
-          { "age": 60, "risk": 0.032 },
-          { "age": 70, "risk": 0.036 }
+          {
+            "age": 35,
+            "risk": 0.005
+          },
+          {
+            "age": 40,
+            "risk": 0.013
+          },
+          {
+            "age": 50,
+            "risk": 0.023
+          },
+          {
+            "age": 60,
+            "risk": 0.032
+          },
+          {
+            "age": 70,
+            "risk": 0.036
+          }
         ]
       }
     ]
@@ -86,7 +158,7 @@
       "factorId": "age_first_period",
       "name": "Age at First Menstrual Period",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.reproductiveHistory.ageAtMenarche.value",
@@ -97,15 +169,65 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 11, "hazardRatio": 1.15 },
-          { "value": 12, "hazardRatio": 1.10 },
-          { "value": 13, "hazardRatio": 1.0 },
-          { "value": 14, "hazardRatio": 0.93 },
-          { "value": 15, "hazardRatio": 0.87 },
-          { "value": 16, "hazardRatio": 0.82 }
+          {
+            "value": 11,
+            "hazardRatio": 1.15
+          },
+          {
+            "value": 12,
+            "hazardRatio": 1.1
+          },
+          {
+            "value": 13,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 14,
+            "hazardRatio": 0.93
+          },
+          {
+            "value": 15,
+            "hazardRatio": 0.87
+          },
+          {
+            "value": 16,
+            "hazardRatio": 0.82
+          }
         ],
-        "validRange": [8, 20]
-      }
+        "validRange": [
+          8,
+          20
+        ],
+        "categories": [
+          {
+            "value": "11",
+            "hazardRatio": 1.1
+          },
+          {
+            "value": "12",
+            "hazardRatio": 1.05
+          },
+          {
+            "value": "13",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "14",
+            "hazardRatio": 0.95
+          },
+          {
+            "value": "15",
+            "hazardRatio": 0.9
+          },
+          {
+            "value": "16",
+            "hazardRatio": 0.86
+          }
+        ]
+      },
+      "citation": "Collaborative Group on Hormonal Factors in Breast Cancer. Menarche, menopause, and breast cancer risk: individual participant meta-analysis of 117 studies. Lancet Oncol. 2012;13(11):1141-1151",
+      "doi": "10.1016/S1470-2045(12)70425-4",
+      "notes": "RR 1.050 (95% CI 1.044-1.057) per year younger at menarche, reference age 13; values compound the per-year estimate."
     },
     {
       "factorId": "age_first_birth",
@@ -124,12 +246,48 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": ["nulliparous", "never"], "hazardRatio": 1.3 },
-          { "value": ["under_20", "<20"], "hazardRatio": 0.75 },
-          { "value": ["20_24", "20-24"], "hazardRatio": 0.90 },
-          { "value": ["25_29", "25-29"], "hazardRatio": 1.0 },
-          { "value": ["30_34", "30-34"], "hazardRatio": 1.25 },
-          { "value": ["35_plus", "35+"], "hazardRatio": 1.8 }
+          {
+            "value": [
+              "nulliparous",
+              "never"
+            ],
+            "hazardRatio": 1.3
+          },
+          {
+            "value": [
+              "under_20",
+              "<20"
+            ],
+            "hazardRatio": 0.75
+          },
+          {
+            "value": [
+              "20_24",
+              "20-24"
+            ],
+            "hazardRatio": 0.9
+          },
+          {
+            "value": [
+              "25_29",
+              "25-29"
+            ],
+            "hazardRatio": 1.0
+          },
+          {
+            "value": [
+              "30_34",
+              "30-34"
+            ],
+            "hazardRatio": 1.25
+          },
+          {
+            "value": [
+              "35_plus",
+              "35+"
+            ],
+            "hazardRatio": 1.8
+          }
         ]
       }
     },
@@ -150,9 +308,18 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": "none", "hazardRatio": 1.0 },
-          { "value": "one", "hazardRatio": 2.0 },
-          { "value": "two_or_more", "hazardRatio": 2.9 }
+          {
+            "value": "none",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "one",
+            "hazardRatio": 2.0
+          },
+          {
+            "value": "two_or_more",
+            "hazardRatio": 2.9
+          }
         ]
       }
     },
@@ -160,7 +327,7 @@
       "factorId": "breast_biopsies",
       "name": "Number of Breast Biopsies",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.reproductiveHistory.breastBiopsies.value",
@@ -170,17 +337,38 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": ["0", "none"], "hazardRatio": 1.0 },
-          { "value": ["1"], "hazardRatio": 1.4 },
-          { "value": ["2", "2+", "multiple"], "hazardRatio": 1.9 }
+          {
+            "value": [
+              "0",
+              "none"
+            ],
+            "hazardRatio": 1.0
+          },
+          {
+            "value": [
+              "1"
+            ],
+            "hazardRatio": 1.4
+          },
+          {
+            "value": [
+              "2",
+              "2+",
+              "multiple"
+            ],
+            "hazardRatio": 1.9
+          }
         ]
-      }
+      },
+      "citation": "Gail MH, Brinton LA, Byar DP, et al. Projecting individualized probabilities of developing breast cancer for white females who are being examined annually. J Natl Cancer Inst. 1989;81:1879-1886",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3496137/",
+      "notes": "Gail model (BCRAT) biopsy relative risks; age-averaged here (age-stratified: <50y ~1.70, >=50y 1.27 per biopsy)."
     },
     {
       "factorId": "atypical_hyperplasia",
       "name": "Atypical Hyperplasia on Biopsy",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.reproductiveHistory.atypicalHyperplasia.value",
@@ -191,7 +379,10 @@
         "type": "boolean",
         "trueHazardRatio": 1.8,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Hartmann LC, et al. Benign Breast Disease and the Risk of Breast Cancer. N Engl J Med. 2005;353:229-237",
+      "doi": "10.1056/NEJMoa044383",
+      "notes": "Standalone RR for atypical hyperplasia is ~4.24 (3.26-5.41). The 1.8 here is the Gail-model-style ADDITIONAL multiplier applied on top of the biopsy-count factor (both factors multiply in this engine), matching BCRAT's x1.82 structure."
     },
     {
       "factorId": "bmi_breast",
@@ -211,14 +402,35 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 18.5, "hazardRatio": 0.85 },
-          { "value": 22, "hazardRatio": 1.0 },
-          { "value": 25, "hazardRatio": 1.08 },
-          { "value": 30, "hazardRatio": 1.25 },
-          { "value": 35, "hazardRatio": 1.45 },
-          { "value": 40, "hazardRatio": 1.65 }
+          {
+            "value": 18.5,
+            "hazardRatio": 0.85
+          },
+          {
+            "value": 22,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 25,
+            "hazardRatio": 1.08
+          },
+          {
+            "value": 30,
+            "hazardRatio": 1.25
+          },
+          {
+            "value": 35,
+            "hazardRatio": 1.45
+          },
+          {
+            "value": 40,
+            "hazardRatio": 1.65
+          }
         ],
-        "validRange": [15, 50]
+        "validRange": [
+          15,
+          50
+        ]
       }
     },
     {
@@ -242,14 +454,17 @@
           "slope": 0.009,
           "intercept": 0
         },
-        "validRange": [0, 50]
+        "validRange": [
+          0,
+          50
+        ]
       }
     },
     {
       "factorId": "exercise_breast",
       "name": "Physical Activity",
       "modifiable": true,
-      "evidenceLevel": "moderate",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.exercise.moderateMinutesPerWeek.mostRecent.value",
@@ -260,14 +475,35 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.2 },
-          { "value": 60, "hazardRatio": 1.1 },
-          { "value": 150, "hazardRatio": 1.0 },
-          { "value": 300, "hazardRatio": 0.88 },
-          { "value": 450, "hazardRatio": 0.80 }
+          {
+            "value": 0,
+            "hazardRatio": 1.06
+          },
+          {
+            "value": 150,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 300,
+            "hazardRatio": 0.96
+          },
+          {
+            "value": 450,
+            "hazardRatio": 0.93,
+            "confidence": [
+              0.9,
+              0.97
+            ]
+          }
         ],
-        "validRange": [0, 1000]
-      }
+        "validRange": [
+          0,
+          1000
+        ]
+      },
+      "citation": "Wu Y, Zhang D, Kang S. Physical activity and risk of breast cancer: a meta-analysis of prospective studies. Breast Cancer Res Treat. 2013;137(3):869-882",
+      "doi": "10.1007/s10549-012-2396-7",
+      "notes": "Highest-vs-lowest activity RR 0.88 (0.85-0.91) across 31 prospective studies; curve anchored so the full spread equals the pooled contrast."
     },
     {
       "factorId": "mammography_screening",
@@ -289,8 +525,22 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": false, "hazardRatio": 1.0, "confidence": [0.95, 1.05] },
-          { "value": true, "hazardRatio": 0.78, "confidence": [0.75, 0.82] }
+          {
+            "value": false,
+            "hazardRatio": 1.0,
+            "confidence": [
+              0.95,
+              1.05
+            ]
+          },
+          {
+            "value": true,
+            "hazardRatio": 0.78,
+            "confidence": [
+              0.75,
+              0.82
+            ]
+          }
         ]
       }
     }

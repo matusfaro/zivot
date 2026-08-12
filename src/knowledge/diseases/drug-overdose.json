@@ -13,11 +13,112 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year risk of death from drug overdose, including opioids, stimulants, and other substances"
+    "description": "10-year risk of death from drug overdose, including opioids, stimulants, and other substances",
+    "outcome": "mortality"
   },
   "baselineRisk": {
     "defaultCurve": "general_us",
     "curves": [
+      {
+        "id": "male_us",
+        "applicability": {
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            18,
+            100
+          ],
+          "sex": "male"
+        },
+        "source": "Derived from the unstratified NCHS curve using the male:female drug-overdose mortality ratio ~2.4 (NCHS Data Briefs 522/549: age-adjusted 2022-2024 male 45.6/44.3/32.2 vs female 19.4/18.3/14.1 per 100k; ratio stable across ages 15-74 per Butelman et al. 2023, doi:10.1101/2023.01.20.23284833)",
+        "url": "https://www.cdc.gov/nchs/products/databriefs/db549.htm",
+        "notes": "male = 1.41x combined, female = 0.59x combined (equal population shares)",
+        "ageRiskMapping": [
+          {
+            "age": 18,
+            "risk": 0.00282
+          },
+          {
+            "age": 25,
+            "risk": 0.004413
+          },
+          {
+            "age": 35,
+            "risk": 0.00564
+          },
+          {
+            "age": 45,
+            "risk": 0.004935
+          },
+          {
+            "age": 55,
+            "risk": 0.003525
+          },
+          {
+            "age": 65,
+            "risk": 0.002115
+          },
+          {
+            "age": 75,
+            "risk": 0.001128
+          },
+          {
+            "age": 85,
+            "risk": 0.000705
+          }
+        ]
+      },
+      {
+        "id": "female_us",
+        "applicability": {
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            18,
+            100
+          ],
+          "sex": "female"
+        },
+        "source": "Derived from the unstratified NCHS curve using the male:female drug-overdose mortality ratio ~2.4 (NCHS Data Briefs 522/549: age-adjusted 2022-2024 male 45.6/44.3/32.2 vs female 19.4/18.3/14.1 per 100k; ratio stable across ages 15-74 per Butelman et al. 2023, doi:10.1101/2023.01.20.23284833)",
+        "url": "https://www.cdc.gov/nchs/products/databriefs/db549.htm",
+        "notes": "male = 1.41x combined, female = 0.59x combined (equal population shares)",
+        "ageRiskMapping": [
+          {
+            "age": 18,
+            "risk": 0.00118
+          },
+          {
+            "age": 25,
+            "risk": 0.001847
+          },
+          {
+            "age": 35,
+            "risk": 0.00236
+          },
+          {
+            "age": 45,
+            "risk": 0.002065
+          },
+          {
+            "age": 55,
+            "risk": 0.001475
+          },
+          {
+            "age": 65,
+            "risk": 0.000885
+          },
+          {
+            "age": 75,
+            "risk": 0.000472
+          },
+          {
+            "age": 85,
+            "risk": 0.000295
+          }
+        ]
+      },
       {
         "id": "general_us",
         "applicability": {
@@ -71,28 +172,10 @@
   },
   "riskFactors": [
     {
-      "factorId": "prescribed_opioids",
-      "name": "Prescribed Opioids",
-      "modifiable": true,
-      "evidenceLevel": "high",
-      "requiredFields": [
-        {
-          "path": "medicalHistory.substanceUse.prescribedOpioids.value",
-          "alternatives": []
-        }
-      ],
-      "mapping": {
-        "type": "boolean",
-        "trueHazardRatio": 4.0,
-        "falseHazardRatio": 1.0,
-        "notes": "Prescription opioid use is major risk factor"
-      }
-    },
-    {
       "factorId": "opioid_daily_dose",
       "name": "Opioid Daily Dose (MME)",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.substanceUse.opioidDailyDose.value",
@@ -108,30 +191,53 @@
             "hazardRatio": 1.0
           },
           {
-            "value": 50,
-            "hazardRatio": 2.0
+            "value": 20,
+            "hazardRatio": 1.0
           },
           {
-            "value": 90,
-            "hazardRatio": 4.0
+            "value": 35,
+            "hazardRatio": 1.9,
+            "confidence": [
+              1.3,
+              2.7
+            ]
+          },
+          {
+            "value": 75,
+            "hazardRatio": 4.6,
+            "confidence": [
+              3.2,
+              6.7
+            ]
+          },
+          {
+            "value": 100,
+            "hazardRatio": 7.2,
+            "confidence": [
+              4.9,
+              10.7
+            ]
           },
           {
             "value": 200,
-            "hazardRatio": 8.0
+            "hazardRatio": 7.2
           }
         ],
         "validRange": [
           0,
-          500
+          200
         ],
         "notes": "Risk increases dramatically above 90 MME/day"
-      }
+      },
+      "citation": "Bohnert ASB, Valenstein M, Bair MJ, et al. Association Between Opioid Prescribing Patterns and Opioid Overdose-Related Deaths. JAMA. 2011;305(13):1315-1321; CDC Guideline for Prescribing Opioids for Chronic Pain. MMWR Recomm Rep. 2016;65(1)",
+      "doi": "10.15585/mmwr.rr6501e1",
+      "notes": "VA cohort fatal-overdose HRs vs 1-20 MME/day reference: 20-49 -> 1.9, 50-99 -> 4.6, >=100 -> 7.2; plateau above 100 (no data). Reference category is low-dose users, not non-users."
     },
     {
       "factorId": "prescribed_benzodiazepines",
       "name": "Prescribed Benzodiazepines",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.substanceUse.prescribedBenzodiazepines.value",
@@ -143,7 +249,10 @@
         "trueHazardRatio": 3.0,
         "falseHazardRatio": 1.0,
         "notes": "Benzos + opioids = very high risk combination"
-      }
+      },
+      "citation": "Park TW, Saitz R, Ganoczy D, Ilgen MA, Bohnert ASB. Benzodiazepine prescribing patterns and deaths from drug overdose among US veterans receiving opioid analgesics: case-cohort study. BMJ. 2015;350:h2698",
+      "doi": "10.1136/bmj.h2698",
+      "notes": "Current benzodiazepine prescription among opioid recipients: overdose-death aHR 3.86 (3.49-4.26); concurrent-use estimate elsewhere 2.11 (1.70-2.62). 3.0 is a conservative middle that also fires without opioid co-prescription."
     },
     {
       "factorId": "substance_abuse_history",
@@ -170,7 +279,7 @@
       "factorId": "prior_overdose",
       "name": "Prior Overdose",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.substanceUse.priorOverdose.value",
@@ -182,13 +291,16 @@
         "trueHazardRatio": 10.0,
         "falseHazardRatio": 1.0,
         "notes": "Prior overdose dramatically increases future risk"
-      }
+      },
+      "citation": "Olfson M, Crystal S, Wall M, Wang S, Liu SM, Blanco C. Causes of Death After Nonfatal Opioid Overdose. JAMA Psychiatry. 2018;75(8):820-827",
+      "doi": "10.1001/jamapsychiatry.2018.1471",
+      "notes": "Comparator-dependent: within people who inject drugs, recent nonfatal overdose aHR 1.95 (1.17-3.27); vs the GENERAL population, first-year all-cause SMR after nonfatal opioid overdose is 24.2 (drug-related SMR 132). HR 10 is a deliberately conservative population-baseline multiplier."
     },
     {
       "factorId": "depression",
       "name": "Depression Diagnosis",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.mentalHealth.depressionDiagnosis.value",
@@ -197,15 +309,18 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 2.5,
+        "trueHazardRatio": 1.35,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Weiner SG, El Ibrahimi S, Hendricks MA, et al. Factors Associated With Opioid Overdose After an Initial Opioid Prescription. JAMA Netw Open. 2022;5(1):e2145691",
+      "doi": "10.1001/jamanetworkopen.2021.45691",
+      "notes": "Depression aHR 1.26 (1.03-1.55) for opioid overdose; repeated-overdose cohort aHR 1.44 (1.17-1.78). The larger effects in this literature belong to substance use disorder (aHR 2.74), modeled separately."
     },
     {
       "factorId": "alcohol_consumption",
       "name": "Alcohol Consumption",
       "modifiable": true,
-      "evidenceLevel": "medium",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
@@ -220,10 +335,13 @@
         },
         "validRange": [
           0,
-          50
+          23
         ],
         "notes": "Alcohol mixed with substances increases overdose risk"
-      }
+      },
+      "citation": "Substance use and use disorders among Veterans on long-term opioid therapy (VHA cohort 2014-2019)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12166433/",
+      "notes": "Alcohol use disorder: fatal-overdose HR 1.43 (1.10-1.86) among long-term opioid therapy patients; exp(0.03x) reaches 1.43 at ~12 drinks/week. Capped at ~23 drinks/week (HR ~2.0) — nothing beyond the AUD-level effect is evidenced."
     }
   ]
 }

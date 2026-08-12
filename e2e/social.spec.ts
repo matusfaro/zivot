@@ -242,3 +242,22 @@ test.describe('Social & Wellbeing Section Fields', () => {
     expect(await isCheckboxChecked(page, 'Engage in Creative Hobbies')).toBe(true);
   });
 });
+
+test.describe('Living Alone (mortality modifier input)', () => {
+  test('should persist and calculate risk when Lives Alone is toggled', async ({ page }) => {
+    await toggleCheckbox(page, 'I live alone', true);
+    await page.waitForTimeout(500);
+
+    const social = await getIndexedDBValue(page, 'social');
+    expect(social.connections.livesAlone.value).toBe(true);
+
+    await waitForRiskCalculation(page);
+
+    // Unchecking clears the flag
+    await toggleCheckbox(page, 'I live alone', false);
+    await page.waitForTimeout(500);
+    const socialAfter = await getIndexedDBValue(page, 'social');
+    expect(socialAfter.connections?.livesAlone?.value ?? false).toBe(false);
+    await waitForRiskCalculation(page);
+  });
+});

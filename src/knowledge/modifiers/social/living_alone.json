@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "id": "living_alone",
+    "name": "Living Alone",
+    "category": "social",
+    "version": "1.0.0",
+    "lastUpdated": "2026-08-12",
+    "sources": [
+      {
+        "citation": "Holt-Lunstad J, Smith TB, Baker M, Harris T, Stephenson D. Loneliness and Social Isolation as Risk Factors for Mortality: A Meta-Analytic Review. Perspect Psychol Sci. 2015;10(2):227-237",
+        "doi": "10.1177/1745691614568352",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "description": "Living alone is associated with increased all-cause mortality (OR 1.32, adjusted), comparable to social isolation (1.29) and loneliness (1.26). Participates in the social-category modifier combination rule, so it is attenuated when other social factors are present."
+  },
+  "applicability": {},
+  "requiredFields": [
+    {
+      "path": "social.connections.livesAlone.value",
+      "required": false
+    }
+  ],
+  "mapping": {
+    "type": "boolean",
+    "trueHazardRatio": 1.32,
+    "falseHazardRatio": 1.0
+  },
+  "effectSize": {
+    "hazardRatio": 1.32,
+    "evidenceLevel": "meta_analysis",
+    "evidenceStrength": "strong"
+  }
+}

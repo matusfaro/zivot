@@ -13,7 +13,15 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year dementia risk based on CAIDE and ANU-ADRI models (NOTE: Models have limited predictive accuracy)"
+    "description": "10-year dementia risk based on CAIDE and ANU-ADRI models (NOTE: Models have limited predictive accuracy)",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.7,
+      "basis": "Derived: median survival after dementia diagnosis ~5.7 years (men dx at 65; shorter at older ages) -> ~70% 10-year mortality under an exponential survival assumption",
+      "citation": "Brück CC, Mooldijk SS, Kuiper LM, et al. Projections of life expectancy after dementia diagnosis: systematic review and meta-analysis (235 studies, 5.5M participants). BMJ 2025;388:e080636",
+      "doi": "10.1136/bmj-2024-080636",
+      "notes": "All-cause mortality among the diagnosed; includes background mortality at typically advanced ages"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -210,7 +218,7 @@
       "factorId": "bmi_dementia",
       "name": "Body Mass Index",
       "modifiable": true,
-      "evidenceLevel": "moderate",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "biometrics.weight.mostRecent.value.value",
@@ -250,7 +258,10 @@
           15,
           50
         ]
-      }
+      },
+      "citation": "Anstey KJ, et al. Body mass index in midlife and late-life as a risk factor for dementia: a meta-analysis of prospective studies. Obes Rev. 2011;12(5):e426-e437",
+      "doi": "10.1111/j.1467-789X.2010.00825.x",
+      "notes": "U-shaped: midlife obesity pooled RR 1.64 (any dementia) / 2.04 (AD); midlife underweight RR ~1.96 for AD. Valid for MIDLIFE BMI; the association attenuates/reverses when BMI is measured near dementia onset (late life)."
     },
     {
       "factorId": "physical_activity_dementia",
@@ -301,7 +312,7 @@
       "factorId": "diabetes_dementia",
       "name": "Diabetes",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -310,15 +321,18 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 1.6,
+        "trueHazardRatio": 1.48,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Thomassen JQ, Tolstrup JS, Benn M, Frikke-Schmidt R. Type-2 diabetes and risk of dementia: observational and Mendelian randomisation studies in 1 million individuals. Epidemiol Psychiatr Sci. 2020;29:e118",
+      "doi": "10.1017/S2045796020000347",
+      "notes": "All-cause dementia HR 1.48 (95% CI 1.44-1.53) in 784,434 Danes 65+; AD-specific 1.13, vascular dementia 1.98."
     },
     {
       "factorId": "smoking_dementia",
       "name": "Smoking Status",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.smoking.status.value",
@@ -334,20 +348,31 @@
           },
           {
             "value": "former",
-            "hazardRatio": 1.2
+            "hazardRatio": 1.01,
+            "confidence": [
+              0.96,
+              1.06
+            ]
           },
           {
             "value": "current",
-            "hazardRatio": 1.6
+            "hazardRatio": 1.3,
+            "confidence": [
+              1.18,
+              1.45
+            ]
           }
         ]
-      }
+      },
+      "citation": "Zhong G, Wang Y, Zhang Y, Guo JJ, Zhao Y. Smoking Is Associated with an Increased Risk of Dementia: A Meta-Analysis of Prospective Cohort Studies. PLoS ONE. 2015;10(3):e0118333",
+      "doi": "10.1371/journal.pone.0118333",
+      "notes": "37 cohorts, 960,280 people. Current vs never: all-cause dementia RR 1.30 (1.18-1.45). Former smokers show no excess risk (1.01, 0.96-1.06)."
     },
     {
       "factorId": "family_history_dementia",
       "name": "Family History of Dementia",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.familyHistory",
@@ -363,14 +388,25 @@
           },
           {
             "value": "one",
-            "hazardRatio": 1.8
+            "hazardRatio": 1.73,
+            "confidence": [
+              1.59,
+              1.87
+            ]
           },
           {
             "value": "two_or_more",
-            "hazardRatio": 3.0
+            "hazardRatio": 3.98,
+            "confidence": [
+              3.26,
+              4.82
+            ]
           }
         ]
-      }
+      },
+      "citation": "Cannon-Albright LA, et al. Relative risk for Alzheimer disease based on complete family history. Neurology. 2019;92(15)",
+      "doi": "10.1212/WNL.0000000000007231",
+      "notes": "Utah Population Database complete family histories: >=1 affected first-degree relative RR 1.73 (1.59-1.87); >=2 FDRs RR 3.98 (3.26-4.82)."
     },
     {
       "factorId": "social_engagement",

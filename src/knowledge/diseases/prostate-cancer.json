@@ -18,7 +18,14 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "Prostate cancer risk for men based on PCPT model"
+    "description": "Prostate cancer risk for men based on PCPT model",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.02,
+      "basis": "SEER 5-year relative survival 98.2% (all stages, 2016-2022) -> CFR 0.018; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/prost.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "white_male_us",
@@ -27,56 +34,120 @@
         "id": "white_male_us",
         "applicability": {
           "sex": "male",
-          "ethnicity": ["white"],
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "ethnicity": [
+            "white"
+          ],
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Prostate Cancer Incidence (1975-2021)",
         "url": "https://seer.cancer.gov/statfacts/html/prost.html",
         "notes": "Age-specific: rises exponentially post-50; ~100/100k age-adjusted.",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.008 },
-          { "age": 50, "risk": 0.025 },
-          { "age": 60, "risk": 0.055 },
-          { "age": 70, "risk": 0.085 },
-          { "age": 80, "risk": 0.095 }
+          {
+            "age": 40,
+            "risk": 0.008
+          },
+          {
+            "age": 50,
+            "risk": 0.025
+          },
+          {
+            "age": 60,
+            "risk": 0.055
+          },
+          {
+            "age": 70,
+            "risk": 0.085
+          },
+          {
+            "age": 80,
+            "risk": 0.095
+          }
         ]
       },
       {
         "id": "black_male_us",
         "applicability": {
           "sex": "male",
-          "ethnicity": ["black"],
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "ethnicity": [
+            "black"
+          ],
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Incidence by Race/Ethnicity",
         "url": "https://seer.cancer.gov/statfacts/html/prost.html",
         "notes": "African American males: 1.7x higher incidence vs White; RR~1.6-1.8.",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.016 },
-          { "age": 50, "risk": 0.050 },
-          { "age": 60, "risk": 0.110 },
-          { "age": 70, "risk": 0.170 },
-          { "age": 80, "risk": 0.190 }
+          {
+            "age": 40,
+            "risk": 0.016
+          },
+          {
+            "age": 50,
+            "risk": 0.05
+          },
+          {
+            "age": 60,
+            "risk": 0.11
+          },
+          {
+            "age": 70,
+            "risk": 0.17
+          },
+          {
+            "age": 80,
+            "risk": 0.19
+          }
         ]
       },
       {
         "id": "male_us",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Prostate Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/prost.html",
         "notes": "Overall US male population incidence; accounts for all ethnicities.",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.010 },
-          { "age": 50, "risk": 0.030 },
-          { "age": 60, "risk": 0.070 },
-          { "age": 70, "risk": 0.110 },
-          { "age": 80, "risk": 0.125 }
+          {
+            "age": 40,
+            "risk": 0.01
+          },
+          {
+            "age": 50,
+            "risk": 0.03
+          },
+          {
+            "age": 60,
+            "risk": 0.07
+          },
+          {
+            "age": 70,
+            "risk": 0.11
+          },
+          {
+            "age": 80,
+            "risk": 0.125
+          }
         ]
       }
     ]
@@ -99,9 +170,18 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": "none", "hazardRatio": 1.0 },
-          { "value": "one", "hazardRatio": 2.5 },
-          { "value": "two_or_more", "hazardRatio": 3.5 }
+          {
+            "value": "none",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "one",
+            "hazardRatio": 2.5
+          },
+          {
+            "value": "two_or_more",
+            "hazardRatio": 3.5
+          }
         ]
       }
     },
@@ -109,7 +189,7 @@
       "factorId": "psa_level",
       "name": "PSA Level (ng/mL)",
       "modifiable": false,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "labTests.psa.mostRecent.value",
@@ -120,22 +200,49 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0.5, "hazardRatio": 0.5 },
-          { "value": 1.0, "hazardRatio": 1.0 },
-          { "value": 2.0, "hazardRatio": 1.8 },
-          { "value": 3.0, "hazardRatio": 2.5 },
-          { "value": 4.0, "hazardRatio": 3.2 },
-          { "value": 5.0, "hazardRatio": 4.0 },
-          { "value": 10.0, "hazardRatio": 6.5 }
+          {
+            "value": 0.5,
+            "hazardRatio": 0.5
+          },
+          {
+            "value": 1.0,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 2.0,
+            "hazardRatio": 1.8
+          },
+          {
+            "value": 3.0,
+            "hazardRatio": 2.5
+          },
+          {
+            "value": 4.0,
+            "hazardRatio": 3.2
+          },
+          {
+            "value": 5.0,
+            "hazardRatio": 4.0
+          },
+          {
+            "value": 10.0,
+            "hazardRatio": 8.0
+          }
         ],
-        "validRange": [0, 100]
-      }
+        "validRange": [
+          0,
+          100
+        ]
+      },
+      "citation": "Long-term Risk of Prostate Cancer Mortality Among Men with Baseline PSA Below 3 ng/ml: Finnish Randomized Study of Screening for Prostate Cancer. Eur Urol Open Sci. 2024",
+      "url": "https://www.sciencedirect.com/science/article/pii/S2588931124002724",
+      "notes": "Incidence HR 9.0 (7.9-10.2) for PSA 2-2.99 vs <1; 20-yr cumulative incidence 3.3% (PSA<1), 11.8% (1-3), 34.8% (>3). Curve rebased to PSA 1.0 reference."
     },
     {
       "factorId": "prior_negative_biopsy",
       "name": "Prior Negative Prostate Biopsy",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "cohort",
       "requiredFields": [
         {
           "path": "medicalHistory.urinaryHistory.priorNegativeBiopsy.value",
@@ -146,32 +253,10 @@
         "type": "boolean",
         "trueHazardRatio": 0.6,
         "falseHazardRatio": 1.0
-      }
-    },
-    {
-      "factorId": "bmi_prostate",
-      "name": "Body Mass Index",
-      "modifiable": true,
-      "evidenceLevel": "moderate",
-      "requiredFields": [
-        {
-          "path": "biometrics.weight.mostRecent.value.value",
-          "alternatives": []
-        }
-      ],
-      "mapping": {
-        "type": "continuous",
-        "strategy": "lookup",
-        "points": [
-          { "value": 18.5, "hazardRatio": 0.95 },
-          { "value": 22, "hazardRatio": 1.0 },
-          { "value": 25, "hazardRatio": 1.05 },
-          { "value": 30, "hazardRatio": 1.15 },
-          { "value": 35, "hazardRatio": 1.25 },
-          { "value": 40, "hazardRatio": 1.35 }
-        ],
-        "validRange": [15, 50]
-      }
+      },
+      "citation": "Risk of prostate cancer for men with prior negative biopsies undergoing MRI vs biopsy-naive men: prospective PLUM cohort. 2021",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34427930/",
+      "notes": "Prior negative biopsy: cancer detection 27.9% vs 54.4% biopsy-naive (~0.5 relative); 0.6 is conservative."
     }
   ]
 }

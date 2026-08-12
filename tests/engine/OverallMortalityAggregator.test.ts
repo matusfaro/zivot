@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   OverallMortalityAggregator,
   AppliedModifier,
+  combineModifierHRs,
 } from '../../src/engine/aggregators/OverallMortalityAggregator';
 import { getBaselineAnnualMortality } from '../../src/engine/utils/mortalityCurve';
 import { DiseaseRisk } from '../../src/types/risk/calculation';
@@ -14,13 +15,18 @@ const aggregator = new OverallMortalityAggregator();
 function diseaseRisk(overrides: Partial<DiseaseRisk>): DiseaseRisk {
   const baselineRisk = overrides.baselineRisk ?? 0.05;
   const adjustedRisk = overrides.adjustedRisk ?? baselineRisk;
+  const caseFatality = overrides.caseFatality ?? 1.0;
   return {
     diseaseId: 'test_disease',
     diseaseName: 'Test Disease',
     timeframe: 10,
+    outcome: 'mortality',
     baselineRisk,
     adjustedRisk,
     absoluteRiskIncrease: adjustedRisk - baselineRisk,
+    mortalityRisk: adjustedRisk * caseFatality,
+    baselineMortalityRisk: baselineRisk * caseFatality,
+    caseFatality,
     confidence: { level: 'moderate', score: 0.5 },
     range: [adjustedRisk * 0.8, Math.min(adjustedRisk * 1.2, 0.999)],
     factorContributions: [],
@@ -141,6 +147,70 @@ describe('OverallMortalityAggregator', () => {
     const byId = Object.fromEntries(result.diseaseContributions.map(c => [c.diseaseId, c.contribution]));
     expect(byId.a).toBeGreaterThan(byId.b);
     expect(byId.b).toBeGreaterThan(byId.c);
+  });
+
+  it('scales incidence models by case fatality on the mortality scale', () => {
+    // 20% incidence with 5% case fatality (e.g., melanoma-like) should
+    // contribute like a 1% mortality risk, not a 20% one
+    const incidence = diseaseRisk({
+      diseaseId: 'melanoma_like',
+      outcome: 'incidence',
+      baselineRisk: 0.2,
+      adjustedRisk: 0.2,
+      caseFatality: 0.05,
+      mortalityRisk: 0.01,
+      baselineMortalityRisk: 0.01,
+    });
+    const result = aggregator.aggregate([incidence]);
+    expect(result.estimatedRisk).toBeCloseTo(0.01, 6);
+  });
+
+  it('gives high-fatality diseases larger contributions than high-incidence/low-fatality ones', () => {
+    const prostateLike = diseaseRisk({
+      diseaseId: 'prostate_like',
+      outcome: 'incidence',
+      baselineRisk: 0.15,
+      adjustedRisk: 0.15,
+      caseFatality: 0.02,
+      mortalityRisk: 0.003,
+      baselineMortalityRisk: 0.003,
+    });
+    const pancreaticLike = diseaseRisk({
+      diseaseId: 'pancreatic_like',
+      outcome: 'incidence',
+      baselineRisk: 0.02,
+      adjustedRisk: 0.02,
+      caseFatality: 0.86,
+      mortalityRisk: 0.0172,
+      baselineMortalityRisk: 0.0172,
+    });
+    const result = aggregator.aggregate([prostateLike, pancreaticLike]);
+    const byId = Object.fromEntries(result.diseaseContributions.map(c => [c.diseaseId, c.contribution]));
+    // 2% incidence at 86% fatality kills more people than 15% incidence at 2%
+    expect(byId.pancreatic_like).toBeGreaterThan(byId.prostate_like);
+  });
+
+  it('combines correlated modifiers with attenuation instead of raw multiplication', () => {
+    const social = (id: string, hr: number): AppliedModifier => ({
+      modifier: { metadata: { id, name: id, category: 'social' } } as MortalityModifier,
+      hazardRatio: hr,
+    });
+    // Raw product would be 0.76 × 0.78 × 0.67 = 0.397; the rule applies the
+    // strongest (0.67) fully and attenuates the rest 50% in log space
+    const combined = combineModifierHRs([
+      social('dog', 0.76),
+      social('volunteer', 0.78),
+      social('religion', 0.67),
+    ]);
+    const expected = Math.exp(Math.log(0.67) + 0.5 * (Math.log(0.78) + Math.log(0.76)));
+    expect(combined).toBeCloseTo(Math.max(expected, 1 / 1.91), 6);
+    expect(combined).toBeGreaterThan(0.76 * 0.78 * 0.67);
+    // And the floor holds no matter how many protective social factors stack
+    const many = combineModifierHRs([
+      social('a', 0.67), social('b', 0.67), social('c', 0.67),
+      social('d', 0.67), social('e', 0.67),
+    ]);
+    expect(many).toBeGreaterThanOrEqual(1 / 1.91 - 1e-9);
   });
 
   it('normalizes the contribution-weighted confidence score', () => {

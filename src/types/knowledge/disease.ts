@@ -19,6 +19,31 @@ export interface DiseaseMetadata {
   lastUpdated: string; // ISO date
   sources: Source[];
   description?: string;
+
+  /**
+   * What the model's baseline curves actually predict:
+   * - 'mortality': risk of DYING from the cause (e.g., COPD mortality, falls)
+   * - 'incidence': risk of DEVELOPING the disease (e.g., diabetes, most cancers)
+   * Incidence models must carry caseFatality10yr so the aggregator can
+   * convert to a mortality contribution.
+   */
+  outcome: 'incidence' | 'mortality';
+
+  /**
+   * For incidence models: fraction of diagnosed individuals who die within
+   * ~10 years (1 − relative survival for cancers; documented derivations
+   * otherwise). Multiplied into adjustedRisk for the overall-mortality
+   * aggregation. A value of 0 means the disease's mortality is intentionally
+   * attributed to other modeled diseases (e.g., diabetes → CVD/CKD/stroke).
+   */
+  caseFatality10yr?: {
+    value: number; // 0-1
+    basis: string;
+    citation: string;
+    url?: string;
+    doi?: string;
+    notes?: string;
+  };
 }
 
 export type DiseaseCategory =
@@ -26,6 +51,9 @@ export type DiseaseCategory =
   | 'cancer'
   | 'metabolic'
   | 'respiratory'
+  | 'injury'
+  | 'infectious'
+  | 'external'
   | 'other';
 
 export interface Source {

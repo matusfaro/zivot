@@ -59,6 +59,21 @@ export const SocialSection: React.FC<ProfileSectionProps> = ({ getFieldValue, up
           <div className="compact-form-row">
             <label className="checkbox-label">
               <input
+                data-testid="profile-social-connections-livesAlone"
+                type="checkbox"
+                checked={getFieldValue('social', 'connections.livesAlone') === true}
+                onChange={(e) => updateField('social', 'connections.livesAlone', e.target.checked)}
+              />
+              <span>I live alone</span>
+              <Tooltip content="Living alone is associated with 32% higher all-cause mortality (meta-analysis). Combined with other social factors using an attenuated rule, not raw multiplication.">
+                <span className="field-help">ℹ️</span>
+              </Tooltip>
+            </label>
+          </div>
+
+          <div className="compact-form-row">
+            <label className="checkbox-label">
+              <input
                 data-testid="profile-social-volunteering-active"
                 type="checkbox"
                 checked={getFieldValue('social', 'volunteering.active') || false}

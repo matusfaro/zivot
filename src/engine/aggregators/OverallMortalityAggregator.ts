@@ -13,6 +13,46 @@ export interface AppliedModifier {
   hazardRatio: number;
 }
 
+/**
+ * Combine correlated mortality-modifier hazard ratios.
+ *
+ * The six modifiers are correlated lifestyle measures — multiplying their
+ * univariate HRs as if independent overstates the joint effect (unadjusted
+ * social-engagement effects roughly halve after confounder adjustment:
+ * Jenkinson 2013, doi:10.1186/1471-2458-13-773). Rule:
+ * - Within each category, the strongest effect (largest |ln HR|) applies in
+ *   full; each additional modifier's log-HR is attenuated by 50%.
+ * - The combined social-category multiplier is floored at 1/1.91 ≈ 0.52 —
+ *   the measured joint effect of complex/multidimensional social integration
+ *   (Holt-Lunstad 2010, doi:10.1371/journal.pmed.1000316, OR 1.91).
+ * - Category results multiply across categories (distinct pathways).
+ */
+export function combineModifierHRs(applied: AppliedModifier[]): number {
+  const byCategory = new Map<string, number[]>();
+  for (const { modifier, hazardRatio } of applied) {
+    const category = modifier.metadata.category || 'other';
+    if (!byCategory.has(category)) byCategory.set(category, []);
+    byCategory.get(category)!.push(hazardRatio);
+  }
+
+  let total = 1.0;
+  for (const [category, hrs] of byCategory) {
+    const sorted = hrs
+      .slice()
+      .sort((a, b) => Math.abs(Math.log(b)) - Math.abs(Math.log(a)));
+    let categoryLogHR = 0;
+    sorted.forEach((hr, index) => {
+      categoryLogHR += Math.log(hr) * (index === 0 ? 1 : 0.5);
+    });
+    let categoryHR = Math.exp(categoryLogHR);
+    if (category === 'social') {
+      categoryHR = Math.max(categoryHR, 1 / 1.91);
+    }
+    total *= categoryHR;
+  }
+  return total;
+}
+
 /** Convert a 10-year risk (probability) to a cumulative hazard */
 const toHazard = (risk: number): number => -Math.log(1 - Math.min(risk, 0.999));
 
@@ -58,16 +98,21 @@ export class OverallMortalityAggregator {
     const timeframe = diseaseRisks[0].timeframe;
 
     // ---- Step 1: complement rule over the disease models ----
+    // Products run on the MORTALITY scale: incidence models are scaled by
+    // their cited 10-year case fatality (disease.mortalityRisk) so that,
+    // e.g., a prostate-cancer diagnosis (98% 10-year survival) is not
+    // counted as a death.
     let survivalProb = 1.0;
     let baselineSurvivalProb = 1.0;
     let survivalProbLow = 1.0;
     let survivalProbHigh = 1.0;
 
     for (const disease of diseaseRisks) {
-      survivalProb *= (1 - disease.adjustedRisk);
-      baselineSurvivalProb *= (1 - disease.baselineRisk);
-      survivalProbLow *= (1 - disease.range[1]); // High risk = low survival
-      survivalProbHigh *= (1 - disease.range[0]); // Low risk = high survival
+      const cfr = disease.caseFatality ?? 1.0;
+      survivalProb *= (1 - (disease.mortalityRisk ?? disease.adjustedRisk));
+      baselineSurvivalProb *= (1 - (disease.baselineMortalityRisk ?? disease.baselineRisk));
+      survivalProbLow *= (1 - disease.range[1] * cfr); // High risk = low survival
+      survivalProbHigh *= (1 - disease.range[0] * cfr); // Low risk = high survival
     }
 
     const rawPersonalRisk = Math.min(1 - survivalProb, 0.999);
@@ -94,7 +139,9 @@ export class OverallMortalityAggregator {
       lifeTableRisk !== null ? toHazard(lifeTableRisk) * relativeHazard : personalHazard;
 
     // ---- Step 4: apply mortality modifiers once, on the hazard scale ----
-    const modifierHR = appliedModifiers.reduce((acc, m) => acc * m.hazardRatio, 1.0);
+    // Correlated modifiers are combined with attenuation rather than raw
+    // multiplication (see combineModifierHRs).
+    const modifierHR = combineModifierHRs(appliedModifiers);
     const finalHazard = anchoredHazard * modifierHR;
     const estimatedRisk = Math.min(toRisk(finalHazard), 0.999);
 
@@ -113,8 +160,10 @@ export class OverallMortalityAggregator {
       if (rawPersonalRisk <= 0) {
         return { diseaseId: disease.diseaseId, contribution: 0 };
       }
-      // Marginal contribution: P(death) − P(death without this disease)
-      const survivalWithoutThis = survivalProb / (1 - disease.adjustedRisk);
+      // Marginal contribution: P(death) − P(death without this disease),
+      // on the mortality scale
+      const mortalityRisk = disease.mortalityRisk ?? disease.adjustedRisk;
+      const survivalWithoutThis = survivalProb / (1 - mortalityRisk);
       const mortalityWithoutThis = 1 - survivalWithoutThis;
       const marginalContribution = rawPersonalRisk - mortalityWithoutThis;
 
@@ -216,12 +265,13 @@ export class OverallMortalityAggregator {
     const competingRisksRef = ReferenceExtractor.getCompetingRisksReference();
     builder.addMethodologyReference(competingRisksRef);
 
-    // Calculate survival probabilities for all diseases
+    // Calculate survival probabilities for all diseases (mortality scale:
+    // incidence risks are scaled by their cited case fatality)
     const survivalProbs = diseaseRisks.map((disease) => ({
       diseaseId: disease.diseaseId,
       diseaseName: disease.diseaseName,
-      risk: disease.adjustedRisk,
-      survivalProb: 1 - disease.adjustedRisk,
+      risk: disease.mortalityRisk ?? disease.adjustedRisk,
+      survivalProb: 1 - (disease.mortalityRisk ?? disease.adjustedRisk),
     }));
 
     // Overall survival probability
@@ -445,14 +495,17 @@ export class OverallMortalityAggregator {
           ProvenanceBuilder.calculated(extras.estimatedRisk, extras.appliedModifiers.length, 'Final 10-Year Mortality Risk', '%')
         )
         .setFormula(
-          `Final = 1 − (1 − calibrated)^HRmod, HRmod = ${extras.appliedModifiers
+          `Final = 1 − (1 − calibrated)^HRmod, HRmod = combine(${extras.appliedModifiers
             .map(m => m.hazardRatio.toFixed(2))
-            .join(' × ')} = ${extras.modifierHR.toFixed(3)}`
+            .join(', ')}) = ${extras.modifierHR.toFixed(3)}`
         )
         .setExplanation(
-          'All-cause mortality modifiers (social, environmental, cultural) applied once at the overall level on the ' +
-            'hazard scale. Note: these modifiers are correlated lifestyle measures; multiplying them treats them as ' +
-            'independent and likely overstates their combined effect.'
+          'All-cause mortality modifiers applied once at the overall level on the hazard scale. Because these are ' +
+            'correlated lifestyle measures, they are NOT multiplied as independent: within each category the strongest ' +
+            'effect applies in full and additional effects are attenuated 50% in log-HR space (Jenkinson 2013, ' +
+            'doi:10.1186/1471-2458-13-773 — social-engagement effects roughly halve after confounder adjustment), and ' +
+            'the combined social-category multiplier is floored at 1/1.91 ≈ 0.52, the measured joint effect of ' +
+            'multidimensional social integration (Holt-Lunstad 2010, doi:10.1371/journal.pmed.1000316).'
         )
         .complete();
     }

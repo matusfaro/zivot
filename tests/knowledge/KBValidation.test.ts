@@ -105,24 +105,38 @@ describe('Knowledge base validation', () => {
     }
   });
 
-  it('citation debt does not grow (ratchet: 67 uncited factors as of 2026-08)', async () => {
+  it('every risk factor is cited (citation debt reached zero 2026-08)', async () => {
     const kb = await loadDiseaseKB();
     let total = 0;
-    let uncited = 0;
-    for (const [, model] of kb) {
+    const uncited: string[] = [];
+    for (const [id, model] of kb) {
       for (const factor of model.riskFactors) {
         total += 1;
         const f = factor as unknown as { citation?: string; doi?: string; url?: string };
         if (!f.citation && !f.doi && !f.url) {
-          uncited += 1;
+          uncited.push(`${id}/${factor.factorId}`);
         }
       }
     }
     expect(total).toBeGreaterThan(100);
-    // CLAUDE.md mandates citations on every factor. 67 legacy factors are
-    // still missing them — backfill is an open task. New factors must be
-    // cited, so this number may only go down.
-    expect(uncited).toBeLessThanOrEqual(67);
+    // CLAUDE.md mandates citations on every factor — no exceptions.
+    expect(uncited, uncited.join(', ')).toHaveLength(0);
+  });
+
+  it('every model declares its outcome; incidence models carry a cited case fatality', async () => {
+    const kb = await loadDiseaseKB();
+    for (const [id, model] of kb) {
+      const meta = model.metadata;
+      expect(['incidence', 'mortality'], `${id} outcome "${meta.outcome}"`).toContain(meta.outcome);
+      if (meta.outcome === 'incidence') {
+        const cfr = meta.caseFatality10yr;
+        expect(cfr, `${id} incidence model missing caseFatality10yr`).toBeDefined();
+        expect(cfr!.value, `${id} CFR out of range`).toBeGreaterThanOrEqual(0);
+        expect(cfr!.value, `${id} CFR out of range`).toBeLessThanOrEqual(1);
+        expect(cfr!.citation, `${id} CFR missing citation`).toBeTruthy();
+        expect(cfr!.basis, `${id} CFR missing basis`).toBeTruthy();
+      }
+    }
   });
 
   it('every modifier has cited sources and a bounded hazard ratio', async () => {

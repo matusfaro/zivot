@@ -17,7 +17,14 @@
         "evidenceLevel": "cohort"
       }
     ],
-    "description": "10-year pancreatic cancer risk based on validated prediction models"
+    "description": "10-year pancreatic cancer risk based on validated prediction models",
+    "outcome": "incidence",
+    "caseFatality10yr": {
+      "value": 0.863,
+      "basis": "SEER 5-year relative survival 13.7% (all stages, 2016-2022) -> CFR 0.863; relative survival nets out background mortality (10-year survival is modestly lower, so this is a slight underestimate)",
+      "citation": "SEER Cancer Stat Facts, National Cancer Institute",
+      "url": "https://seer.cancer.gov/statfacts/html/pancreas.html"
+    }
   },
   "baselineRisk": {
     "defaultCurve": "male_us",
@@ -26,36 +33,76 @@
         "id": "male_us",
         "applicability": {
           "sex": "male",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Pancreatic Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/pancreas.html",
         "notes": "Pancreatic cancer incidence by age/sex; poor prognosis disease",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.0008 },
-          { "age": 50, "risk": 0.0025 },
-          { "age": 60, "risk": 0.0055 },
-          { "age": 70, "risk": 0.0095 },
-          { "age": 80, "risk": 0.0115 }
+          {
+            "age": 40,
+            "risk": 0.0008
+          },
+          {
+            "age": 50,
+            "risk": 0.0025
+          },
+          {
+            "age": 60,
+            "risk": 0.0055
+          },
+          {
+            "age": 70,
+            "risk": 0.0095
+          },
+          {
+            "age": 80,
+            "risk": 0.0115
+          }
         ]
       },
       {
         "id": "female_us",
         "applicability": {
           "sex": "female",
-          "region": ["US"],
-          "ageRange": [40, 100]
+          "region": [
+            "US"
+          ],
+          "ageRange": [
+            40,
+            100
+          ]
         },
         "source": "SEER Pancreatic Cancer Incidence",
         "url": "https://seer.cancer.gov/statfacts/html/pancreas.html",
         "notes": "Pancreatic cancer incidence by age/sex; poor prognosis disease",
         "ageRiskMapping": [
-          { "age": 40, "risk": 0.0006 },
-          { "age": 50, "risk": 0.0020 },
-          { "age": 60, "risk": 0.0045 },
-          { "age": 70, "risk": 0.0078 },
-          { "age": 80, "risk": 0.0095 }
+          {
+            "age": 40,
+            "risk": 0.0006
+          },
+          {
+            "age": 50,
+            "risk": 0.002
+          },
+          {
+            "age": 60,
+            "risk": 0.0045
+          },
+          {
+            "age": 70,
+            "risk": 0.0078
+          },
+          {
+            "age": 80,
+            "risk": 0.0095
+          }
         ]
       }
     ]
@@ -65,7 +112,7 @@
       "factorId": "smoking_pancreatic",
       "name": "Smoking Status",
       "modifiable": true,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.smoking.status.value",
@@ -75,17 +122,37 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": "never", "hazardRatio": 1.0 },
-          { "value": "former", "hazardRatio": 1.2 },
-          { "value": "current", "hazardRatio": 1.8 }
+          {
+            "value": "never",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "former",
+            "hazardRatio": 1.2,
+            "confidence": [
+              1.11,
+              1.29
+            ]
+          },
+          {
+            "value": "current",
+            "hazardRatio": 1.74,
+            "confidence": [
+              1.61,
+              1.87
+            ]
+          }
         ]
-      }
+      },
+      "citation": "Iodice S, Gandini S, Maisonneuve P, Lowenfels AB. Tobacco and the risk of pancreatic cancer: a review and meta-analysis (82 studies). Langenbecks Arch Surg. 2008;393:535-545",
+      "doi": "10.1007/s00423-007-0266-2",
+      "notes": "Current smokers RR 1.74 (1.61-1.87); former 1.20 (1.11-1.29)."
     },
     {
       "factorId": "diabetes_pancreatic",
       "name": "Diabetes (especially new-onset)",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.conditions",
@@ -94,15 +161,18 @@
       ],
       "mapping": {
         "type": "boolean",
-        "trueHazardRatio": 2.0,
+        "trueHazardRatio": 1.94,
         "falseHazardRatio": 1.0
-      }
+      },
+      "citation": "Ben Q, et al. Diabetes mellitus and risk of pancreatic cancer: a meta-analysis of cohort studies (35 cohorts). Eur J Cancer. 2011;47(13):1928-1937",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21458985/",
+      "notes": "Summary RR 1.94 (1.66-2.27); attenuates to 1.58 (1.42-1.75) for diabetes duration >=5 years (reverse causation strongest in first year)."
     },
     {
       "factorId": "bmi_pancreatic",
       "name": "Body Mass Index",
       "modifiable": true,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "biometrics.weight.mostRecent.value.value",
@@ -113,21 +183,41 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 18.5, "hazardRatio": 0.95 },
-          { "value": 22, "hazardRatio": 1.0 },
-          { "value": 25, "hazardRatio": 1.1 },
-          { "value": 30, "hazardRatio": 1.3 },
-          { "value": 35, "hazardRatio": 1.55 },
-          { "value": 40, "hazardRatio": 1.85 }
+          {
+            "value": 18.5,
+            "hazardRatio": 0.95
+          },
+          {
+            "value": 22,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 25,
+            "hazardRatio": 1.07
+          },
+          {
+            "value": 30,
+            "hazardRatio": 1.2
+          },
+          {
+            "value": 40,
+            "hazardRatio": 1.5
+          }
         ],
-        "validRange": [15, 50]
-      }
+        "validRange": [
+          15,
+          50
+        ]
+      },
+      "citation": "Larsson SC, Orsini N, Wolk A. Body mass index and pancreatic cancer risk: a meta-analysis of prospective studies. Int J Cancer. 2007;120(9):1993-1998",
+      "doi": "10.1002/ijc.22535",
+      "notes": "RR 1.12 (1.06-1.17) per 5 kg/m2 (2012 update: 1.10, 1.07-1.14); curve compounds the per-5-unit estimate."
     },
     {
       "factorId": "family_history_pancreatic",
       "name": "Family History of Pancreatic Cancer",
       "modifiable": false,
-      "evidenceLevel": "high",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "medicalHistory.familyHistory",
@@ -137,20 +227,31 @@
       "mapping": {
         "type": "categorical",
         "categories": [
-          { "value": "none", "hazardRatio": 1.0 },
-          { "value": "one", "hazardRatio": 2.3 },
-          { "value": "two_or_more", "hazardRatio": 4.5 }
+          {
+            "value": "none",
+            "hazardRatio": 1.0
+          },
+          {
+            "value": "one",
+            "hazardRatio": 2.3
+          },
+          {
+            "value": "two_or_more",
+            "hazardRatio": 4.5
+          }
         ]
-      }
+      },
+      "citation": "Permuth-Wey J, Egan KM. Family history is a significant risk factor for pancreatic cancer: results from a systematic review and meta-analysis. Fam Cancer. 2009;8:109-117",
+      "doi": "10.1007/s10689-008-9214-8",
+      "notes": "Any family history RR 1.80 (1.48-2.12); familial-registry estimates: 1 FDR ~4.5x, 2 FDRs ~6.4x. Values sit between population and registry estimates."
     },
     {
       "factorId": "chronic_pancreatitis",
       "name": "Chronic Pancreatitis",
       "modifiable": false,
-      "evidenceLevel": "very_high",
+      "evidenceLevel": "cohort",
       "citation": "Chronic Pancreatitis and Pancreatic Cancer Risk",
       "doi": "10.1056/NEJM199902113400701",
-      "evidenceLevel": "cohort",
       "notes": "Chronic pancreatitis HR~13 confirmed; plausible per longitudinal evidence",
       "requiredFields": [
         {
@@ -168,7 +269,7 @@
       "factorId": "alcohol_pancreatic",
       "name": "Heavy Alcohol Use",
       "modifiable": true,
-      "evidenceLevel": "moderate",
+      "evidenceLevel": "meta_analysis",
       "requiredFields": [
         {
           "path": "lifestyle.alcohol.drinksPerWeek.mostRecent.value",
@@ -179,15 +280,35 @@
         "type": "continuous",
         "strategy": "lookup",
         "points": [
-          { "value": 0, "hazardRatio": 1.0 },
-          { "value": 7, "hazardRatio": 1.05 },
-          { "value": 14, "hazardRatio": 1.15 },
-          { "value": 21, "hazardRatio": 1.3 },
-          { "value": 35, "hazardRatio": 1.6 },
-          { "value": 50, "hazardRatio": 2.0 }
+          {
+            "value": 0,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 10,
+            "hazardRatio": 1.0
+          },
+          {
+            "value": 21,
+            "hazardRatio": 1.22,
+            "confidence": [
+              1.12,
+              1.34
+            ]
+          },
+          {
+            "value": 50,
+            "hazardRatio": 1.4
+          }
         ],
-        "validRange": [0, 100]
-      }
+        "validRange": [
+          0,
+          100
+        ]
+      },
+      "citation": "Tramacere I, et al. Alcohol drinking and pancreatic cancer risk: a meta-analysis of the dose-risk relation. Int J Cancer. 2010;126(6):1474-1486",
+      "doi": "10.1002/ijc.24936",
+      "notes": ">=3 drinks/day RR 1.22 (1.12-1.34); light-moderate drinking shows no increase (RR 0.92)."
     }
   ]
 }

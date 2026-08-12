@@ -38,6 +38,31 @@ export class FactorAdjuster {
     profile: UserProfile,
     factor: RiskFactorDescriptor
   ): HazardRatioResult | null {
+    // Derived factors compute their own inputs (condition checks, BMI) and
+    // must not be gated on raw path extraction — paths like
+    // "medicalHistory.conditions" point at arrays, which extract to null and
+    // previously left every non-special-cased has_condition factor inert.
+    if (factor.mapping.type === 'derived') {
+      const mapping = factor.mapping as unknown as { strategy?: string; conditionId?: string };
+      // Only fire when the underlying data genuinely exists
+      if (mapping.strategy === 'has_condition' && !Array.isArray(profile.medicalHistory?.conditions)) {
+        return null;
+      }
+      if (mapping.strategy === 'bmi_lookup' && calculateBMI(profile) === null) {
+        return null;
+      }
+      const calculationId = `hr-${factor.factorId}-${Date.now()}`;
+      const result = this.calculateDerivedHRWithProvenance(profile, factor, calculationId);
+      const inputValue = ProvenanceBuilder.userInput(
+        mapping.strategy === 'has_condition'
+          ? hasCondition(profile, mapping.conditionId ?? '')
+          : calculateBMI(profile) ?? 'derived',
+        factor.requiredFields[0]?.path ?? 'derived',
+        factor.name
+      );
+      return { hr: result.hr, inputValue, provenance: result.provenance };
+    }
+
     // Extract value from user profile
     const extractionResult = this.extractFactorValueWithPath(profile, factor);
 
@@ -83,12 +108,6 @@ export class FactorAdjuster {
           calculationId,
           extractionResult.path
         );
-        hr = result.hr;
-        provenance = result.provenance;
-        break;
-      }
-      case 'derived': {
-        const result = this.calculateDerivedHRWithProvenance(profile, factor, calculationId);
         hr = result.hr;
         provenance = result.provenance;
         break;
