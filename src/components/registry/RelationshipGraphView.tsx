@@ -34,7 +34,10 @@ export function RelationshipGraphView({ graph, onNodeClick }: RelationshipGraphV
 
   // Build graph data
   const { elements, style, layout } = useMemo(() => {
-    return buildGraphLayout(filteredGraph, { layout: layoutAlgorithm, animate: true });
+    // animate: false — an animated initial layout leaves a pending frame that
+    // crashes ("null.notify") if the instance is destroyed mid-animation
+    // (StrictMode dev double-mount, fast filter switches)
+    return buildGraphLayout(filteredGraph, { layout: layoutAlgorithm, animate: false });
   }, [filteredGraph, layoutAlgorithm]);
 
   // Initialize Cytoscape
@@ -99,9 +102,16 @@ export function RelationshipGraphView({ graph, onNodeClick }: RelationshipGraphV
     // Store reference
     cyRef.current = cy;
 
-    // Cleanup
+    // Cleanup — stop any in-flight layout/animation first; a pending frame
+    // firing on a destroyed instance throws "Cannot read ... 'notify'"
+    // (visible under StrictMode's dev double-mount)
     return () => {
-      cy.destroy();
+      try {
+        cy.stop();
+        cy.destroy();
+      } catch {
+        // instance already destroyed
+      }
       cyRef.current = null;
     };
   }, [elements, style, layout, onNodeClick]);

@@ -250,27 +250,27 @@ verify against the actual type in `src/types/user/`.
 
 ---
 
-## Remaining known work (2026-08 — after the remediation pass)
+## Remaining known work (2026-08 — after the research/completion pass)
 
-- **Citation backfill**: 67 legacy risk factors still lack citations
-  (`KBValidation.test.ts` ratchets the count so it can only shrink); 13 disease files also lack
-  confidence intervals on most hazard ratios.
-- **Sex coverage**: drug-overdose, influenza-pneumonia, and liver-cancer have a single
-  unstratified baseline curve despite strong known sex gradients; most `defaultCurve`s are male.
-- **Incidence vs. mortality**: life-table anchoring corrects the overall number, but
-  disease-level cards still display model outcomes that mix incidence (diabetes, prostate) and
-  mortality (COPD, melanoma). An explicit `outcome` metadata field + case-fatality data would
-  let the UI label them honestly.
-- **Correlated modifiers**: the six all-cause modifiers multiply as if independent (documented
-  in provenance); a shared-variance discount needs a methodological source.
-- **Legacy mega-components**: `SwipeSurvey.tsx` (~3,400 lines, `@ts-nocheck`) and
-  `CompactProfileEditor.tsx` (~2,900 lines) need splitting; they hold nearly all remaining
-  lint warnings (`no-explicit-any`, `set-state-in-effect`).
-- **E2E style**: specs still use fixed `waitForTimeout(1000)` before assertions
-  (`getIndexedDBValue` now polls, which removes the main flake class); migrating to
-  `waitForProfilePersistence` remains preferable. `expandSection` helper is unused.
-- **Accessibility**: no `aria-` attributes anywhere; `window.confirm` used for profile reset.
-- **TopLevers metadata**: `currentValue`/`targetValue`/`effort`/`timeframe` on levers are
-  hardcoded placeholders (`RiskEngine.identifyTopLevers`).
-- Unused-but-typed profile fields (ApoB, sleep quality, vigorous exercise minutes, marital
-  status, lives-alone…) are candidates for new evidence-backed risk factors.
+Resolved since the last audit: citation debt is ZERO (every factor cited, ratchet is a hard
+zero in `KBValidation.test.ts`); all models declare `outcome` with cited `caseFatality10yr`;
+correlated modifiers combine with the cited attenuation rule; all diseases have sex-aware
+baselines; mega-components split; levers carry real current/target values; profile reset uses
+an accessible dialog; insomnia (CVD) and living-alone (modifier) inputs added.
+
+Still open:
+- **Type-safety of legacy UI**: the split survey/editor modules still carry `@ts-nocheck`
+  and ~189 `no-explicit-any` lint warnings — a typed rewrite remains desirable.
+- **CVD/stroke overlap**: the CVD model's baseline (ASCVD events) includes stroke, and a
+  separate stroke model also contributes — partial double-counting in the overall aggregate.
+- **CFR provenance caveats**: stroke/dementia/CKD case-fatality figures are all-cause among
+  the diagnosed (include background mortality); the CVD figure is a documented derivation.
+  Better cause-specific attributable fractions welcome.
+- **Dyspnea grade HRs** (COPD) are interpolations pending full-text verification of
+  Nishimura 2002; the mMRC association itself is verified.
+- **ApoB, grip strength, vigorous activity**: meta-analysis-grade evidence exists (see
+  factor-notes/commit history) but wiring them cleanly needs per-unit scaling (ApoB SD),
+  sex-specific references (grip), or double-count avoidance vs moderate activity (VPA).
+- **E2E style**: many specs still pair fixed `waitForTimeout(1000)` sleeps with the now-polling
+  `getIndexedDBValue`; harmless but slower than `waitForProfilePersistence`.
+- **Screening/interventions domains** in the profile types remain unused by any model.

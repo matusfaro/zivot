@@ -98,7 +98,11 @@ export const MortalityRiskChart: React.FC<MortalityRiskChartProps> = React.memo(
     const ticks = [baseAge];
     const startDecade = Math.ceil(baseAge / 10) * 10;
     for (let age = startDecade; age <= 110; age += 10) {
-      ticks.push(age);
+      // Avoid a duplicate tick (and duplicate React keys in recharts) when
+      // the current age is exactly on a decade boundary
+      if (age !== baseAge) {
+        ticks.push(age);
+      }
     }
     return ticks;
   }, [currentAge]);
