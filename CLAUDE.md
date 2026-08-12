@@ -250,27 +250,8 @@ verify against the actual type in `src/types/user/`.
 
 ---
 
-## Remaining known work (2026-08 — after the research/completion pass)
+## Roadmap
 
-Resolved since the last audit: citation debt is ZERO (every factor cited, ratchet is a hard
-zero in `KBValidation.test.ts`); all models declare `outcome` with cited `caseFatality10yr`;
-correlated modifiers combine with the cited attenuation rule; all diseases have sex-aware
-baselines; mega-components split; levers carry real current/target values; profile reset uses
-an accessible dialog; insomnia (CVD) and living-alone (modifier) inputs added.
-
-Still open:
-- **Type-safety of legacy UI**: the split survey/editor modules still carry `@ts-nocheck`
-  and ~189 `no-explicit-any` lint warnings — a typed rewrite remains desirable.
-- **CVD/stroke overlap**: the CVD model's baseline (ASCVD events) includes stroke, and a
-  separate stroke model also contributes — partial double-counting in the overall aggregate.
-- **CFR provenance caveats**: stroke/dementia/CKD case-fatality figures are all-cause among
-  the diagnosed (include background mortality); the CVD figure is a documented derivation.
-  Better cause-specific attributable fractions welcome.
-- **Dyspnea grade HRs** (COPD) are interpolations pending full-text verification of
-  Nishimura 2002; the mMRC association itself is verified.
-- **ApoB, grip strength, vigorous activity**: meta-analysis-grade evidence exists (see
-  factor-notes/commit history) but wiring them cleanly needs per-unit scaling (ApoB SD),
-  sex-specific references (grip), or double-count avoidance vs moderate activity (VPA).
-- **E2E style**: many specs still pair fixed `waitForTimeout(1000)` sleeps with the now-polling
-  `getIndexedDBValue`; harmless but slower than `waitForProfilePersistence`.
-- **Screening/interventions domains** in the profile types remain unused by any model.
+Open ideas and known model caveats live in [`docs/ROADMAP.md`](docs/ROADMAP.md) — check it
+before starting model or refactoring work so effort isn't duplicated or double-counted risk
+introduced (several ideas there are blocked on specific evidence gaps documented in place).
