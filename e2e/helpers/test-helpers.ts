@@ -141,22 +141,6 @@ export async function waitForRiskCalculation(page: Page, timeout: number = 5000)
 }
 
 /**
- * Expand a section if it's collapsed
- */
-export async function expandSection(page: Page, sectionName: string): Promise<void> {
-  const sectionButton = page.locator(`button:has-text("${sectionName}")`);
-
-  // Check if section is collapsed (has ▶)
-  const isCollapsed = await sectionButton.locator('text=▶').isVisible().catch(() => false);
-
-  if (isCollapsed) {
-    await sectionButton.click();
-    // Wait for section to expand
-    await page.waitForTimeout(200);
-  }
-}
-
-/**
  * Clear all IndexedDB data
  */
 export async function clearIndexedDB(page: Page): Promise<void> {

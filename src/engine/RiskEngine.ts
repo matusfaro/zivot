@@ -229,13 +229,92 @@ export class RiskEngine {
       profile
     );
 
+    // Comparison to the population average (CDC life-table anchor)
+    let comparisonToAverage = '';
+    if (overallMortality.populationBaselineRisk !== undefined) {
+      const avgPercent = (overallMortality.populationBaselineRisk * 100).toFixed(1);
+      const ratio = overallMortality.relativeHazard ?? 1;
+      if (ratio > 1.1) {
+        comparisonToAverage = `That is about ${ratio.toFixed(1)}× the average ${avgPercent}% for your age and sex.`;
+      } else if (ratio < 0.9) {
+        comparisonToAverage = `That is below the average ${avgPercent}% for your age and sex (about ${ratio.toFixed(1)}× the population hazard).`;
+      } else {
+        comparisonToAverage = `That is close to the average ${avgPercent}% for your age and sex.`;
+      }
+    }
+
     return {
       overallSummary,
       riskCategory,
-      comparisonToAverage: '', // TODO: Phase 4 - Add comparison to population average
+      comparisonToAverage,
       diseaseInterpretations,
       recommendations,
     };
+  }
+
+  /**
+   * Effort/timeframe guidance by factor category. These are UX guidance
+   * heuristics for prioritizing behavior change, not clinical claims: e.g.
+   * smoking cessation and sustained weight change are long-horizon,
+   * lab-driven factors are typically clinician-assisted and faster.
+   */
+  private leverGuidance(factorId: string, category: string): { effort: ModifiableLever['effort']; timeframe: string } {
+    const id = factorId.toLowerCase();
+    const cat = category.toLowerCase();
+    if (id.includes('smoking') || id.includes('pack_years')) {
+      return { effort: 'high', timeframe: '6-12 months' };
+    }
+    if (id.includes('bmi') || id.includes('weight') || id.includes('obesity')) {
+      return { effort: 'high', timeframe: '6-12 months' };
+    }
+    if (id.includes('alcohol') || id.includes('opioid') || id.includes('benzo')) {
+      return { effort: 'high', timeframe: '3-6 months' };
+    }
+    if (cat.includes('lipid') || cat.includes('lab') || id.includes('cholesterol') || id.includes('bp') || id.includes('blood_pressure') || id.includes('systolic')) {
+      return { effort: 'low', timeframe: '3-6 months' };
+    }
+    if (cat.includes('psychosocial') || cat.includes('social') || id.includes('insomnia') || id.includes('sleep')) {
+      return { effort: 'moderate', timeframe: '1-3 months' };
+    }
+    return { effort: 'moderate', timeframe: '3-6 months' };
+  }
+
+  /**
+   * The value of this factor that minimizes risk, read from the model's own
+   * mapping (lowest-HR point/category, or the low/high end of a linear range).
+   */
+  private optimalValueForFactor(diseaseId: string, factorId: string): number | string | boolean | null {
+    const model = this.diseaseKB?.get(diseaseId);
+    const factor = model?.riskFactors.find(f => f.factorId === factorId);
+    if (!factor) return null;
+    const mapping = factor.mapping as unknown as {
+      points?: Array<{ value: number; hazardRatio: number }>;
+      categories?: Array<{ value: string | string[]; hazardRatio: number }>;
+      trueHazardRatio?: number;
+      falseHazardRatio?: number;
+      presentHR?: number;
+      absentHR?: number;
+      coefficients?: { slope?: number };
+      validRange?: [number, number];
+    };
+    if (mapping.points?.length) {
+      const best = mapping.points.reduce((a, b) => (b.hazardRatio < a.hazardRatio ? b : a));
+      return best.value;
+    }
+    if (mapping.categories?.length) {
+      const best = mapping.categories.reduce((a, b) => (b.hazardRatio < a.hazardRatio ? b : a));
+      return Array.isArray(best.value) ? best.value[0] : best.value;
+    }
+    if (mapping.trueHazardRatio !== undefined && mapping.falseHazardRatio !== undefined) {
+      return mapping.trueHazardRatio < mapping.falseHazardRatio;
+    }
+    if (mapping.presentHR !== undefined && mapping.absentHR !== undefined) {
+      return mapping.presentHR < mapping.absentHR;
+    }
+    if (mapping.coefficients?.slope !== undefined && mapping.validRange) {
+      return mapping.coefficients.slope > 0 ? mapping.validRange[0] : mapping.validRange[1];
+    }
+    return null;
   }
 
   /**
@@ -259,15 +338,21 @@ export class RiskEngine {
           existing.totalImpact += Math.abs(contrib.contribution);
           existing.potentialRiskReduction += Math.abs(contrib.contribution);
         } else {
+          const guidance = this.leverGuidance(contrib.factorId, contrib.category);
+          const rawInput = contrib.inputValue?.value;
+          const currentValue =
+            typeof rawInput === 'number' || typeof rawInput === 'string' || typeof rawInput === 'boolean'
+              ? rawInput
+              : null;
           leverMap.set(contrib.factorId, {
             factorId: contrib.factorId,
             factorName: contrib.factorName,
-            currentValue: null, // TODO: Extract from profile
-            targetValue: null, // TODO: Define target
+            currentValue,
+            targetValue: this.optimalValueForFactor(disease.diseaseId, contrib.factorId),
             potentialRiskReduction: Math.abs(contrib.contribution),
             totalImpact: Math.abs(contrib.contribution),
-            effort: 'moderate' as const, // TODO: Estimate based on factor type
-            timeframe: '3-6 months', // TODO: Estimate
+            effort: guidance.effort,
+            timeframe: guidance.timeframe,
             diseases: [disease.diseaseId],
           });
         }

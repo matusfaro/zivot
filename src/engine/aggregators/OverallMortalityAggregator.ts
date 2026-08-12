@@ -228,6 +228,8 @@ export class OverallMortalityAggregator {
       timeframe,
       estimatedRisk,
       range: [rangeLow, rangeHigh],
+      populationBaselineRisk: lifeTableRisk ?? undefined,
+      relativeHazard,
       confidence: {
         level: confidenceLevel,
         score: weightedConfidenceScore,

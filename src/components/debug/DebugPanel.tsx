@@ -49,9 +49,11 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ profile, result, onClose
     };
 
     navigator.clipboard.writeText(JSON.stringify(debugData, null, 2))
-      .then(() => alert('Debug data copied to clipboard!'))
-      .catch(err => alert('Failed to copy: ' + err.message));
+      .then(() => setStatusMessage('Debug data copied to clipboard'))
+      .catch(err => setStatusMessage('Failed to copy: ' + err.message));
   };
+
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleProfileJsonChange = (newJson: string) => {
     setProfileJson(newJson);
@@ -70,11 +72,11 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ profile, result, onClose
       setJsonError(null);
       if (onProfileUpdate) {
         onProfileUpdate(parsed);
-        alert('Profile updated!');
+        setStatusMessage('Profile updated');
       }
     } catch (err) {
       setJsonError((err as Error).message);
-      alert('Invalid JSON: ' + (err as Error).message);
+      setStatusMessage('Invalid JSON: ' + (err as Error).message);
     }
   };
 
@@ -87,11 +89,17 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ profile, result, onClose
             <button onClick={handleCopyAll} className="debug-button">
               📋 Copy All to Clipboard
             </button>
-            <button onClick={onClose} className="debug-button close">
+            <button onClick={onClose} className="debug-button close" aria-label="Close debug panel">
               ✕ Close
             </button>
           </div>
         </div>
+
+        {statusMessage && (
+          <div role="status" aria-live="polite" style={{ padding: '4px 12px', fontSize: 12, color: '#16a34a' }}>
+            {statusMessage}
+          </div>
+        )}
 
         <div className="debug-content">
           {/* User Profile - Editable */}

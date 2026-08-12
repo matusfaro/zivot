@@ -49,6 +49,7 @@ const DEFAULT_PROFILE: UserProfile = {
 
 export const LiveDashboard: React.FC = () => {
   const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [riskEngine, setRiskEngine] = useState<RiskEngine | null>(null);
   const [relationshipGraph, setRelationshipGraph] = useState<RelationshipGraph | null>(null);
   const profileApi = useUserProfile();
@@ -116,15 +117,15 @@ export const LiveDashboard: React.FC = () => {
   // Risk calculation based on local profile (always up-to-date)
   const { result, calculating, error: calcError } = useRiskCalculation(localProfile);
 
-  // Handle profile reset
-  const handleResetProfile = async () => {
-    if (window.confirm('Are you sure you want to reset your entire health profile? This cannot be undone.')) {
-      try {
-        await clearProfile();
-        // Local profile will automatically sync with cleared profile from IndexedDB
-      } catch (err) {
-        console.error('Failed to reset profile:', err);
-      }
+  // Handle profile reset (confirmed via accessible dialog, not window.confirm,
+  // which blocks the event loop and browser automation)
+  const handleConfirmedReset = async () => {
+    setShowResetConfirm(false);
+    try {
+      await clearProfile();
+      // Local profile will automatically sync with cleared profile from IndexedDB
+    } catch (err) {
+      console.error('Failed to reset profile:', err);
     }
   };
 
@@ -144,8 +145,31 @@ export const LiveDashboard: React.FC = () => {
         result={result}
         calculating={calculating}
         error={calcError}
-        onResetProfile={handleResetProfile}
+        onResetProfile={() => setShowResetConfirm(true)}
       />
+      {showResetConfirm && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="reset-confirm-title"
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,0.55)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div style={{ background: 'var(--bg-color, #fff)', color: 'inherit', padding: '1.5rem', borderRadius: 8, maxWidth: 420, margin: '1rem', border: '1px solid #888' }}>
+            <h3 id="reset-confirm-title" style={{ marginTop: 0 }}>Reset health profile?</h3>
+            <p>This permanently deletes your entire health profile from this browser. This cannot be undone.</p>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button autoFocus onClick={() => setShowResetConfirm(false)}>Cancel</button>
+              <button onClick={handleConfirmedReset} style={{ background: '#dc2626', color: '#fff' }}>
+                Reset profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <main className="main-content">
         <div className="live-dashboard">
           <div className="dashboard-layout">

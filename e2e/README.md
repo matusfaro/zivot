@@ -44,7 +44,6 @@ npm run test:e2e:report
 - Waits for app to be ready
 
 ### Test Helpers (`helpers/test-helpers.ts`)
-- `expandSection(page, name)` - Expand a collapsed section
 - `setInputValue(page, label, value)` - Set input field value
 - `setSelectValue(page, label, value)` - Set dropdown value
 - `toggleCheckbox(page, label, checked)` - Toggle checkbox
@@ -68,7 +67,6 @@ When adding a new user profile field, you **MUST** add corresponding E2E tests:
 ```typescript
 test('should persist and calculate risk when NewField is changed', async ({ page }) => {
   // 1. Expand the appropriate section
-  await expandSection(page, 'SectionName');
 
   // 2. Set the field value
   await setInputValue(page, 'New Field Label', '100');

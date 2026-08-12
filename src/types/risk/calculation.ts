@@ -94,6 +94,11 @@ export interface OverallMortalityRisk {
   range: [number, number];
   confidence: ConfidenceScore;
 
+  /** CDC life-table 10-year mortality for this age/sex (population average) */
+  populationBaselineRisk?: number;
+  /** Modeled hazard of this profile relative to the population baseline */
+  relativeHazard?: number;
+
   // Breakdown by disease
   diseaseContributions: {
     diseaseId: string;
