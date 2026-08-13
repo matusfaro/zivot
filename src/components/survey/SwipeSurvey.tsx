@@ -653,7 +653,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           display: flex;
           flex-direction: column;
           position: relative;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .survey-header {
@@ -670,14 +670,14 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 1px;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .survey-progress {
           font-size: 0.7rem;
           color: var(--color-text-secondary);
           font-weight: 700;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .survey-instructions {
@@ -696,7 +696,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           color: var(--color-text-secondary);
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .instruction.left {
@@ -724,9 +724,10 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           position: absolute;
           width: 100%;
           max-width: 420px;
-          background: white;
-          border: 2px solid var(--color-border);
-          box-shadow: inset 0 0 0 1px rgba(163, 155, 139, 0.2);
+          background: var(--color-bg-secondary);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          box-shadow: var(--shadow-md);
           padding: var(--spacing-md);
           user-select: none;
           z-index: 2;
@@ -769,7 +770,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           color: var(--color-text-secondary);
           letter-spacing: 0.5px;
           margin-bottom: var(--spacing-xs);
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .card-question {
@@ -778,7 +779,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           color: var(--color-text);
           margin-bottom: var(--spacing-md);
           line-height: 1.3;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .card-options {
@@ -834,7 +835,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           font-weight: 700;
           color: var(--color-text);
           margin-bottom: var(--spacing-xs);
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           text-transform: uppercase;
           letter-spacing: 0.3px;
         }
@@ -842,7 +843,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
         .option-impact {
           font-size: 0.85rem;
           font-weight: 700;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .option-impact.bad {
@@ -865,7 +866,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           margin-top: var(--spacing-xs);
           font-size: 0.8rem;
           font-weight: 700;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           text-align: center;
         }
 
@@ -893,7 +894,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           flex-direction: column;
           align-items: center;
           gap: var(--spacing-xs);
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -940,7 +941,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           cursor: pointer;
           transition: all 0.2s ease;
           min-width: 80px;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .nav-button:hover:not(:disabled) {
@@ -1010,7 +1011,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           color: var(--color-text);
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .input-wrapper {
@@ -1052,7 +1053,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           padding: var(--spacing-xs);
           font-size: 0.75rem;
           font-weight: 700;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           border: 2px solid var(--color-border);
           background: var(--color-bg);
           color: var(--color-text);
@@ -1068,7 +1069,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           padding: var(--spacing-xs);
           font-size: 0.75rem;
           font-weight: 700;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           border: 2px solid var(--color-border);
           background: var(--color-bg);
           color: var(--color-text);
@@ -1084,13 +1085,13 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           font-size: 0.85rem;
           font-weight: 700;
           color: var(--color-primary);
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .unit-label {
           font-size: 0.7rem;
           color: var(--color-text-secondary);
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           text-align: center;
         }
 
@@ -1106,7 +1107,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           transition: all 0.2s;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           margin-top: var(--spacing-xs);
         }
 
@@ -1135,7 +1136,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
         .survey-complete h2 {
           font-size: 1.2rem;
           margin-bottom: var(--spacing-sm);
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 1px;
@@ -1145,7 +1146,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           font-size: 0.75rem;
           color: var(--color-text-secondary);
           margin-bottom: var(--spacing-md);
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .restart-button {
@@ -1159,7 +1160,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
           transition: background 0.2s;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
 
         .restart-button:hover {

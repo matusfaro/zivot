@@ -132,7 +132,7 @@ export const ProfilePicker: React.FC<ProfilePickerProps> = ({ onSelected }) => {
           border: 2px solid var(--color-border, #888);
           border-radius: 10px;
           padding: 1.5rem;
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-sans);
         }
         .profile-picker-card h1 {
           margin: 0 0 0.25rem;

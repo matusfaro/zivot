@@ -1,5 +1,5 @@
 .risk-report-card {
-  background: #faf8f3;
+  background: var(--color-bg-secondary);
   background-image:
     repeating-linear-gradient(
       0deg,
@@ -92,7 +92,7 @@
 }
 
 .risk-factor-item:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--color-bg-tertiary);
   border-color: var(--color-primary);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

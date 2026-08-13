@@ -302,7 +302,7 @@ export const MedicalHistorySection: React.FC<ProfileSectionProps> = ({ getFieldV
 
             <div className="sensitive-data-warning" style={{
               backgroundColor: '#fff3cd',
-              border: '1px solid #ffc107',
+              border: '1px solid var(--color-warning)', color: 'var(--color-text)',
               borderRadius: '4px',
               padding: '12px',
               marginTop: '20px',

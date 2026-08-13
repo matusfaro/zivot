@@ -5,6 +5,7 @@ import { ProfilePicker } from './components/profile/ProfilePicker';
 import { profileRepository } from './database/repositories/ProfileRepository';
 import './App.css';
 import './styles/relationship-graph.css';
+import './styles/theme.css';
 
 // E2E tests exercise the dashboard directly against a cleared database —
 // bypass the picker and use the legacy first-profile behavior there.
@@ -32,7 +33,7 @@ function App() {
       <div className="app">
         <Routes>
           <Route
-            path="/"
+            path="/:tab?"
             element={
               <LiveDashboard
                 key={activeProfileId}

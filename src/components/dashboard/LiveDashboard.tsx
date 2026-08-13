@@ -1,11 +1,13 @@
 import React, { Suspense, lazy, useState, useCallback, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { UserProfileContext } from '../../contexts/UserProfileContext';
 import { useRiskCalculation } from '../../hooks/useRiskCalculation';
 import { useDebounceProp } from '../../hooks/useDebounceProp';
 import { ChartsSection } from './ChartsSection';
 import { CompactProfileEditor } from './CompactProfileEditor';
-import { Header } from '../layout/Header';
+import { TopBar } from '../layout/TopBar';
+import { SurvivalHero } from './SurvivalHero';
 import { RiskReportCard } from '../results/RiskReportCard';
 import { RecommendationsPanel } from './RecommendationsPanel';
 import { UserProfile } from '../../types/user';
@@ -13,7 +15,7 @@ import { RiskEngine, getSharedRiskEngine } from '../../engine/RiskEngine';
 import { RelationshipGraph } from '../../types/registry';
 import { getRelationshipGraph } from '../../registry/RelationshipGraphBuilder';
 
-// Heavy, below-the-fold sections are code-split out of the initial bundle
+// Heavy, tab-specific sections are code-split out of the initial bundle
 const SwipeSurvey = lazy(() =>
   import('../survey/SwipeSurvey').then(m => ({ default: m.SwipeSurvey }))
 );
@@ -47,11 +49,31 @@ const DEFAULT_PROFILE: UserProfile = {
   },
 };
 
+type TabId = 'overview' | 'survey' | 'profile' | 'habits' | 'explore';
+
+function tabFromParam(param: string | undefined): TabId {
+  switch (param) {
+    case undefined:
+    case '':
+      return 'overview';
+    case 'survey':
+    case 'profile':
+    case 'habits':
+    case 'explore':
+      return param;
+    default:
+      return 'overview';
+  }
+}
+
 interface LiveDashboardProps {
   onSwitchProfile?: () => void;
 }
 
 export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile }) => {
+  const { tab: tabParam } = useParams();
+  const tab = tabFromParam(tabParam);
+
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [riskEngine, setRiskEngine] = useState<RiskEngine | null>(null);
@@ -75,12 +97,13 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile })
     engine.initialize().then(() => setRiskEngine(engine));
   }, []);
 
-  // Build relationship graph on mount
+  // Build the relationship graph only when the Explore tab is first opened
   useEffect(() => {
+    if (tab !== 'explore' || relationshipGraph) return;
     getRelationshipGraph()
       .then(setRelationshipGraph)
       .catch(error => console.error('[LiveDashboard] Failed to build relationship graph:', error));
-  }, []);
+  }, [tab, relationshipGraph]);
 
   // Debounced save function for profile updates
   const saveProfile = useCallback(async (updatedProfile: UserProfile) => {
@@ -121,13 +144,12 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile })
   // Risk calculation based on local profile (always up-to-date)
   const { result, calculating, error: calcError } = useRiskCalculation(localProfile);
 
-  // Handle profile reset (confirmed via accessible dialog, not window.confirm,
-  // which blocks the event loop and browser automation)
+  // Handle profile reset (confirmed via accessible dialog)
   const handleConfirmedReset = async () => {
     setShowResetConfirm(false);
     try {
       await clearProfile();
-      // Local profile will automatically sync with cleared profile from IndexedDB
+      onSwitchProfile?.();
     } catch (err) {
       console.error('Failed to reset profile:', err);
     }
@@ -142,16 +164,19 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile })
     );
   }
 
+  const survivalPercent = result ? (1 - result.overallMortality.estimatedRisk) * 100 : null;
+
   return (
     <UserProfileContext.Provider value={profileApi}>
-      <Header
-        onLogoDoubleClick={() => setShowDebugPanel(true)}
-        result={result}
+      <TopBar
+        profileName={localProfile?.name}
+        survivalPercent={survivalPercent}
         calculating={calculating}
         error={calcError}
-        onResetProfile={() => setShowResetConfirm(true)}
         onSwitchProfile={onSwitchProfile}
+        onLogoDoubleClick={() => setShowDebugPanel(true)}
       />
+
       {showResetConfirm && (
         <div
           role="alertdialog"
@@ -163,38 +188,50 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile })
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <div style={{ background: 'var(--bg-color, #fff)', color: 'inherit', padding: '1.5rem', borderRadius: 8, maxWidth: 420, margin: '1rem', border: '1px solid #888' }}>
-            <h3 id="reset-confirm-title" style={{ marginTop: 0 }}>Reset health profile?</h3>
-            <p>This permanently deletes your entire health profile from this browser. This cannot be undone.</p>
+          <div style={{ background: 'var(--color-bg-secondary)', color: 'inherit', padding: '1.5rem', borderRadius: 'var(--radius-md)', maxWidth: 420, margin: '1rem', border: '1px solid var(--color-border)' }}>
+            <h3 id="reset-confirm-title" style={{ marginTop: 0 }}>Delete this profile?</h3>
+            <p>This permanently deletes the profile "{localProfile?.name || 'unnamed'}" from this browser. This cannot be undone.</p>
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
               <button autoFocus onClick={() => setShowResetConfirm(false)}>Cancel</button>
-              <button onClick={handleConfirmedReset} style={{ background: '#dc2626', color: '#fff' }}>
-                Reset profile
+              <button onClick={handleConfirmedReset} style={{ background: 'var(--color-danger)', color: '#fff' }}>
+                Delete profile
               </button>
             </div>
           </div>
         </div>
       )}
-      <main className="main-content">
-        <div className="live-dashboard">
-          <div className="dashboard-layout">
-            {/* Charts Section: Risk Over Time + Breakdown */}
-            {result && localProfile && (
-              <section className="dashboard-section charts-section-wrapper full-width">
-                <ChartsSection result={result} profile={localProfile} />
-              </section>
-            )}
 
-            {/* Personalized Recommendations */}
+      <main className="main-content">
+        {tab === 'overview' && (
+          <div className="page">
+            <SurvivalHero result={result} calculating={calculating} />
             {result?.interpretation?.recommendations && result.interpretation.recommendations.length > 0 && (
-              <section className="dashboard-section recommendations-section full-width">
+              <section className="dashboard-section recommendations-section">
                 <RecommendationsPanel recommendations={result.interpretation.recommendations} />
               </section>
             )}
+            {result && localProfile && (
+              <section className="dashboard-section charts-section-wrapper">
+                <ChartsSection result={result} profile={localProfile} />
+              </section>
+            )}
+            {result && (
+              <section className="dashboard-section risk-report-section">
+                <RiskReportCard result={result} />
+              </section>
+            )}
+          </div>
+        )}
 
-            {/* Swipe Survey Section */}
-            <section className="dashboard-section swipe-section full-width">
-              <h2>🎯 QUICK INPUT</h2>
+        {tab === 'survey' && (
+          <div className="page page-narrow">
+            <div>
+              <h1 className="page-title">Quick survey</h1>
+              <p className="page-subtitle">
+                Swipe through the questions that matter most — every answer updates your survival estimate live.
+              </p>
+            </div>
+            <section className="dashboard-section swipe-section">
               <Suspense fallback={<SectionSpinner />}>
                 <SwipeSurvey
                   profile={localProfile}
@@ -204,35 +241,53 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile })
                 />
               </Suspense>
             </section>
+          </div>
+        )}
 
-            {/* Habits Tracking Section */}
-            <section className="dashboard-section habits-section full-width">
+        {tab === 'profile' && (
+          <div className="page">
+            <div>
+              <h1 className="page-title">Health profile</h1>
+              <p className="page-subtitle">
+                The precise version of the survey — everything the models can use, with sources for every factor.
+              </p>
+            </div>
+            <CompactProfileEditor
+              profile={localProfile}
+              onProfileChange={setLocalProfile}
+            />
+            <div className="danger-zone">
+              <p>Delete this profile and all of its data from this browser.</p>
+              <button onClick={() => setShowResetConfirm(true)}>Delete profile</button>
+            </div>
+          </div>
+        )}
+
+        {tab === 'habits' && (
+          <div className="page page-narrow">
+            <div>
+              <h1 className="page-title">Habits</h1>
+              <p className="page-subtitle">
+                Log day-to-day behavior — rolling averages feed back into your profile automatically.
+              </p>
+            </div>
+            <section className="dashboard-section habits-section">
               <Suspense fallback={<SectionSpinner />}>
                 <HabitsDashboard />
               </Suspense>
             </section>
+          </div>
+        )}
 
-            {/* Profile Input Section */}
-            <section className="dashboard-section profile-section full-width">
-              <CompactProfileEditor
-                profile={localProfile}
-                onProfileChange={setLocalProfile}
-              />
-            </section>
-
-            {/* Risk Report Card - Bottom of page to avoid jumping */}
-            {result && (
-              <section className="dashboard-section risk-report-section full-width">
-                <RiskReportCard result={result} />
-              </section>
-            )}
-
-            {/* Relationship Graph Section - Always shown at the end */}
-            <section className="dashboard-section relationship-graph-section full-width">
-              <h2>🔗 RELATIONSHIP GRAPH</h2>
-              <p className="section-description">
-                Visualizing connections between inputs, questions, risk factors, and diseases
+        {tab === 'explore' && (
+          <div className="page">
+            <div>
+              <h1 className="page-title">Explore the model</h1>
+              <p className="page-subtitle">
+                How inputs, risk factors, and diseases connect — every edge is backed by a cited study.
               </p>
+            </div>
+            <section className="dashboard-section relationship-graph-section">
               {relationshipGraph ? (
                 <div className="graph-wrapper">
                   <Suspense fallback={<SectionSpinner />}>
@@ -247,7 +302,7 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile })
               )}
             </section>
           </div>
-        </div>
+        )}
       </main>
 
       {/* Debug Panel */}

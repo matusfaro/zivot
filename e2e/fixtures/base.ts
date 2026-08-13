@@ -6,10 +6,10 @@ import { clearIndexedDB } from '../helpers/test-helpers';
  */
 export const test = base.extend({
   page: async ({ page }, use) => {
-    // Navigate to the app
-    await page.goto('/');
+    // Navigate straight to the Profile tab, where the editor lives
+    await page.goto('/profile');
 
-    // Wait for app to be ready - look for the profile editor section which should always be present
+    // Wait for app to be ready - the profile editor sections
     await page.waitForSelector('.profile-section', { timeout: 15000 });
 
     // Clear IndexedDB before each test
