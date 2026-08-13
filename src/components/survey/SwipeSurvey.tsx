@@ -47,7 +47,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
 
     const allQuestions = generateQuestions();
     // Filter out questions that have already been answered
-    const unanswered = allQuestions.filter(q => !isQuestionAnswered(q, profile));
+    const unanswered = allQuestions.filter(q => (!q.applicableTo || q.applicableTo(profile)) && !isQuestionAnswered(q, profile));
     // Shuffle questions once for randomization
     const shuffled = [...unanswered].sort(() => Math.random() - 0.5);
     setQuestions(shuffled);

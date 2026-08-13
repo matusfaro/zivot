@@ -7,6 +7,8 @@ export type DetailedInputType =
 
 export interface SwipeQuestion {
   id: string;
+  /** Optional gate: hide the question for profiles it cannot apply to */
+  applicableTo?: (profile: UserProfile) => boolean;
   question: string;
   category: string;
   leftOption: {

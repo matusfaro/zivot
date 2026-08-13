@@ -336,6 +336,29 @@
       "citation": "Miyashita K, Nakatani E, Hozumi H, et al. Open Forum Infect Dis. 2021;8(3):ofab068",
       "doi": "10.1093/ofid/ofab068",
       "notes": "Congestive heart failure: 28-day mortality HR 2.11 (1.49-2.98); evidence is CHF-specific — may overstate stable coronary disease."
+    },
+    {
+      "factorId": "flu_vaccination",
+      "name": "Annual Influenza Vaccination",
+      "type": "boolean",
+      "evidenceStrength": "moderate",
+      "category": "Preventive Care",
+      "modifiable": true,
+      "citation": "Gross PA, Hermogenes AW, Sacks HS, Lau J, Levandowski RA. The efficacy of influenza vaccine in elderly persons. A meta-analysis and review of the literature. Ann Intern Med. 1995;123(7):518-527",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/7661497/",
+      "evidenceLevel": "meta_analysis",
+      "notes": "Pooled cohort estimates: 68% (56-76%) reduction in influenza-associated death and ~50% in pneumonia/influenza hospitalization among vaccinated elderly. Modeled conservatively at HR 0.5 because healthy-vaccinee bias inflates observational estimates and the model outcome includes non-influenza pneumonia.",
+      "requiredFields": [
+        {
+          "path": "medicalHistory.vaccinations.fluVaccineCurrentYear.value",
+          "required": false
+        }
+      ],
+      "mapping": {
+        "type": "boolean",
+        "trueHazardRatio": 0.5,
+        "falseHazardRatio": 1.0
+      }
     }
   ]
 }

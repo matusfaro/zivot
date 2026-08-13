@@ -309,75 +309,6 @@ export function generateQuestions(): SwipeQuestion[] {
       }
     },
     {
-      id: 'stress',
-      question: 'Are you under chronic stress?',
-      category: 'Lifestyle',
-      leftOption: {
-        label: 'High stress',
-        emoji: '😰',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, stress: createUserDataPoint('high') } as any
-        })
-      },
-      rightOption: {
-        label: 'Low stress',
-        emoji: '😌',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, stress: createUserDataPoint('low') } as any
-        })
-      }
-    },
-    {
-      id: 'socialConnection',
-      question: 'Do you have strong social connections?',
-      category: 'Lifestyle',
-      leftOption: {
-        label: 'Socially isolated',
-        emoji: '😔',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: {
-            ...p.lifestyle,
-            socialEngagement: createUserDataPoint('low')
-          }
-        })
-      },
-      rightOption: {
-        label: 'Strong connections',
-        emoji: '👥',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: {
-            ...p.lifestyle,
-            socialEngagement: createUserDataPoint('high')
-          }
-        })
-      }
-    },
-    {
-      id: 'sunExposure',
-      question: 'Do you get excessive sun exposure?',
-      category: 'Lifestyle',
-      leftOption: {
-        label: 'Excessive sun',
-        emoji: '☀️',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, sunExposure: createUserDataPoint('excessive') } as any
-        })
-      },
-      rightOption: {
-        label: 'Protected/Moderate',
-        emoji: '🧴',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, sunExposure: createUserDataPoint('moderate') } as any
-        })
-      }
-    },
-    {
       id: 'occupationalHazards',
       question: 'Are you exposed to workplace hazards?',
       category: 'Lifestyle',
@@ -457,7 +388,20 @@ export function generateQuestions(): SwipeQuestion[] {
       leftOption: {
         label: 'Yes',
         emoji: '📈',
-        profileUpdate: (p) => setCondition(p, 'hypertension', true)
+        profileUpdate: (p) => {
+          const withCondition = setCondition(p, 'hypertension', true);
+          // Representative uncontrolled stage-2 BP; refine in the editor
+          return {
+            ...withCondition,
+            biometrics: {
+              ...withCondition.biometrics,
+              bloodPressure: {
+                dataPoints: withCondition.biometrics?.bloodPressure?.dataPoints || [],
+                mostRecent: createUserDataPoint({ systolic: 145, diastolic: 90 })
+              }
+            }
+          };
+        }
       },
       rightOption: {
         label: 'No',
@@ -472,12 +416,12 @@ export function generateQuestions(): SwipeQuestion[] {
       leftOption: {
         label: 'Yes',
         emoji: '💔',
-        profileUpdate: (p) => setCondition(p, 'heartDisease', true)
+        profileUpdate: (p) => setCondition(p, 'cvd', true)
       },
       rightOption: {
         label: 'No',
         emoji: '❤️',
-        profileUpdate: (p) => setCondition(p, 'heartDisease', false)
+        profileUpdate: (p) => setCondition(p, 'cvd', false)
       }
     },
     {
@@ -526,33 +470,18 @@ export function generateQuestions(): SwipeQuestion[] {
       }
     },
     {
-      id: 'kidneyDisease',
-      question: 'Do you have kidney disease?',
-      category: 'Medical History',
-      leftOption: {
-        label: 'Yes',
-        emoji: '🩺',
-        profileUpdate: (p) => setCondition(p, 'kidneyDisease', true)
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => setCondition(p, 'kidneyDisease', false)
-      }
-    },
-    {
       id: 'liverDisease',
       question: 'Do you have liver disease?',
       category: 'Medical History',
       leftOption: {
         label: 'Yes',
         emoji: '🫀',
-        profileUpdate: (p) => setCondition(p, 'liverDisease', true)
+        profileUpdate: (p) => setCondition(p, 'nafld', true)
       },
       rightOption: {
         label: 'No',
         emoji: '✅',
-        profileUpdate: (p) => setCondition(p, 'liverDisease', false)
+        profileUpdate: (p) => setCondition(p, 'nafld', false)
       }
     },
     {
@@ -562,27 +491,36 @@ export function generateQuestions(): SwipeQuestion[] {
       leftOption: {
         label: 'Yes',
         emoji: '😢',
-        profileUpdate: (p) => setCondition(p, 'depression', true)
+        profileUpdate: (p) => {
+          const withCondition = setCondition(p, 'depression', true);
+          return {
+            ...withCondition,
+            medicalHistory: {
+              ...withCondition.medicalHistory,
+              mentalHealth: {
+                ...withCondition.medicalHistory?.mentalHealth,
+                depressionDiagnosis: createUserDataPoint(true)
+              }
+            }
+          };
+        }
       },
       rightOption: {
         label: 'No',
         emoji: '😊',
-        profileUpdate: (p) => setCondition(p, 'depression', false)
-      }
-    },
-    {
-      id: 'asthma',
-      question: 'Do you have asthma?',
-      category: 'Medical History',
-      leftOption: {
-        label: 'Yes',
-        emoji: '😮‍💨',
-        profileUpdate: (p) => setCondition(p, 'asthma', true)
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => setCondition(p, 'asthma', false)
+        profileUpdate: (p) => {
+          const withCondition = setCondition(p, 'depression', false);
+          return {
+            ...withCondition,
+            medicalHistory: {
+              ...withCondition.medicalHistory,
+              mentalHealth: {
+                ...withCondition.medicalHistory?.mentalHealth,
+                depressionDiagnosis: createUserDataPoint(false)
+              }
+            }
+          };
+        }
       }
     },
 
@@ -594,27 +532,12 @@ export function generateQuestions(): SwipeQuestion[] {
       leftOption: {
         label: 'Yes',
         emoji: '👨‍👩‍👧‍👦💔',
-        profileUpdate: (p) => setFamilyHistory(p, 'heart_disease', true)
+        profileUpdate: (p) => setFamilyHistory(p, 'cvd', true)
       },
       rightOption: {
         label: 'No',
         emoji: '✅',
-        profileUpdate: (p) => setFamilyHistory(p, 'heart_disease', false)
-      }
-    },
-    {
-      id: 'familyCancer',
-      question: 'Family history of cancer?',
-      category: 'Family History',
-      leftOption: {
-        label: 'Yes',
-        emoji: '👨‍👩‍👧‍👦🎗️',
-        profileUpdate: (p) => setFamilyHistory(p, 'cancer', true)
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => setFamilyHistory(p, 'cancer', false)
+        profileUpdate: (p) => setFamilyHistory(p, 'cvd', false)
       }
     },
 
@@ -784,7 +707,8 @@ export function generateQuestions(): SwipeQuestion[] {
             ...p.labTests,
             metabolicPanel: {
               ...p.labTests?.metabolicPanel,
-              hba1c: createUserDataPoint(6.0)
+              hba1c: createUserDataPoint(6.0),
+              glucose: createUserDataPoint(110) // mid prediabetic range (100-125 mg/dL)
             }
           }
         })
@@ -798,7 +722,8 @@ export function generateQuestions(): SwipeQuestion[] {
             ...p.labTests,
             metabolicPanel: {
               ...p.labTests?.metabolicPanel,
-              hba1c: createUserDataPoint(5.2)
+              hba1c: createUserDataPoint(5.2),
+              glucose: createUserDataPoint(90) // normal fasting glucose
             }
           }
         })
@@ -862,8 +787,9 @@ export function generateQuestions(): SwipeQuestion[] {
     },
     {
       id: 'mammogram',
-      question: 'Regular mammograms (if female)?',
+      question: 'Do you get regular mammograms?',
       category: 'Preventive Care',
+      applicableTo: (p) => p.demographics?.biologicalSex?.value === 'female',
       leftOption: {
         label: 'No',
         emoji: '🚫',
@@ -883,60 +809,6 @@ export function generateQuestions(): SwipeQuestion[] {
           medicalHistory: {
             ...p.medicalHistory,
             screenings: updateScreeningArray(p.medicalHistory?.screenings, 'mammogram', 'negative', true)
-          }
-        })
-      }
-    },
-    {
-      id: 'dentist',
-      question: 'Do you visit dentist regularly?',
-      category: 'Preventive Care',
-      leftOption: {
-        label: 'Rarely/Never',
-        emoji: '🦷',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            screenings: updateScreeningArray(p.medicalHistory?.screenings, 'dental', 'negative', false)
-          }
-        })
-      },
-      rightOption: {
-        label: 'Twice yearly',
-        emoji: '😁',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            screenings: updateScreeningArray(p.medicalHistory?.screenings, 'dental', 'negative', true)
-          }
-        })
-      }
-    },
-    {
-      id: 'vision',
-      question: 'Regular vision checkups?',
-      category: 'Preventive Care',
-      leftOption: {
-        label: 'No',
-        emoji: '👓',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            screenings: updateScreeningArray(p.medicalHistory?.screenings, 'vision', 'negative', false)
-          }
-        })
-      },
-      rightOption: {
-        label: 'Yes, regular',
-        emoji: '👁️',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            screenings: updateScreeningArray(p.medicalHistory?.screenings, 'vision', 'negative', true)
           }
         })
       }
@@ -1006,27 +878,6 @@ export function generateQuestions(): SwipeQuestion[] {
         })
       }
     },
-    {
-      id: 'helmet',
-      question: 'Wear helmet when biking/motorcycling?',
-      category: 'Safety',
-      leftOption: {
-        label: 'No',
-        emoji: '🚴',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, helmetUse: createUserDataPoint(false) } as any
-        })
-      },
-      rightOption: {
-        label: 'Always',
-        emoji: '⛑️',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, helmetUse: createUserDataPoint(true) } as any
-        })
-      }
-    },
 
     // SUBSTANCE USE
     {
@@ -1038,7 +889,13 @@ export function generateQuestions(): SwipeQuestion[] {
         emoji: '💊',
         profileUpdate: (p) => ({
           ...p,
-          lifestyle: { ...p.lifestyle, recreationalDrugs: createUserDataPoint(true) } as any
+          medicalHistory: {
+            ...p.medicalHistory,
+            substanceUse: {
+              ...p.medicalHistory?.substanceUse,
+              substanceAbuseHistory: createUserDataPoint(true)
+            }
+          }
         })
       },
       rightOption: {
@@ -1046,7 +903,13 @@ export function generateQuestions(): SwipeQuestion[] {
         emoji: '🚫',
         profileUpdate: (p) => ({
           ...p,
-          lifestyle: { ...p.lifestyle, recreationalDrugs: createUserDataPoint(false) } as any
+          medicalHistory: {
+            ...p.medicalHistory,
+            substanceUse: {
+              ...p.medicalHistory?.substanceUse,
+              substanceAbuseHistory: createUserDataPoint(false)
+            }
+          }
         })
       }
     },
@@ -1063,7 +926,8 @@ export function generateQuestions(): SwipeQuestion[] {
             ...p.medicalHistory,
             substanceUse: {
               ...p.medicalHistory?.substanceUse,
-              prescribedOpioids: createUserDataPoint(true)
+              prescribedOpioids: createUserDataPoint(true),
+              opioidDailyDose: createUserDataPoint(50) // coarse estimate: CDC 50-MME caution threshold
             }
           }
         })
@@ -1077,56 +941,15 @@ export function generateQuestions(): SwipeQuestion[] {
             ...p.medicalHistory,
             substanceUse: {
               ...p.medicalHistory?.substanceUse,
-              prescribedOpioids: createUserDataPoint(false)
+              prescribedOpioids: createUserDataPoint(false),
+              opioidDailyDose: createUserDataPoint(0)
             }
           }
         })
       }
     },
-    {
-      id: 'marijuana',
-      question: 'Do you use marijuana regularly?',
-      category: 'Substance Use',
-      leftOption: {
-        label: 'Yes, daily',
-        emoji: '🌿',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, marijuana: createUserDataPoint('daily') } as any
-        })
-      },
-      rightOption: {
-        label: 'No/Occasionally',
-        emoji: '🚫',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, marijuana: createUserDataPoint('none') } as any
-        })
-      }
-    },
 
     // ENVIRONMENTAL EXPOSURES
-    {
-      id: 'airQuality',
-      question: 'Do you live in area with poor air quality?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes, high pollution',
-        emoji: '🏭',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, airQualityExposure: createUserDataPoint('poor') } as any
-        })
-      },
-      rightOption: {
-        label: 'No, clean air',
-        emoji: '🌲',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, airQualityExposure: createUserDataPoint('good') } as any
-        })
-      }
-    },
     // REMOVED: Water Quality - Too heterogeneous for self-report
     // Evidence too location-dependent and requires specific contaminant measurements (arsenic, lead, etc.)
     // Self-reported "clean water" is unreliable without zip-code based water quality index
@@ -1152,315 +975,12 @@ export function generateQuestions(): SwipeQuestion[] {
     //     })
     //   }
     // },
-    {
-      id: 'pesticides',
-      question: 'Regular pesticide exposure?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes, regular',
-        emoji: '🌾',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, pesticideExposure: createUserDataPoint(true) } as any
-        })
-      },
-      rightOption: {
-        label: 'No/Minimal',
-        emoji: '🥬',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, pesticideExposure: createUserDataPoint(false) } as any
-        })
-      }
-    },
-    {
-      id: 'radiation',
-      question: 'Occupational radiation exposure?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes',
-        emoji: '☢️',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, radiationExposure: createUserDataPoint(true) } as any
-        })
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, radiationExposure: createUserDataPoint(false) } as any
-        })
-      }
-    },
-    {
-      id: 'pollution',
-      question: 'Live near major pollution source?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes (highway, factory)',
-        emoji: '🏭',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, pollutionExposure: createUserDataPoint('high') } as any
-        })
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '🏡',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, pollutionExposure: createUserDataPoint('low') } as any
-        })
-      }
-    },
-    {
-      id: 'noise',
-      question: 'Chronic noise pollution exposure?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes, very loud',
-        emoji: '🔊',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, noiseExposure: createUserDataPoint('high') } as any
-        })
-      },
-      rightOption: {
-        label: 'No, quiet',
-        emoji: '🤫',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, noiseExposure: createUserDataPoint('low') } as any
-        })
-      }
-    },
-    {
-      id: 'mold',
-      question: 'Mold exposure in home/work?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes, significant',
-        emoji: '🦠',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, moldExposure: createUserDataPoint(true) } as any
-        })
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, moldExposure: createUserDataPoint(false) } as any
-        })
-      }
-    },
-    {
-      id: 'leadPaint',
-      question: 'Lead paint exposure (old building)?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes, possible',
-        emoji: '🎨',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, leadExposure: createUserDataPoint(true) } as any
-        })
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, leadExposure: createUserDataPoint(false) } as any
-        })
-      }
-    },
-    {
-      id: 'asbestos',
-      question: 'Asbestos exposure?',
-      category: 'Environment',
-      leftOption: {
-        label: 'Yes, occupational',
-        emoji: '🏗️',
-        profileUpdate: (p) => ({
-          ...p,
-          customFields: { ...p.customFields, asbestosExposure: createUserDataPoint(true) } as any
-        })
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => ({
-          ...p,
-          customFields: { ...p.customFields, asbestosExposure: createUserDataPoint(false) } as any
-        })
-      }
-    },
 
     // MENTAL HEALTH (Additional)
-    {
-      id: 'anxiety',
-      question: 'Do you have anxiety disorder?',
-      category: 'Mental Health',
-      leftOption: {
-        label: 'Yes',
-        emoji: '😰',
-        profileUpdate: (p) => setCondition(p, 'anxiety', true)
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '😌',
-        profileUpdate: (p) => setCondition(p, 'anxiety', false)
-      }
-    },
-    {
-      id: 'bipolar',
-      question: 'Do you have bipolar disorder?',
-      category: 'Mental Health',
-      leftOption: {
-        label: 'Yes',
-        emoji: '🎭',
-        profileUpdate: (p) => setCondition(p, 'bipolar', true)
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => setCondition(p, 'bipolar', false)
-      }
-    },
-    {
-      id: 'ptsd',
-      question: 'Do you have PTSD?',
-      category: 'Mental Health',
-      leftOption: {
-        label: 'Yes',
-        emoji: '😔',
-        profileUpdate: (p) => setCondition(p, 'ptsd', true)
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => setCondition(p, 'ptsd', false)
-      }
-    },
-    {
-      id: 'eatingDisorder',
-      question: 'Do you have an eating disorder?',
-      category: 'Mental Health',
-      leftOption: {
-        label: 'Yes',
-        emoji: '🍽️',
-        profileUpdate: (p) => setCondition(p, 'eatingDisorder', true)
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '✅',
-        profileUpdate: (p) => setCondition(p, 'eatingDisorder', false)
-      }
-    },
 
     // REPRODUCTIVE HEALTH
-    {
-      id: 'hrt',
-      question: 'Are you on hormone replacement therapy?',
-      category: 'Reproductive Health',
-      leftOption: {
-        label: 'No',
-        emoji: '🚫',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            medications: { ...(p.medicalHistory?.medications || {}), hrt: createUserDataPoint(false) } as any
-          }
-        })
-      },
-      rightOption: {
-        label: 'Yes',
-        emoji: '💊',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            medications: { ...(p.medicalHistory?.medications || {}), hrt: createUserDataPoint(true) } as any
-          }
-        })
-      }
-    },
-    {
-      id: 'contraception',
-      question: 'Do you use hormonal contraception?',
-      category: 'Reproductive Health',
-      leftOption: {
-        label: 'Yes, long-term',
-        emoji: '💊',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            reproductiveHistory: { ...p.medicalHistory?.reproductiveHistory, contraceptionUse: createUserDataPoint(true) } as any
-          }
-        })
-      },
-      rightOption: {
-        label: 'No',
-        emoji: '🚫',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            reproductiveHistory: { ...p.medicalHistory?.reproductiveHistory, contraceptionUse: createUserDataPoint(false) } as any
-          }
-        })
-      }
-    },
 
     // DENTAL HEALTH
-    {
-      id: 'teeth',
-      question: 'Do you brush teeth twice daily?',
-      category: 'Dental Health',
-      leftOption: {
-        label: 'No/Rarely',
-        emoji: '🦷',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, dentalHygiene: createUserDataPoint('poor') } as any
-        })
-      },
-      rightOption: {
-        label: 'Yes, twice daily',
-        emoji: '🪥',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, dentalHygiene: createUserDataPoint('good') } as any
-        })
-      }
-    },
-    {
-      id: 'floss',
-      question: 'Do you floss regularly?',
-      category: 'Dental Health',
-      leftOption: {
-        label: 'No',
-        emoji: '🦷',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, flossing: createUserDataPoint(false) } as any
-        })
-      },
-      rightOption: {
-        label: 'Yes, daily',
-        emoji: '🧵',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, flossing: createUserDataPoint(true) } as any
-        })
-      }
-    },
 
     // LIFESTYLE & WELLBEING
     {
@@ -1548,27 +1068,6 @@ export function generateQuestions(): SwipeQuestion[] {
       }
     },
     {
-      id: 'music',
-      question: 'Do you listen to music regularly?',
-      category: 'Wellbeing',
-      leftOption: {
-        label: 'Rarely',
-        emoji: '🔇',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, musicListening: createUserDataPoint(false) } as any
-        })
-      },
-      rightOption: {
-        label: 'Yes, often',
-        emoji: '🎵',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, musicListening: createUserDataPoint(true) } as any
-        })
-      }
-    },
-    {
       id: 'reading',
       question: 'Do you read books regularly?',
       category: 'Wellbeing',
@@ -1586,27 +1085,6 @@ export function generateQuestions(): SwipeQuestion[] {
         profileUpdate: (p) => ({
           ...p,
           social: { ...p.social, hobbies: { ...p.social?.hobbies, intellectual: { engaged: createUserDataPoint(true) } } }
-        })
-      }
-    },
-    {
-      id: 'screenTime',
-      question: 'Excessive screen time (>6 hrs/day)?',
-      category: 'Wellbeing',
-      leftOption: {
-        label: 'Yes, very high',
-        emoji: '📱',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, screenTime: createUserDataPoint('high') } as any
-        })
-      },
-      rightOption: {
-        label: 'No, moderate',
-        emoji: '📵',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, screenTime: createUserDataPoint('moderate') } as any
         })
       }
     },
@@ -1721,10 +1199,13 @@ export function generateQuestions(): SwipeQuestion[] {
         emoji: '😔',
         profileUpdate: (p) => ({
           ...p,
-          lifestyle: {
-            ...p.lifestyle,
-            socialEngagement: createUserDataPoint('low')
-          } as any
+          social: {
+            ...p.social,
+            connections: {
+              ...p.social?.connections,
+              strength: createUserDataPoint('isolated' as const)
+            }
+          }
         })
       },
       rightOption: {
@@ -1732,10 +1213,13 @@ export function generateQuestions(): SwipeQuestion[] {
         emoji: '💚',
         profileUpdate: (p) => ({
           ...p,
-          lifestyle: {
-            ...p.lifestyle,
-            socialEngagement: createUserDataPoint('high')
-          } as any
+          social: {
+            ...p.social,
+            connections: {
+              ...p.social?.connections,
+              strength: createUserDataPoint('strong' as const)
+            }
+          }
         })
       }
     },
@@ -1877,33 +1361,6 @@ export function generateQuestions(): SwipeQuestion[] {
     },
 
     // LAB TESTS / CARDIOVASCULAR SCREENING
-    {
-      id: 'cacScore',
-      question: 'Have you had a coronary artery calcium (CAC) scan?',
-      category: 'Lab Tests',
-      leftOption: {
-        label: 'No / Not tested',
-        emoji: '❓',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            cacScore: undefined
-          }
-        })
-      },
-      rightOption: {
-        label: 'Yes, tested',
-        emoji: '🩺',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            cacScore: createUserDataPoint('0' as const) // Default to 0 (best score)
-          }
-        })
-      }
-    },
 
     // MENTAL HEALTH - SUICIDE RISK (SENSITIVE)
     {

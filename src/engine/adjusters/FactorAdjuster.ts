@@ -13,6 +13,7 @@ import {
   getFamilyHistoryCategory,
   getYearsSinceQuit,
   hasPrediabetes,
+  hasScreening,
   hasHypertension,
   getDiabetesFamilyHistoryCategory,
 } from '../../utils/dataExtraction';
@@ -296,6 +297,15 @@ export class FactorAdjuster {
     // Liver disease specific
     if (factor.factorId === 'nafld_diagnosis') {
       return hasCondition(profile, 'nafld') || hasCondition(profile, 'nash');
+    }
+
+    // Screening history (stored as an array of Screening records, so raw
+    // path extraction cannot resolve it)
+    if (factor.factorId === 'colonoscopy_screening') {
+      return hasScreening(profile, 'colonoscopy');
+    }
+    if (factor.factorId === 'mammography_screening') {
+      return hasScreening(profile, 'mammogram');
     }
 
     if (factor.factorId === 'cirrhosis_diagnosis') {

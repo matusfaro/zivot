@@ -1,6 +1,6 @@
 // @ts-nocheck -- extracted from the legacy survey; type-safe rewrite pending
 import { UserProfile, Screening } from '../../types/user';
-import { TimeSeries } from '../../types/common/datapoint';
+import { TimeSeries, createUserDataPoint } from '../../types/common/datapoint';
 import { SwipeQuestion } from './surveyTypes';
 
 // Helper functions to manage conditions as an array
@@ -174,13 +174,13 @@ export function isQuestionAnswered(question: SwipeQuestion, profile: UserProfile
     case 'cancer':
       return hasConditionInProfile(profile, "cancer");
     case 'heartDisease':
-      return hasConditionInProfile(profile, "heartDisease");
+      return hasConditionInProfile(profile, 'cvd');
     case 'stroke':
       return hasConditionInProfile(profile, "stroke");
     case 'kidneyDisease':
       return hasConditionInProfile(profile, "kidneyDisease");
     case 'liverDisease':
-      return hasConditionInProfile(profile, "liverDisease");
+      return hasConditionInProfile(profile, 'nafld');
     case 'copd':
       return hasConditionInProfile(profile, "copd");
     case 'asthma':
@@ -200,7 +200,7 @@ export function isQuestionAnswered(question: SwipeQuestion, profile: UserProfile
     case 'helmet':
       return false; // Field not in type system
     case 'drugs':
-      return false; // Field not in type system
+      return profile.medicalHistory?.substanceUse?.substanceAbuseHistory !== undefined;
     case 'opioids':
       return profile.medicalHistory?.substanceUse?.prescribedOpioids !== undefined;
     case 'marijuana':
@@ -250,7 +250,7 @@ export function isQuestionAnswered(question: SwipeQuestion, profile: UserProfile
     case 'dog_ownership':
       return profile.social?.petOwnership?.ownsDog?.value !== undefined;
     case 'social_connections':
-      return (profile.social as any)?.socialEngagement !== undefined;
+      return profile.social?.connections?.strength?.value !== undefined;
     case 'creative_hobbies':
       return profile.social?.hobbies?.creative?.engaged?.value !== undefined;
     case 'religious_attendance':

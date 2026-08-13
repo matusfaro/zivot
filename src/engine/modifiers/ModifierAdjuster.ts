@@ -5,7 +5,7 @@ import {
   CategoricalModifierMapping,
   ContinuousModifierMapping,
 } from '../../types/knowledge/mortalityModifier';
-import { extractPathValue, calculateAge } from '../../utils/dataExtraction';
+import { extractPathValue, calculateAge, hasCondition } from '../../utils/dataExtraction';
 
 /**
  * ModifierAdjuster - Calculates hazard ratios for mortality modifiers
@@ -83,6 +83,17 @@ export class ModifierAdjuster {
    * Tries primary path first, then alternatives
    */
   private extractModifierValue(profile: UserProfile, modifier: MortalityModifier): number | string | boolean | null {
+    // Condition-backed modifiers (e.g., cancer survivorship) read the
+    // medicalHistory.conditions array, which raw path extraction cannot
+    // resolve. Only fire when the conditions data genuinely exists.
+    const conditionId = (modifier.mapping as { conditionId?: string }).conditionId;
+    if (conditionId) {
+      if (!Array.isArray(profile.medicalHistory?.conditions)) {
+        return null;
+      }
+      return hasCondition(profile, conditionId);
+    }
+
     // Try primary field
     const primaryField = modifier.requiredFields[0];
     if (!primaryField) {

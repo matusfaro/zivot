@@ -319,9 +319,31 @@ export function hasPrediabetes(profile: UserProfile): boolean {
 }
 
 /**
- * Check if user has hypertension (BP >= 130/80)
+ * Check whether the user has had a given screening.
+ * Returns null when nothing is known (no screenings answer at all),
+ * false when the screening is explicitly recorded as not done
+ * (details.completed === false), true when a completed record exists.
+ */
+export function hasScreening(profile: UserProfile, screeningType: string): boolean | null {
+  const screenings = profile.medicalHistory?.screenings;
+  if (!Array.isArray(screenings)) {
+    return null;
+  }
+  const entry = screenings.find(s => s.screeningType === screeningType);
+  if (!entry) {
+    return null;
+  }
+  return (entry.details as { completed?: boolean } | undefined)?.completed === false ? false : true;
+}
+
+/**
+ * Check if user has hypertension: a diagnosed hypertension condition, or
+ * measured BP >= 130/80 (ACC/AHA 2017 stage 1)
  */
 export function hasHypertension(profile: UserProfile): boolean {
+  if (hasCondition(profile, 'hypertension')) {
+    return true;
+  }
   const bp = profile.biometrics?.bloodPressure;
   if (!bp) {
     return false;

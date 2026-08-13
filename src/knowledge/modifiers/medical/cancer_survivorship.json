@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "id": "cancer_survivorship",
+    "name": "Cancer Survivor (personal history of cancer)",
+    "category": "medical",
+    "version": "1.0.0",
+    "lastUpdated": "2026-08-13",
+    "sources": [
+      {
+        "citation": "Difference in excess late mortality between early-onset and late-onset cancer survivors: a nationwide cross-sectional study (PMC12430759). Late-onset survivors SMR 1.59 (95% CI 1.37-1.84); early-onset SMR 2.07 (1.76-2.44)",
+        "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12430759/",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "A personal history of cancer carries excess all-cause mortality vs the general population (late recurrence, second cancers, treatment cardiotoxicity). Modeled at the late-onset survivor estimate; early-onset and recently diagnosed survivors are higher (AYA SMR up to 7-12 in the first decade)."
+  },
+  "applicability": {},
+  "requiredFields": [
+    {
+      "path": "medicalHistory.conditions",
+      "required": false
+    }
+  ],
+  "mapping": {
+    "type": "boolean",
+    "conditionId": "cancer",
+    "trueHazardRatio": 1.59,
+    "falseHazardRatio": 1.0
+  },
+  "effectSize": {
+    "hazardRatio": 1.59,
+    "confidenceInterval": [
+      1.37,
+      1.84
+    ],
+    "evidenceLevel": "cohort",
+    "evidenceStrength": "moderate"
+  }
+}
