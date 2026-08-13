@@ -1109,27 +1109,6 @@ export function generateQuestions(): SwipeQuestion[] {
         })
       }
     },
-    {
-      id: 'nature',
-      question: 'Regular exposure to nature/greenspace?',
-      category: 'Wellbeing',
-      leftOption: {
-        label: 'No, mostly urban',
-        emoji: '🏙️',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, outdoorTime: { ...p.lifestyle?.outdoorTime, minutesPerWeek: createTimeSeries(30) } }
-        })
-      },
-      rightOption: {
-        label: 'Yes, frequent',
-        emoji: '🌲',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: { ...p.lifestyle, outdoorTime: { ...p.lifestyle?.outdoorTime, minutesPerWeek: createTimeSeries(300) } }
-        })
-      }
-    },
     // REMOVED: Blood Donation - Healthy donor bias confounds evidence
     // Apparent benefits (HR 0.98) largely due to "Healthy Donor Effect"
     // Rigorous studies controlling for health status show no significant mortality benefit
@@ -1246,39 +1225,6 @@ export function generateQuestions(): SwipeQuestion[] {
           social: {
             ...p.social,
             religiousAttendance: createUserDataPoint('weekly' as const)
-          }
-        })
-      }
-    },
-    {
-      id: 'nature_exposure',
-      question: 'Time spent in nature per week?',
-      category: 'Environmental',
-      leftOption: {
-        label: 'Little/None',
-        emoji: '🏢',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: {
-            ...p.lifestyle,
-            outdoorTime: {
-              ...p.lifestyle?.outdoorTime,
-              minutesPerWeek: createTimeSeries(30)
-            }
-          }
-        })
-      },
-      rightOption: {
-        label: '2+ hours',
-        emoji: '🌳',
-        profileUpdate: (p) => ({
-          ...p,
-          lifestyle: {
-            ...p.lifestyle,
-            outdoorTime: {
-              ...p.lifestyle?.outdoorTime,
-              minutesPerWeek: createTimeSeries(150)
-            }
           }
         })
       }

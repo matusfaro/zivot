@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "id": "fruit_vegetable_intake",
+    "name": "Fruit & Vegetable Intake",
+    "category": "dietary",
+    "version": "1.0.0",
+    "lastUpdated": "2026-08-13",
+    "sources": [
+      {
+        "citation": "Wang X, Ouyang Y, Liu J, Zhu M, Zhao G, Bao W, Hu FB. Fruit and vegetable consumption and mortality from all causes, cardiovascular disease, and cancer: systematic review and dose-response meta-analysis of prospective cohort studies. BMJ. 2014;349:g4490",
+        "doi": "10.1136/bmj.g4490",
+        "evidenceLevel": "meta_analysis"
+      }
+    ],
+    "description": "All-cause mortality HR 0.95 (95% CI 0.92-0.98) per daily serving of fruit+vegetables, with a plateau at ~5 servings/day. Curve renormalized so typical US intake (~1.5 vegetable servings/day) is the reference (HR 1) — below-typical intake reads as elevated risk, not zero effect. Overlaps slightly with the diabetes model's diet-quality factor (diabetes CFR 0.03, negligible)."
+  },
+  "applicability": {},
+  "requiredFields": [
+    {
+      "path": "lifestyle.diet.vegetableServingsPerDay.mostRecent.value",
+      "required": false
+    }
+  ],
+  "mapping": {
+    "type": "continuous",
+    "strategy": "lookup",
+    "points": [
+      {
+        "value": 0,
+        "hazardRatio": 1.08
+      },
+      {
+        "value": 1.5,
+        "hazardRatio": 1.0
+      },
+      {
+        "value": 3,
+        "hazardRatio": 0.93
+      },
+      {
+        "value": 5,
+        "hazardRatio": 0.84
+      },
+      {
+        "value": 10,
+        "hazardRatio": 0.84
+      }
+    ],
+    "validRange": [
+      0,
+      10
+    ]
+  },
+  "effectSize": {
+    "hazardRatio": 0.95,
+    "confidenceInterval": [
+      0.92,
+      0.98
+    ],
+    "evidenceLevel": "meta_analysis",
+    "evidenceStrength": "strong"
+  }
+}

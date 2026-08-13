@@ -3,7 +3,7 @@
     "id": "nature_exposure",
     "name": "Time Spent in Nature",
     "category": "environmental",
-    "description": "Regular exposure to natural environments (greenspace) is associated with reduced cardiovascular and all-cause mortality, with optimal benefits at 120-300 minutes per week.",
+    "description": "Regular exposure to natural environments (greenspace) is associated with reduced cardiovascular and all-cause mortality, with optimal benefits at 120-300 minutes per week. Reference category is below-threshold exposure (<120 min/week — the population majority per White 2019), so sub-threshold answers read as average risk rather than every exposure level appearing protective; the cited high-vs-low contrast (~0.84) applies at >=120-300 min/week.",
     "version": "1.0.0",
     "lastUpdated": "2026-01-03",
     "sources": [
@@ -26,11 +26,16 @@
   },
   "effectSize": {
     "hazardRatio": 0.84,
-    "confidenceInterval": [0.76, 0.93],
+    "confidenceInterval": [
+      0.76,
+      0.93
+    ],
     "evidenceLevel": "meta_analysis",
     "evidenceStrength": "strong",
     "affectsAllCauseMortality": true,
-    "primaryDiseases": ["cvd_10year"],
+    "primaryDiseases": [
+      "cvd_10year"
+    ],
     "doseResponse": {
       "type": "saturation",
       "points": [
@@ -47,12 +52,15 @@
         {
           "dose": 120,
           "hazardRatio": 0.84,
-          "confidence": [0.76, 0.93],
+          "confidence": [
+            0.76,
+            0.93
+          ],
           "citation": "2 hours per week (threshold for significant benefit)"
         },
         {
           "dose": 200,
-          "hazardRatio": 0.80,
+          "hazardRatio": 0.8,
           "citation": "3+ hours per week (optimal benefit)"
         },
         {
@@ -74,20 +82,43 @@
     {
       "path": "lifestyle.outdoorTime.minutesPerWeek.mostRecent.value",
       "required": false,
-      "alternatives": ["lifestyle.outdoorTime.minutesPerWeek"]
+      "alternatives": [
+        "lifestyle.outdoorTime.minutesPerWeek"
+      ]
     }
   ],
   "mapping": {
     "type": "continuous",
     "strategy": "lookup",
     "points": [
-      {"value": 0, "hazardRatio": 1.0},
-      {"value": 60, "hazardRatio": 0.95},
-      {"value": 120, "hazardRatio": 0.84, "confidence": [0.76, 0.93]},
-      {"value": 200, "hazardRatio": 0.80},
-      {"value": 300, "hazardRatio": 0.78},
-      {"value": 400, "hazardRatio": 0.78}
+      {
+        "value": 0,
+        "hazardRatio": 1.0
+      },
+      {
+        "value": 90,
+        "hazardRatio": 1.0
+      },
+      {
+        "value": 120,
+        "hazardRatio": 0.9
+      },
+      {
+        "value": 300,
+        "hazardRatio": 0.84,
+        "confidence": [
+          0.76,
+          0.93
+        ]
+      },
+      {
+        "value": 600,
+        "hazardRatio": 0.84
+      }
     ],
-    "validRange": [0, 600]
+    "validRange": [
+      0,
+      600
+    ]
   }
 }

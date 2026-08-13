@@ -5,6 +5,14 @@ import { SwipeQuestion } from './surveyTypes';
 import { isQuestionAnswered } from './surveyHelpers';
 import { generateQuestions } from './surveyQuestions';
 
+
+// Show two decimals for sub-0.1pp impacts so small-but-real effects don't
+// display as a misleading 0.0%
+function formatImpact(value: number): string {
+  const decimals = Math.abs(value) < 0.095 && value !== 0 ? 2 : 1;
+  return `${value >= 0 ? '+' : ''}${value.toFixed(decimals)}%`;
+}
+
 interface SwipeSurveyProps {
   profile: UserProfile | null;
   onProfileChange: (profile: UserProfile) => void;
@@ -430,7 +438,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
               <div className="option-emoji">{currentQuestion.leftOption.emoji}</div>
               <div className="option-label">{currentQuestion.leftOption.label}</div>
               <div className="option-impact bad">
-                {getImpactValue('left') >= 0 ? '+' : ''}{getImpactValue('left').toFixed(1)}%
+                {formatImpact(getImpactValue('left'))}
               </div>
             </div>
 
@@ -444,7 +452,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
               <div className="option-emoji">{currentQuestion.rightOption.emoji}</div>
               <div className="option-label">{currentQuestion.rightOption.label}</div>
               <div className="option-impact good">
-                {getImpactValue('right') >= 0 ? '+' : ''}{getImpactValue('right').toFixed(1)}%
+                {formatImpact(getImpactValue('right'))}
               </div>
             </div>
           </div>

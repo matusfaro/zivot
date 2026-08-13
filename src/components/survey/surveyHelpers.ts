@@ -258,7 +258,15 @@ export function isQuestionAnswered(question: SwipeQuestion, profile: UserProfile
     case 'music':
       return (profile.lifestyle as any)?.musicListening !== undefined;
     case 'reading':
-      return (profile.lifestyle as any)?.reading !== undefined;
+      return profile.social?.hobbies?.intellectual?.engaged?.value !== undefined;
+    case 'pets':
+      return profile.social?.petOwnership?.ownsDog?.value !== undefined;
+    case 'hobbies':
+      return profile.social?.hobbies?.creative?.engaged?.value !== undefined;
+    case 'religion':
+      return profile.social?.religiousAttendance?.value !== undefined;
+    case 'outdoorTime':
+      return profile.lifestyle?.outdoorTime?.minutesPerWeek !== undefined;
     case 'gaming':
       return (profile.lifestyle as any)?.gaming !== undefined;
     case 'screenTime':

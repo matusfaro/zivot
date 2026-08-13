@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "id": "book_reading",
+    "name": "Regular Book Reading",
+    "category": "cultural",
+    "version": "1.0.0",
+    "lastUpdated": "2026-08-13",
+    "sources": [
+      {
+        "citation": "Bavishi A, Slade MD, Levy BR. A chapter a day: Association of book reading with longevity. Soc Sci Med. 2016;164:44-48",
+        "doi": "10.1016/j.socscimed.2016.06.014",
+        "evidenceLevel": "cohort"
+      }
+    ],
+    "description": "Health and Retirement Study (n=3,635, 12-year follow-up): book readers had ~20% lower mortality than non-readers after adjustment for age, sex, education, comorbidities, self-rated health, wealth, marital status and depression (tertile HRs 0.83 and 0.77). Shares the cultural category with creative hobbies, so the combination rule attenuates overlap."
+  },
+  "applicability": {},
+  "requiredFields": [
+    {
+      "path": "social.hobbies.intellectual.engaged.value",
+      "required": false
+    }
+  ],
+  "mapping": {
+    "type": "boolean",
+    "trueHazardRatio": 0.8,
+    "falseHazardRatio": 1.0
+  },
+  "effectSize": {
+    "hazardRatio": 0.8,
+    "evidenceLevel": "cohort",
+    "evidenceStrength": "moderate"
+  }
+}
