@@ -6,11 +6,22 @@ import { isQuestionAnswered } from './surveyHelpers';
 import { generateQuestions } from './surveyQuestions';
 
 
-// Show two decimals for sub-0.1pp impacts so small-but-real effects don't
-// display as a misleading 0.0%
-function formatImpact(value: number): string {
-  const decimals = Math.abs(value) < 0.095 && value !== 0 ? 2 : 1;
-  return `${value >= 0 ? '+' : ''}${value.toFixed(decimals)}%`;
+// Impacts are computed internally as mortality-risk deltas (percentage
+// points), but presented to the user as SURVIVAL deltas so the sign and the
+// color always agree: green/positive = better chance of surviving.
+const NEGLIGIBLE = 0.005; // below this the effect is not meaningfully nonzero
+
+function formatSurvival(mortalityDelta: number): string {
+  const s = -mortalityDelta;
+  if (Math.abs(s) < NEGLIGIBLE) return '≈0%';
+  const decimals = Math.abs(s) < 0.095 ? 2 : 1;
+  return `${s > 0 ? '+' : ''}${s.toFixed(decimals)}% survival`;
+}
+
+function impactClass(mortalityDelta: number): 'good' | 'bad' | 'neutral' {
+  const s = -mortalityDelta;
+  if (Math.abs(s) < NEGLIGIBLE) return 'neutral';
+  return s > 0 ? 'good' : 'bad';
 }
 
 interface SwipeSurveyProps {
@@ -36,6 +47,7 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
   const [isAppearing, setIsAppearing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [customValue, setCustomValue] = useState<any>(null);
+  const [customImpact, setCustomImpact] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
   const questionsInitialized = useRef(false);
@@ -49,20 +61,76 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
     console.log('[SURVEY] Risk engine prop updated:', riskEngine ? 'initialized' : 'null');
   }, [riskEngine]);
 
-  // Generate and shuffle questions once on mount
+  // Generate questions once, ordered by how much they can move the outcome
+  // (largest absolute effect first) so early questions matter most
   useEffect(() => {
-    if (!profile || questionsInitialized.current) return;
+    if (!profile || !riskEngine || questionsInitialized.current) return;
+    questionsInitialized.current = true;
 
     const allQuestions = generateQuestions();
-    // Filter out questions that have already been answered
     const unanswered = allQuestions.filter(q => (!q.applicableTo || q.applicableTo(profile)) && !isQuestionAnswered(q, profile));
-    // Shuffle questions once for randomization
-    const shuffled = [...unanswered].sort(() => Math.random() - 0.5);
-    setQuestions(shuffled);
-    questionsInitialized.current = true;
-  }, [profile]);
+
+    const orderByImpact = async () => {
+      try {
+        const snapshot = JSON.parse(JSON.stringify(profile));
+        const baseResult = await riskEngine.calculate(snapshot);
+        const baseline = baseResult.overallMortality.estimatedRisk * 100;
+
+        const scored = await Promise.all(unanswered.map(async (q) => {
+          try {
+            const clone = () => JSON.parse(JSON.stringify(snapshot));
+            const leftResult = await riskEngine.calculate(q.leftOption.profileUpdate(clone()));
+            const rightResult = await riskEngine.calculate(q.rightOption.profileUpdate(clone()));
+            const magnitude = Math.max(
+              Math.abs(leftResult.overallMortality.estimatedRisk * 100 - baseline),
+              Math.abs(rightResult.overallMortality.estimatedRisk * 100 - baseline)
+            );
+            return { q, magnitude };
+          } catch {
+            return { q, magnitude: 0 };
+          }
+        }));
+
+        scored.sort((a, b) => b.magnitude - a.magnitude);
+        setQuestions(scored.map(s => s.q));
+      } catch (error) {
+        console.error('[SURVEY] Impact ordering failed, using unordered questions', error);
+        setQuestions(unanswered);
+      }
+    };
+
+    orderByImpact();
+  }, [profile, riskEngine]);
 
   const currentQuestion = questions[currentIndex];
+
+  // Live outcome preview for the detailed input (slider/number/select):
+  // debounce, apply the candidate value to the question's baseline profile,
+  // and show the resulting survival change next to the control
+  useEffect(() => {
+    if (!currentQuestion?.detailedInput || customValue === null || customValue === undefined || customValue === '' || !riskEngine) {
+      setCustomImpact(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const snapshot = questionBaselineRef.current;
+        const baseProfile = snapshot?.profile ?? profile;
+        const baseline = snapshot?.baseline ?? currentRisk;
+        if (!baseProfile || baseline === undefined) return;
+        const updated = currentQuestion.detailedInput.profileUpdate(
+          JSON.parse(JSON.stringify(baseProfile)),
+          customValue
+        );
+        const result = await riskEngine.calculate(updated);
+        setCustomImpact(result.overallMortality.estimatedRisk * 100 - baseline);
+      } catch (error) {
+        console.error('[SURVEY CUSTOM] Impact preview failed:', error);
+        setCustomImpact(null);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [customValue, currentQuestion, riskEngine, profile, currentRisk]);
 
   // Calculate dynamic mortality impact for current question
   // Only recalculates when question changes, NOT when profile/currentRisk change
@@ -392,17 +460,15 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
         <h2>Swipe Survey</h2>
         <p className="survey-progress">
           {currentIndex + 1} / {questions.length}
+          {currentRisk !== undefined && (
+            <span className="survey-survival"> · 10-yr survival: {(100 - currentRisk).toFixed(1)}%</span>
+          )}
         </p>
       </div>
 
       <div className="survey-instructions">
-        <div className="instruction left">
-          <span className="arrow">←</span>
-          <span>Higher Risk</span>
-        </div>
-        <div className="instruction right">
-          <span>Lower Risk</span>
-          <span className="arrow">→</span>
+        <div className="instruction">
+          <span>Swipe ← or → toward your answer · green = higher survival</span>
         </div>
       </div>
 
@@ -437,8 +503,8 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
             >
               <div className="option-emoji">{currentQuestion.leftOption.emoji}</div>
               <div className="option-label">{currentQuestion.leftOption.label}</div>
-              <div className="option-impact bad">
-                {formatImpact(getImpactValue('left'))}
+              <div className={`option-impact ${impactClass(getImpactValue('left'))}`}>
+                {formatSurvival(getImpactValue('left'))}
               </div>
             </div>
 
@@ -451,8 +517,8 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
             >
               <div className="option-emoji">{currentQuestion.rightOption.emoji}</div>
               <div className="option-label">{currentQuestion.rightOption.label}</div>
-              <div className="option-impact good">
-                {formatImpact(getImpactValue('right'))}
+              <div className={`option-impact ${impactClass(getImpactValue('right'))}`}>
+                {formatSurvival(getImpactValue('right'))}
               </div>
             </div>
           </div>
@@ -520,6 +586,12 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
                   </div>
                 )}
 
+                {customImpact !== null && (
+                  <div className={`custom-impact ${impactClass(customImpact)}`} aria-live="polite">
+                    {formatSurvival(customImpact)}
+                  </div>
+                )}
+
                 <button
                   className="submit-custom-button"
                   onClick={handleCustomSubmit}
@@ -533,15 +605,19 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
 
           {/* Swipe indicators */}
           {dragOffset < -50 && (
-            <div className="swipe-indicator swipe-left">
-              <span className="indicator-emoji">💀</span>
-              <span className="indicator-text">HIGHER RISK</span>
+            <div className={`swipe-indicator swipe-left ${impactClass(getImpactValue('left'))}`}>
+              <span className="indicator-emoji">
+                {impactClass(getImpactValue('left')) === 'good' ? '💚' : impactClass(getImpactValue('left')) === 'bad' ? '💀' : '➖'}
+              </span>
+              <span className="indicator-text">{formatSurvival(getImpactValue('left')).toUpperCase()}</span>
             </div>
           )}
           {dragOffset > 50 && (
-            <div className="swipe-indicator swipe-right">
-              <span className="indicator-emoji">💚</span>
-              <span className="indicator-text">LOWER RISK</span>
+            <div className={`swipe-indicator swipe-right ${impactClass(getImpactValue('right'))}`}>
+              <span className="indicator-emoji">
+                {impactClass(getImpactValue('right')) === 'good' ? '💚' : impactClass(getImpactValue('right')) === 'bad' ? '💀' : '➖'}
+              </span>
+              <span className="indicator-text">{formatSurvival(getImpactValue('right')).toUpperCase()}</span>
             </div>
           )}
         </div>
@@ -775,6 +851,34 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
 
         .option-impact.good {
           color: var(--color-success);
+        }
+
+        .option-impact.neutral {
+          color: var(--color-text-secondary);
+        }
+
+        .survey-survival {
+          color: var(--color-success);
+        }
+
+        .custom-impact {
+          margin-top: var(--spacing-xs);
+          font-size: 0.8rem;
+          font-weight: 700;
+          font-family: 'Courier New', monospace;
+          text-align: center;
+        }
+
+        .custom-impact.bad {
+          color: var(--color-danger);
+        }
+
+        .custom-impact.good {
+          color: var(--color-success);
+        }
+
+        .custom-impact.neutral {
+          color: var(--color-text-secondary);
         }
 
         .swipe-indicator {

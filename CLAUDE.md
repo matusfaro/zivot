@@ -180,6 +180,12 @@ docs/                           # mortality-calculation-methodology.md
 - **Local-first persistence**: profile edits flow LiveDashboard → debounce → per-section
   `updateXxx()` on `useUserProfile` → `ProfileRepository` (read-merge-write of one profile blob;
   sections are saved sequentially on purpose — parallel saves overwrite each other).
+- **Multi-profile**: `App.tsx` shows `ProfilePicker` on load (continue a stored profile or
+  create one with an auto name like `green-falcon-40` + age slider). `ProfileRepository`
+  scopes reads/writes to `setActiveProfile(id)`; with no active id it falls back to the first
+  stored profile — that legacy path is what E2E mode uses (`navigator.webdriver` or
+  `VITE_E2E_TEST_MODE` bypasses the picker). The survey presents impacts as SURVIVAL deltas
+  (green = +survival) and orders questions by absolute impact.
 - **Habit events**: logged events are extrapolated to rolling averages (`EventExtrapolator`) and
   merged into the profile (`ProfileMerger`) with `estimated` provenance, mapped via
   `config/eventRegistry.ts`; updates propagate live through the shared profile context.

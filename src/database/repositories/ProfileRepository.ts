@@ -2,30 +2,113 @@ import { db } from '../db';
 import { UserProfile } from '../../types/user';
 import { v4 as uuidv4 } from 'uuid';
 
+/** Lightweight row for the profile-picker list */
+export interface ProfileSummary {
+  profileId: string;
+  name: string;
+  age: number | null;
+  createdAt: number | null;
+  lastUpdated: number;
+}
+
 export class ProfileRepository {
   private static CURRENT_VERSION = '1.0.0';
 
   /**
-   * Get the user profile (single-user app)
+   * The profile the app is currently operating on. Selected via the profile
+   * picker; when unset, falls back to the first stored profile (legacy
+   * single-profile behavior, also used by tests and E2E mode).
    */
-  async getProfile(): Promise<UserProfile | null> {
-    // Single-user app: get the first/only profile
-    const record = await db.profiles.toCollection().first();
-    if (!record?.data) {
-      return null;
-    }
+  private activeProfileId: string | null = null;
 
-    return record.data;
+  setActiveProfile(profileId: string | null): void {
+    this.activeProfileId = profileId;
+  }
+
+  getActiveProfileId(): string | null {
+    return this.activeProfileId;
   }
 
   /**
-   * Save or update the user profile
+   * Get the active user profile
+   */
+  async getProfile(): Promise<UserProfile | null> {
+    if (this.activeProfileId) {
+      const record = await db.profiles.get(this.activeProfileId);
+      return record?.data ?? null;
+    }
+    // Legacy fallback: first/only profile
+    const record = await db.profiles.toCollection().first();
+    return record?.data ?? null;
+  }
+
+  /**
+   * List all stored profiles for the picker (most recently used first)
+   */
+  async listProfiles(): Promise<ProfileSummary[]> {
+    const records = await db.profiles.toArray();
+    const summaries = records
+      .filter(r => r.data)
+      .map(r => {
+        const dob = r.data!.demographics?.dateOfBirth?.value;
+        let age: number | null = null;
+        if (typeof dob === 'string') {
+          const born = new Date(dob);
+          if (!Number.isNaN(born.getTime())) {
+            age = Math.floor((Date.now() - born.getTime()) / (365.25 * 24 * 3600 * 1000));
+          }
+        }
+        return {
+          profileId: r.profileId,
+          name: r.data!.name || 'unnamed-profile',
+          age,
+          createdAt: r.data!.createdAt ?? null,
+          lastUpdated: r.lastUpdated,
+        };
+      });
+    summaries.sort((a, b) => b.lastUpdated - a.lastUpdated);
+    return summaries;
+  }
+
+  /**
+   * Create a new profile with a name and an approximate age, and make it
+   * active. Date of birth is set to Jan 1 of the matching year (refine in
+   * the editor).
+   */
+  async createProfile(options: { name: string; age: number }): Promise<UserProfile> {
+    const now = Date.now();
+    const birthYear = new Date().getFullYear() - options.age;
+    const profile: UserProfile = {
+      profileId: uuidv4(),
+      version: ProfileRepository.CURRENT_VERSION,
+      lastUpdated: now,
+      name: options.name,
+      createdAt: now,
+      demographics: {
+        dateOfBirth: {
+          value: `${birthYear}-01-01`,
+          provenance: { source: 'user_entered' as never, timestamp: now },
+        },
+      },
+    };
+    await db.profiles.put({
+      profileId: profile.profileId,
+      version: profile.version,
+      lastUpdated: now,
+      data: profile,
+    });
+    this.activeProfileId = profile.profileId;
+    return profile;
+  }
+
+  /**
+   * Save or update the active user profile
    */
   async saveProfile(profile: Partial<UserProfile>): Promise<UserProfile> {
     const existing = await this.getProfile();
 
     const updated: UserProfile = {
-      profileId: existing?.profileId || uuidv4(),
+      profileId: existing?.profileId || this.activeProfileId || uuidv4(),
       version: ProfileRepository.CURRENT_VERSION,
       lastUpdated: Date.now(),
       ...existing,
@@ -144,7 +227,13 @@ export class ProfileRepository {
    * Clear all profile data
    */
   async clearProfile(): Promise<void> {
-    await db.profiles.clear();
+    // Only clear the ACTIVE profile — other stored profiles must survive
+    if (this.activeProfileId) {
+      await db.profiles.delete(this.activeProfileId);
+      this.activeProfileId = null;
+    } else {
+      await db.profiles.clear();
+    }
   }
 
   /**

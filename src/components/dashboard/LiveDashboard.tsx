@@ -47,7 +47,11 @@ const DEFAULT_PROFILE: UserProfile = {
   },
 };
 
-export const LiveDashboard: React.FC = () => {
+interface LiveDashboardProps {
+  onSwitchProfile?: () => void;
+}
+
+export const LiveDashboard: React.FC<LiveDashboardProps> = ({ onSwitchProfile }) => {
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [riskEngine, setRiskEngine] = useState<RiskEngine | null>(null);
@@ -146,6 +150,7 @@ export const LiveDashboard: React.FC = () => {
         calculating={calculating}
         error={calcError}
         onResetProfile={() => setShowResetConfirm(true)}
+        onSwitchProfile={onSwitchProfile}
       />
       {showResetConfirm && (
         <div

@@ -8,9 +8,10 @@ interface HeaderProps {
   calculating?: boolean;
   error?: Error | null;
   onResetProfile?: () => void;
+  onSwitchProfile?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onLogoDoubleClick, result, calculating, error, onResetProfile }) => {
+export const Header: React.FC<HeaderProps> = ({ onLogoDoubleClick, result, calculating, error, onResetProfile, onSwitchProfile }) => {
   const getRiskColor = (risk: number) => {
     const percent = risk * 100;
     if (percent < 5) return '#22c55e';
@@ -60,6 +61,16 @@ export const Header: React.FC<HeaderProps> = ({ onLogoDoubleClick, result, calcu
             </ProvenanceTooltip>
           </div>
         ) : null}
+
+        {onSwitchProfile && (
+          <button
+            onClick={onSwitchProfile}
+            className="reset-button header-reset-button"
+            title="Switch to another profile"
+          >
+            PROFILES
+          </button>
+        )}
 
         {onResetProfile && (
           <button

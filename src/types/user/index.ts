@@ -14,6 +14,10 @@ export interface UserProfile {
   profileId: string;
   version: string; // Schema version
   lastUpdated: number; // timestamp
+  /** Display name, e.g. "green-falcon-40" (auto-generated default) */
+  name?: string;
+  /** Creation timestamp (shown in the profile picker) */
+  createdAt?: number;
 
   demographics?: Demographics;
   biometrics?: Biometrics;
