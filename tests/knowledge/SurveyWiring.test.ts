@@ -120,6 +120,46 @@ describe('Survey question wiring', () => {
     ).toHaveLength(0);
   });
 
+  it('no two questions write to the same profile fields (duplicate questions)', () => {
+    // pets/dog_ownership, religion/religious_attendance, hobbies/creative_hobbies
+    // and nature/outdoorTime were all shipped as duplicates at some point —
+    // identical writes mean identical impacts and a confusing repeat question.
+    const signatures = new Map<string, string>();
+    const collisions: string[] = [];
+    const base = { profileId: 't', version: '1', lastUpdated: 0 };
+
+    const leafPaths = (obj: unknown, prefix = ''): string[] => {
+      if (obj === null || typeof obj !== 'object') {
+        // Discriminate array entries by their identity fields so different
+        // condition/screening/family-history toggles don't collide
+        if (/(conditionId|screeningType)$/.test(prefix)) return [`${prefix}=${String(obj)}`];
+        return [prefix];
+      }
+      if (Array.isArray(obj)) return obj.flatMap(v => leafPaths(v, prefix + '[]'));
+      return Object.entries(obj as Record<string, unknown>).flatMap(([k, v]) =>
+        k === 'provenance' || k === 'timestamp' ? [] : leafPaths(v, prefix ? `${prefix}.${k}` : k)
+      );
+    };
+
+    for (const question of generateQuestions()) {
+      try {
+        const updated = question.leftOption.profileUpdate(JSON.parse(JSON.stringify(base)));
+        delete updated.profileId; delete updated.version; delete updated.lastUpdated;
+        const signature = [...new Set(leafPaths(updated))].sort().join('|');
+        if (!signature) continue;
+        const existing = signatures.get(signature);
+        if (existing) {
+          collisions.push(`${existing} <-> ${question.id}`);
+        } else {
+          signatures.set(signature, question.id);
+        }
+      } catch {
+        // covered by the no-throw test
+      }
+    }
+    expect(collisions, 'Duplicate questions writing identical fields: ' + collisions.join(', ')).toHaveLength(0);
+  });
+
   it('answering a question marks it as answered (no reappearing questions)', () => {
     const broken: string[] = [];
     for (const question of generateQuestions()) {

@@ -984,27 +984,6 @@ export function generateQuestions(): SwipeQuestion[] {
 
     // LIFESTYLE & WELLBEING
     {
-      id: 'pets',
-      question: 'Do you have pets?',
-      category: 'Wellbeing',
-      leftOption: {
-        label: 'No',
-        emoji: '🚫',
-        profileUpdate: (p) => ({
-          ...p,
-          social: { ...p.social, petOwnership: { ...p.social?.petOwnership, ownsDog: createUserDataPoint(false) } }
-        })
-      },
-      rightOption: {
-        label: 'Yes',
-        emoji: '🐕',
-        profileUpdate: (p) => ({
-          ...p,
-          social: { ...p.social, petOwnership: { ...p.social?.petOwnership, ownsDog: createUserDataPoint(true) } }
-        })
-      }
-    },
-    {
       id: 'volunteering',
       question: 'Do you volunteer or help others?',
       category: 'Wellbeing',
@@ -1022,48 +1001,6 @@ export function generateQuestions(): SwipeQuestion[] {
         profileUpdate: (p) => ({
           ...p,
           social: { ...p.social, volunteering: { ...p.social?.volunteering, active: createUserDataPoint(true) } }
-        })
-      }
-    },
-    {
-      id: 'hobbies',
-      question: 'Do you have engaging hobbies?',
-      category: 'Wellbeing',
-      leftOption: {
-        label: 'No, not really',
-        emoji: '📺',
-        profileUpdate: (p) => ({
-          ...p,
-          social: { ...p.social, hobbies: { ...p.social?.hobbies, creative: { engaged: createUserDataPoint(false) } } }
-        })
-      },
-      rightOption: {
-        label: 'Yes, several',
-        emoji: '🎨',
-        profileUpdate: (p) => ({
-          ...p,
-          social: { ...p.social, hobbies: { ...p.social?.hobbies, creative: { engaged: createUserDataPoint(true) } } }
-        })
-      }
-    },
-    {
-      id: 'religion',
-      question: 'Do you attend religious services?',
-      category: 'Wellbeing',
-      leftOption: {
-        label: 'No',
-        emoji: '🚫',
-        profileUpdate: (p) => ({
-          ...p,
-          social: { ...p.social, religiousAttendance: createUserDataPoint('never') }
-        })
-      },
-      rightOption: {
-        label: 'Yes, regularly',
-        emoji: '🕊️',
-        profileUpdate: (p) => ({
-          ...p,
-          social: { ...p.social, religiousAttendance: createUserDataPoint('weekly') }
         })
       }
     },
@@ -1272,39 +1209,6 @@ export function generateQuestions(): SwipeQuestion[] {
     // PHASE 3 ADDITIONS - NEW RISK FACTORS
 
     // MEDICATIONS
-    {
-      id: 'statin',
-      question: 'Are you taking a statin medication for cholesterol?',
-      category: 'Medical History',
-      leftOption: {
-        label: 'No',
-        emoji: '🚫',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            medications: {
-              ...(p.medicalHistory?.medications || {}),
-              statin: createUserDataPoint(false)
-            }
-          }
-        })
-      },
-      rightOption: {
-        label: 'Yes',
-        emoji: '💊',
-        profileUpdate: (p) => ({
-          ...p,
-          medicalHistory: {
-            ...p.medicalHistory,
-            medications: {
-              ...(p.medicalHistory?.medications || {}),
-              statin: createUserDataPoint(true)
-            }
-          }
-        })
-      }
-    },
 
     // LAB TESTS / CARDIOVASCULAR SCREENING
 

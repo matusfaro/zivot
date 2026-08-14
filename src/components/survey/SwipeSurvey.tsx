@@ -200,7 +200,17 @@ export const SwipeSurvey: React.FC<SwipeSurveyProps> = ({ profile, onProfileChan
         let leftImpact = 0;
         let rightImpact = 0;
 
-        const baselineRisk = currentRiskSnapshot || 0;
+        // Compute the baseline from the SAME profile snapshot the options are
+        // applied to. The currentRisk prop lags behind profile changes
+        // (debounced save + async recalculation), and a stale baseline makes
+        // BOTH answers show a shifted delta (e.g. yes AND no both negative)
+        // right after answering the previous question.
+        const baselineResult = await riskEngine.calculate(JSON.parse(JSON.stringify(profileSnapshot)));
+        const baselineRisk = baselineResult.overallMortality.estimatedRisk * 100;
+        if (questionBaselineRef.current?.questionId === currentQuestion.id) {
+          questionBaselineRef.current.baseline = baselineRisk;
+        }
+        void currentRiskSnapshot; // superseded by the engine-computed baseline
 
         if (leftMatchesCurrent) {
           // Current profile already has left option selected - only calculate right
