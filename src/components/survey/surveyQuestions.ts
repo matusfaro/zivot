@@ -2,6 +2,7 @@
 import { createUserDataPoint, DataPoint } from '../../types/common/datapoint';
 import { DietPattern } from '../../types/user/lifestyle';
 import { SwipeQuestion } from './surveyTypes';
+import { calculateAge } from '../../utils/dataExtraction';
 import {
   setCondition,
   updateScreeningArray,
@@ -1344,7 +1345,553 @@ export function generateQuestions(): SwipeQuestion[] {
           }
         })
       }
-    }
+    },
+
+    // ===== EXPANDED QUESTION SET: every cited factor gets a question =====
+    {
+      id: 'living_alone',
+      question: 'Do you live alone?',
+      category: 'Social',
+      leftOption: {
+        label: 'Yes, flying solo',
+        emoji: '🏠',
+        profileUpdate: (p) => ({
+          ...p,
+          social: { ...p.social, connections: { ...p.social?.connections, livesAlone: createUserDataPoint(true) } }
+        })
+      },
+      rightOption: {
+        label: 'With family/roommates',
+        emoji: '👥',
+        profileUpdate: (p) => ({
+          ...p,
+          social: { ...p.social, connections: { ...p.social?.connections, livesAlone: createUserDataPoint(false) } }
+        })
+      }
+    },
+    {
+      id: 'insomnia',
+      question: 'Do you lie awake at night unable to sleep?',
+      category: 'Lifestyle',
+      leftOption: {
+        label: 'Most nights (insomnia)',
+        emoji: '🦉',
+        profileUpdate: (p) => setCondition(p, 'insomnia', true)
+      },
+      rightOption: {
+        label: 'I sleep like a log',
+        emoji: '😴',
+        profileUpdate: (p) => setCondition(p, 'insomnia', false)
+      }
+    },
+    {
+      id: 'afib',
+      question: 'Ever been told your heartbeat is irregular (atrial fibrillation)?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes, diagnosed',
+        emoji: '💓',
+        profileUpdate: (p) => setCondition(p, 'atrial_fibrillation', true)
+      },
+      rightOption: {
+        label: 'Steady as a drum',
+        emoji: '🥁',
+        profileUpdate: (p) => setCondition(p, 'atrial_fibrillation', false)
+      }
+    },
+    {
+      id: 'heartburn',
+      question: 'Does heartburn or acid reflux bother you regularly?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes, frequently (GERD)',
+        emoji: '🔥',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            gastrointestinalHistory: {
+              ...p.medicalHistory?.gastrointestinalHistory,
+              gerdDiagnosis: createUserDataPoint(true)
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Rarely or never',
+        emoji: '✅',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            gastrointestinalHistory: {
+              ...p.medicalHistory?.gastrointestinalHistory,
+              gerdDiagnosis: createUserDataPoint(false)
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'ibd',
+      question: 'Diagnosed with IBD (Crohn\'s or ulcerative colitis)?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🎗️',
+        profileUpdate: (p) => setCondition(p, 'ibd', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        profileUpdate: (p) => setCondition(p, 'ibd', false)
+      }
+    },
+    {
+      id: 'familyDiabetes',
+      question: 'Does diabetes run in your family?',
+      category: 'Family History',
+      leftOption: {
+        label: 'Yes (parent/sibling)',
+        emoji: '🧬',
+        profileUpdate: (p) => setFamilyHistory(p, 'type2_diabetes', true)
+      },
+      rightOption: {
+        label: 'Not that I know of',
+        emoji: '🌳',
+        profileUpdate: (p) => setFamilyHistory(p, 'type2_diabetes', false)
+      }
+    },
+    {
+      id: 'familyDementia',
+      question: "Alzheimer's or dementia in your close family?",
+      category: 'Family History',
+      leftOption: {
+        label: 'Yes (parent/sibling)',
+        emoji: '🧠',
+        profileUpdate: (p) => setFamilyHistory(p, 'dementia', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🌳',
+        profileUpdate: (p) => setFamilyHistory(p, 'dementia', false)
+      }
+    },
+    {
+      id: 'familyColorectal',
+      question: 'Colorectal cancer in your close family?',
+      category: 'Family History',
+      leftOption: {
+        label: 'Yes (parent/sibling)',
+        emoji: '🎗️',
+        profileUpdate: (p) => setFamilyHistory(p, 'colorectal_cancer', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🌳',
+        profileUpdate: (p) => setFamilyHistory(p, 'colorectal_cancer', false)
+      }
+    },
+    {
+      id: 'familyBreast',
+      question: 'Breast cancer in your close family?',
+      category: 'Family History',
+      applicableTo: (p) => p.demographics?.biologicalSex?.value === 'female',
+      leftOption: {
+        label: 'Yes (mother/sister)',
+        emoji: '🎗️',
+        profileUpdate: (p) => setFamilyHistory(p, 'breast_cancer', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🌳',
+        profileUpdate: (p) => setFamilyHistory(p, 'breast_cancer', false)
+      }
+    },
+    {
+      id: 'familyProstate',
+      question: 'Prostate cancer in your close family?',
+      category: 'Family History',
+      applicableTo: (p) => p.demographics?.biologicalSex?.value === 'male',
+      leftOption: {
+        label: 'Yes (father/brother)',
+        emoji: '🎗️',
+        profileUpdate: (p) => setFamilyHistory(p, 'prostate_cancer', true)
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🌳',
+        profileUpdate: (p) => setFamilyHistory(p, 'prostate_cancer', false)
+      }
+    },
+    {
+      id: 'waist',
+      question: 'How does your waistline measure up?',
+      category: 'Biometrics',
+      leftOption: {
+        label: 'Carrying extra around the middle',
+        emoji: '🍩',
+        profileUpdate: (p) => ({
+          ...p,
+          biometrics: { ...p.biometrics, waistCircumference: createTimeSeries(105) }
+        })
+      },
+      rightOption: {
+        label: 'Fairly trim',
+        emoji: '📏',
+        profileUpdate: (p) => ({
+          ...p,
+          biometrics: { ...p.biometrics, waistCircumference: createTimeSeries(85) }
+        })
+      },
+      detailedInput: {
+        inputType: { type: 'slider', min: 60, max: 150, step: 1, unit: 'cm' },
+        label: 'Waist circumference',
+        getCurrentValue: (p) => p.biometrics?.waistCircumference?.mostRecent?.value ?? null,
+        profileUpdate: (p, value) => ({
+          ...p,
+          biometrics: { ...p.biometrics, waistCircumference: createTimeSeries(Number(value)) }
+        }),
+        formatDisplay: (v) => `${v} cm (${Math.round(v * 0.393701)} in)`
+      }
+    },
+    {
+      id: 'stairsBreath',
+      question: 'Does one flight of stairs leave you out of breath?',
+      category: 'Fitness',
+      leftOption: {
+        label: 'Yes, quickly winded',
+        emoji: '😮‍💨',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            respiratoryHistory: {
+              ...p.medicalHistory?.respiratoryHistory,
+              dyspneaSeverity: createUserDataPoint('moderate')
+            }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Barely notice them',
+        emoji: '🏃',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            respiratoryHistory: {
+              ...p.medicalHistory?.respiratoryHistory,
+              dyspneaSeverity: createUserDataPoint('none')
+            }
+          }
+        })
+      }
+    },
+    {
+      id: 'fallsPastYear',
+      question: 'Any falls in the past year?',
+      category: 'Safety',
+      applicableTo: (p) => (calculateAge(p) ?? 0) >= 55,
+      leftOption: {
+        label: 'Yes, at least one',
+        emoji: '🍂',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            fallHistory: { ...p.medicalHistory?.fallHistory, fallsPastYear: createUserDataPoint(1) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Steady on my feet',
+        emoji: '🦶',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            fallHistory: { ...p.medicalHistory?.fallHistory, fallsPastYear: createUserDataPoint(0) }
+          }
+        })
+      }
+    },
+    {
+      id: 'dizzyStanding',
+      question: 'Feel dizzy when you stand up quickly?',
+      category: 'Safety',
+      applicableTo: (p) => (calculateAge(p) ?? 0) >= 55,
+      leftOption: {
+        label: 'Yes, the room spins',
+        emoji: '💫',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            fallHistory: { ...p.medicalHistory?.fallHistory, dizzinessWhenStanding: createUserDataPoint(true) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No, rock solid',
+        emoji: '🗿',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            fallHistory: { ...p.medicalHistory?.fallHistory, dizzinessWhenStanding: createUserDataPoint(false) }
+          }
+        })
+      }
+    },
+    {
+      id: 'medicationCount',
+      question: 'How many prescription medications do you take daily?',
+      category: 'Medications',
+      applicableTo: (p) => (calculateAge(p) ?? 0) >= 55,
+      leftOption: {
+        label: 'Five or more',
+        emoji: '💊',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...p.medicalHistory?.medications, totalMedicationCount: createUserDataPoint(6) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'A few or none',
+        emoji: '🌱',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...p.medicalHistory?.medications, totalMedicationCount: createUserDataPoint(1) }
+          }
+        })
+      },
+      detailedInput: {
+        inputType: { type: 'number', min: 0, max: 30, step: 1, unit: 'medications' },
+        label: 'Daily medication count',
+        getCurrentValue: (p) => p.medicalHistory?.medications?.totalMedicationCount?.value ?? null,
+        profileUpdate: (p, value) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            medications: { ...p.medicalHistory?.medications, totalMedicationCount: createUserDataPoint(Number(value)) }
+          }
+        })
+      }
+    },
+    {
+      id: 'pneumoniaVaccine',
+      question: 'Had the pneumonia (pneumococcal) vaccine?',
+      category: 'Preventive Care',
+      applicableTo: (p) => (calculateAge(p) ?? 0) >= 60,
+      leftOption: {
+        label: 'Not yet',
+        emoji: '🚫',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            vaccinations: { ...(p.medicalHistory?.vaccinations || {}), pneumococcalVaccine: createUserDataPoint(false) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Yes, covered',
+        emoji: '💉',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            vaccinations: { ...(p.medicalHistory?.vaccinations || {}), pneumococcalVaccine: createUserDataPoint(true) }
+          }
+        })
+      }
+    },
+    {
+      id: 'benzos',
+      question: 'Do you take benzodiazepines (Xanax, Valium, Ativan...)?',
+      category: 'Substance Use',
+      leftOption: {
+        label: 'Yes, regularly',
+        emoji: '💊',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            substanceUse: { ...p.medicalHistory?.substanceUse, prescribedBenzodiazepines: createUserDataPoint(true) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '🚫',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            substanceUse: { ...p.medicalHistory?.substanceUse, prescribedBenzodiazepines: createUserDataPoint(false) }
+          }
+        })
+      }
+    },
+    {
+      id: 'priorOverdose',
+      question: 'Have you ever experienced a drug overdose? (Confidential)',
+      category: 'Substance Use',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🆘',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            substanceUse: { ...p.medicalHistory?.substanceUse, priorOverdose: createUserDataPoint(true) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'No',
+        emoji: '✅',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            substanceUse: { ...p.medicalHistory?.substanceUse, priorOverdose: createUserDataPoint(false) }
+          }
+        })
+      }
+    },
+    {
+      id: 'immuneStatus',
+      question: 'Is your immune system compromised (condition or medication)?',
+      category: 'Medical History',
+      leftOption: {
+        label: 'Yes',
+        emoji: '🛡️',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: { ...p.medicalHistory, immuneStatus: createUserDataPoint('immunocompromised') }
+        })
+      },
+      rightOption: {
+        label: 'No, normal',
+        emoji: '💪',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: { ...p.medicalHistory, immuneStatus: createUserDataPoint('normal') }
+        })
+      }
+    },
+    {
+      id: 'milesDriven',
+      question: 'How much do you drive in a year?',
+      category: 'Safety',
+      leftOption: {
+        label: 'Road warrior (20k+ mi)',
+        emoji: '🛣️',
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            drivingHabits: { ...p.lifestyle?.drivingHabits, milesPerYear: createUserDataPoint(25000) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Average or less',
+        emoji: '🚗',
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            drivingHabits: { ...p.lifestyle?.drivingHabits, milesPerYear: createUserDataPoint(10000) }
+          }
+        })
+      },
+      detailedInput: {
+        inputType: { type: 'number', min: 0, max: 50000, step: 1000, unit: 'miles/year' },
+        label: 'Annual miles driven',
+        getCurrentValue: (p) => p.lifestyle?.drivingHabits?.milesPerYear?.value ?? null,
+        profileUpdate: (p, value) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            drivingHabits: { ...p.lifestyle?.drivingHabits, milesPerYear: createUserDataPoint(Number(value)) }
+          }
+        })
+      }
+    },
+    {
+      id: 'drivingSetting',
+      question: 'Where do you mostly drive?',
+      category: 'Safety',
+      leftOption: {
+        label: 'Country roads & highways',
+        emoji: '🌾',
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            drivingHabits: { ...p.lifestyle?.drivingHabits, drivingSetting: createUserDataPoint('rural') }
+          }
+        })
+      },
+      rightOption: {
+        label: 'City streets',
+        emoji: '🏙️',
+        profileUpdate: (p) => ({
+          ...p,
+          lifestyle: {
+            ...p.lifestyle,
+            drivingHabits: { ...p.lifestyle?.drivingHabits, drivingSetting: createUserDataPoint('urban') }
+          }
+        })
+      }
+    },
+    {
+      id: 'firstPeriodAge',
+      question: 'How old were you when you had your first period?',
+      category: 'Reproductive Health',
+      applicableTo: (p) => p.demographics?.biologicalSex?.value === 'female',
+      leftOption: {
+        label: 'Early (11 or younger)',
+        emoji: '🌸',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            reproductiveHistory: { ...p.medicalHistory?.reproductiveHistory, ageAtMenarche: createUserDataPoint(11) }
+          }
+        })
+      },
+      rightOption: {
+        label: 'Around 13 or later',
+        emoji: '🌷',
+        profileUpdate: (p) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            reproductiveHistory: { ...p.medicalHistory?.reproductiveHistory, ageAtMenarche: createUserDataPoint(14) }
+          }
+        })
+      },
+      detailedInput: {
+        inputType: { type: 'number', min: 8, max: 18, step: 1, unit: 'years old' },
+        label: 'Age at first period',
+        getCurrentValue: (p) => p.medicalHistory?.reproductiveHistory?.ageAtMenarche?.value ?? null,
+        profileUpdate: (p, value) => ({
+          ...p,
+          medicalHistory: {
+            ...p.medicalHistory,
+            reproductiveHistory: { ...p.medicalHistory?.reproductiveHistory, ageAtMenarche: createUserDataPoint(Number(value)) }
+          }
+        })
+      }
+    },
   ];
 }
-

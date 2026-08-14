@@ -171,11 +171,11 @@
         "points": [
           {
             "value": 11,
-            "hazardRatio": 1.15
+            "hazardRatio": 1.1
           },
           {
             "value": 12,
-            "hazardRatio": 1.1
+            "hazardRatio": 1.05
           },
           {
             "value": 13,
@@ -183,46 +183,20 @@
           },
           {
             "value": 14,
-            "hazardRatio": 0.93
+            "hazardRatio": 0.95
           },
           {
             "value": 15,
-            "hazardRatio": 0.87
+            "hazardRatio": 0.9
           },
           {
             "value": 16,
-            "hazardRatio": 0.82
+            "hazardRatio": 0.86
           }
         ],
         "validRange": [
           8,
           20
-        ],
-        "categories": [
-          {
-            "value": "11",
-            "hazardRatio": 1.1
-          },
-          {
-            "value": "12",
-            "hazardRatio": 1.05
-          },
-          {
-            "value": "13",
-            "hazardRatio": 1.0
-          },
-          {
-            "value": "14",
-            "hazardRatio": 0.95
-          },
-          {
-            "value": "15",
-            "hazardRatio": 0.9
-          },
-          {
-            "value": "16",
-            "hazardRatio": 0.86
-          }
         ]
       },
       "citation": "Collaborative Group on Hormonal Factors in Breast Cancer. Menarche, menopause, and breast cancer risk: individual participant meta-analysis of 117 studies. Lancet Oncol. 2012;13(11):1141-1151",
@@ -313,11 +287,18 @@
             "hazardRatio": 1.0
           },
           {
-            "value": "one",
+            "value": [
+              "one",
+              "one_first_degree"
+            ],
             "hazardRatio": 2.0
           },
           {
-            "value": "two_or_more",
+            "value": [
+              "two_or_more",
+              "multiple_first_degree",
+              "early_onset_family"
+            ],
             "hazardRatio": 2.9
           }
         ]

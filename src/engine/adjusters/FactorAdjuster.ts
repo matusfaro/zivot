@@ -591,11 +591,13 @@ export class FactorAdjuster {
   ): { hr: number; provenance: ProvenanceChain } {
     const references = ReferenceExtractor.getFactorReferences(factor);
 
+    // String coercion: profile fields may store numbers/booleans while
+    // category values are authored as strings ('0', '3+', 'true')
     const category = mapping.categories.find(cat => {
       if (Array.isArray(cat.value)) {
-        return cat.value.includes(value);
+        return cat.value.map(String).includes(String(value));
       }
-      return cat.value === value;
+      return String(cat.value) === String(value);
     });
 
     const hr = category?.hazardRatio || 1.0;

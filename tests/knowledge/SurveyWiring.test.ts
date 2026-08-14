@@ -50,6 +50,10 @@ const PROFILES: Record<string, UserProfile> = {
 const EXPECTED_TINY: Record<string, string> = {
   sunburns:
     'melanoma is rare and 94.7% survivable (CFR 0.053); severe-sunburn HR on a tiny baseline stays under 0.02pp at all matrix ages',
+  milesDriven:
+    'crash mortality is ~0.5% over 10 years, so the sqrt-law mileage spread moves ~0.014pp — real but small; displays as +0.01% (2-decimal formatting)',
+  drivingSetting:
+    'urban 0.84 vs rural 1.3 on the same ~0.5% crash baseline moves ~0.011pp — kept as one of the few modifiable crash factors',
 };
 
 interface AuditRow {

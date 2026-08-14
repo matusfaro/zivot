@@ -232,11 +232,18 @@
             "hazardRatio": 1.0
           },
           {
-            "value": "one",
+            "value": [
+              "one",
+              "one_first_degree"
+            ],
             "hazardRatio": 2.3
           },
           {
-            "value": "two_or_more",
+            "value": [
+              "two_or_more",
+              "multiple_first_degree",
+              "early_onset_family"
+            ],
             "hazardRatio": 4.5
           }
         ]

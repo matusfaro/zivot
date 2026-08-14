@@ -294,6 +294,50 @@ export function isQuestionAnswered(question: SwipeQuestion, profile: UserProfile
       return profile.medicalHistory?.hearingLoss?.treated !== undefined;
     case 'sunburns':
       return profile.medicalHistory?.sunExposure?.sunburns !== undefined;
+    case 'living_alone':
+      return profile.social?.connections?.livesAlone?.value !== undefined;
+    case 'insomnia':
+      return hasConditionInProfile(profile, 'insomnia');
+    case 'afib':
+      return hasConditionInProfile(profile, 'atrial_fibrillation');
+    case 'heartburn':
+      return profile.medicalHistory?.gastrointestinalHistory?.gerdDiagnosis?.value !== undefined;
+    case 'ibd':
+      return hasConditionInProfile(profile, 'ibd');
+    case 'familyDiabetes':
+      return hasFamilyHistoryInProfile(profile, 'type2_diabetes');
+    case 'familyDementia':
+      return hasFamilyHistoryInProfile(profile, 'dementia');
+    case 'familyColorectal':
+      return hasFamilyHistoryInProfile(profile, 'colorectal_cancer');
+    case 'familyBreast':
+      return hasFamilyHistoryInProfile(profile, 'breast_cancer');
+    case 'familyProstate':
+      return hasFamilyHistoryInProfile(profile, 'prostate_cancer');
+    case 'waist':
+      return profile.biometrics?.waistCircumference?.mostRecent?.value !== undefined;
+    case 'stairsBreath':
+      return profile.medicalHistory?.respiratoryHistory?.dyspneaSeverity?.value !== undefined;
+    case 'fallsPastYear':
+      return profile.medicalHistory?.fallHistory?.fallsPastYear?.value !== undefined;
+    case 'dizzyStanding':
+      return profile.medicalHistory?.fallHistory?.dizzinessWhenStanding?.value !== undefined;
+    case 'medicationCount':
+      return profile.medicalHistory?.medications?.totalMedicationCount?.value !== undefined;
+    case 'pneumoniaVaccine':
+      return profile.medicalHistory?.vaccinations?.pneumococcalVaccine?.value !== undefined;
+    case 'benzos':
+      return profile.medicalHistory?.substanceUse?.prescribedBenzodiazepines?.value !== undefined;
+    case 'priorOverdose':
+      return profile.medicalHistory?.substanceUse?.priorOverdose?.value !== undefined;
+    case 'immuneStatus':
+      return profile.medicalHistory?.immuneStatus?.value !== undefined;
+    case 'milesDriven':
+      return profile.lifestyle?.drivingHabits?.milesPerYear?.value !== undefined;
+    case 'drivingSetting':
+      return profile.lifestyle?.drivingHabits?.drivingSetting?.value !== undefined;
+    case 'firstPeriodAge':
+      return profile.medicalHistory?.reproductiveHistory?.ageAtMenarche?.value !== undefined;
     default:
       return false;
   }

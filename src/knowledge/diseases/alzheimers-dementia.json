@@ -387,7 +387,10 @@
             "hazardRatio": 1.0
           },
           {
-            "value": "one",
+            "value": [
+              "one",
+              "one_first_degree"
+            ],
             "hazardRatio": 1.73,
             "confidence": [
               1.59,
@@ -395,7 +398,11 @@
             ]
           },
           {
-            "value": "two_or_more",
+            "value": [
+              "two_or_more",
+              "multiple_first_degree",
+              "early_onset_family"
+            ],
             "hazardRatio": 3.98,
             "confidence": [
               3.26,
